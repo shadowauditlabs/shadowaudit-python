@@ -15,6 +15,11 @@ build/
 .eggs/
 *.egg
 
+# Tool caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
 # Virtual environments
 venv/
 .venv/
