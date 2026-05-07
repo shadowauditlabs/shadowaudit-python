@@ -31,7 +31,7 @@ from shadowaudit.assessment.builder import TaxonomyBuilder
 
 
 @click.group()
-@click.version_option(version="0.3.0", prog_name="shadowaudit")
+@click.version_option(version="0.3.2", prog_name="shadowaudit")
 def main() -> None:
     """ShadowAudit — fail-closed deterministic enforcement for AI agent tool calls."""
     pass

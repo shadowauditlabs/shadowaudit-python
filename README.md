@@ -246,7 +246,7 @@ ShadowAudit is in **alpha** (v0.3.0). The core gate, CLI, framework adapters, an
 Bug reports and pull requests are welcome on GitHub.
 
 ```bash
-git clone https://github.com/shadowaudit/shadowaudit-python.git
+git clone https://github.com/AnshumanKumar14/shadowaudit-python.git
 cd shadowaudit-python
 pip install -e ".[dev,langchain]"
 pytest tests/ -v

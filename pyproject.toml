@@ -4,15 +4,30 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shadowaudit"
-version = "0.3.0"
-description = "Runtime governance for AI agents — deterministic fail-closed enforcement"
+version = "0.3.2"
+description = "Runtime governance for AI agents — deterministic fail-closed enforcement. Wraps any agent tool and blocks dangerous calls before execution. Zero LLM calls, zero cloud dependencies, works offline."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
 authors = [
     { name = "Anshuman Kumar" }
 ]
-keywords = ["ai", "agents", "governance", "safety", "langchain"]
+keywords = [
+    "ai",
+    "agents",
+    "governance",
+    "safety",
+    "security",
+    "langchain",
+    "crewai",
+    "llm",
+    "runtime",
+    "enforcement",
+    "audit",
+    "compliance",
+    "guardrails",
+    "tool-calling",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -43,9 +58,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/shadowaudit/shadowaudit-python"
-Repository = "https://github.com/shadowaudit/shadowaudit-python"
-Issues = "https://github.com/shadowaudit/shadowaudit-python/issues"
+Homepage = "https://github.com/AnshumanKumar14/shadowaudit-python"
+Repository = "https://github.com/AnshumanKumar14/shadowaudit-python"
+Issues = "https://github.com/AnshumanKumar14/shadowaudit-python/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
