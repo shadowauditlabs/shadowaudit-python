@@ -43,8 +43,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://shadowaudit.io"
-Documentation = "https://docs.shadowaudit.io"
+Homepage = "https://github.com/shadowaudit/shadowaudit-python"
 Repository = "https://github.com/shadowaudit/shadowaudit-python"
 Issues = "https://github.com/shadowaudit/shadowaudit-python/issues"
 
