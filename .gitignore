@@ -1,0 +1,56 @@
+# Strategy docs, build plans, PR descriptions — keep out of public repo
+# README.md is explicitly allowed (needed for PyPI/GitHub)
+*.md
+!README.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment secrets
+.env
+.env.local
+.env.production
+
+# Encrypted files
+*.age
+key.txt
+
+# Trade secrets (NEVER commit to git)
+TRADE_SECRET.md
+TRADE_SECRET*
+
+# Patent documents (NEVER commit)
+*patent*
+*Patent*
+*PROVISIONAL*
+
+# Init docs (patent documents, strategy HTMLs)
+.initdocs/
+
+# Archive (old build plans, deprecated docs, superseded specs)
+archive/
+
+# OS
+.DS_Store
+Thumbs.db

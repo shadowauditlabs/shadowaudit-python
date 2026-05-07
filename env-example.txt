@@ -1,0 +1,12 @@
+# ShadowAudit SDK Environment Configuration
+
+# Observability
+LOG_LEVEL=INFO
+ENVIRONMENT=development
+
+# Taxonomy (local file path to custom taxonomy JSON)
+TAXONOMY_PATH=
+
+# Performance
+COGNITIVE_GATE_TIMEOUT_MS=1500
+RATE_LIMIT_PER_MINUTE=6000

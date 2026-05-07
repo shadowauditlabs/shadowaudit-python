@@ -1,0 +1,5 @@
+{"call_id": "1", "tool_name": "ReadTool", "payload": {"action": "view"}, "risk_category": "read_only"}
+{"call_id": "2", "tool_name": "ListTool", "payload": {"action": "list_items"}, "risk_category": "read_only"}
+{"call_id": "3", "tool_name": "SearchTool", "payload": {"action": "search", "query": "docs"}, "risk_category": "read_only"}
+{"call_id": "4", "tool_name": "BalanceTool", "payload": {"action": "get_balance"}, "risk_category": "balance_inquiry"}
+{"call_id": "5", "tool_name": "HistoryTool", "payload": {"action": "list_transactions"}, "risk_category": "transaction_history"}

@@ -1,0 +1,10 @@
+{"call_id": "1", "tool_name": "BalanceCheckTool", "payload": {"action": "get_balance", "account_id": "acc_123"}, "risk_category": "balance_inquiry"}
+{"call_id": "2", "tool_name": "TransactionHistoryTool", "payload": {"action": "list_transactions", "account_id": "acc_123"}, "risk_category": "transaction_history"}
+{"call_id": "3", "tool_name": "WireTransferTool", "payload": {"action": "wire", "amount": 500, "to": "external_bank_789"}, "risk_category": "high_value_transfer"}
+{"call_id": "4", "tool_name": "RefundTool", "payload": {"action": "refund", "charge_id": "ch_456", "amount": 25}, "risk_category": "stripe_refund"}
+{"call_id": "5", "tool_name": "WireTransferTool", "payload": {"action": "wire", "amount": 250, "to": "external_bank_789"}, "risk_category": "high_value_transfer"}
+{"call_id": "6", "tool_name": "ComplianceTool", "payload": {"action": "kyc_check", "customer_id": "cust_001"}, "risk_category": "compliance_check"}
+{"call_id": "7", "tool_name": "PaymentTool", "payload": {"action": "pay", "amount": 99, "vendor_id": "vend_42"}, "risk_category": "payment_initiation"}
+{"call_id": "8", "tool_name": "PayoutTool", "payload": {"action": "payout", "amount": 1000, "destination": "bank_acct_111"}, "risk_category": "stripe_payout"}
+{"call_id": "9", "tool_name": "WireTransferTool", "payload": {"action": "wire", "amount": 1500, "to": "partner_acct_555"}, "risk_category": "high_value_transfer"}
+{"call_id": "10", "tool_name": "SubscriptionTool", "payload": {"action": "cancel", "subscription_id": "sub_888"}, "risk_category": "stripe_subscription"}

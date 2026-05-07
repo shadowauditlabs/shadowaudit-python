@@ -1,0 +1,112 @@
+{
+  "version": "1.0",
+  "domain": "general",
+  "description": "Default taxonomy for generic AI agents and chatbots",
+  "categories": {
+    "read_only": {
+      "delta": 1.0,
+      "risk_keywords": ["read", "get", "list", "view", "fetch", "search", "query", "find", "look_up"],
+      "description": "Read-only operations. No side effects."
+    },
+    "write": {
+      "delta": 0.4,
+      "risk_keywords": ["write", "create", "insert", "add", "post", "submit", "save", "commit"],
+      "description": "Creating new data or resources."
+    },
+    "update": {
+      "delta": 0.3,
+      "risk_keywords": ["update", "modify", "change", "edit", "patch", "revise", "alter", "adjust"],
+      "description": "Modifying existing data."
+    },
+    "delete": {
+      "delta": 0.2,
+      "risk_keywords": ["delete", "remove", "destroy", "drop", "purge", "erase", "wipe", "clear"],
+      "description": "Destructive operations. Often irreversible."
+    },
+    "execute": {
+      "delta": 0.1,
+      "risk_keywords": ["execute", "run", "exec", "call", "invoke", "trigger", "launch", "start", "spawn"],
+      "description": "Running arbitrary code or commands. High risk."
+    },
+    "external_api": {
+      "delta": 0.2,
+      "risk_keywords": ["api_call", "external", "third_party", "outbound", "webhook", "callback", "fetch_url"],
+      "description": "Calling external services outside control."
+    },
+    "data_export": {
+      "delta": 0.15,
+      "risk_keywords": ["export", "download", "dump", "backup", "archive", "extract_data", "copy_all"],
+      "description": "Bulk data extraction. Risk of data leakage."
+    },
+    "authentication": {
+      "delta": 0.5,
+      "risk_keywords": ["login", "authenticate", "token", "session", "verify_identity", "impersonate"],
+      "description": "Authentication and session management."
+    },
+    "permission_change": {
+      "delta": 0.1,
+      "risk_keywords": ["grant", "revoke", "permission", "access_control", "acl", "role_change", "admin"],
+      "description": "Changing access controls. High blast radius."
+    },
+    "balance_inquiry": {
+      "delta": 0.8,
+      "risk_keywords": ["balance", "check", "view", "get_balance", "inquiry"],
+      "description": "Read-only balance checks."
+    },
+    "transaction_history": {
+      "delta": 0.8,
+      "risk_keywords": ["history", "statement", "transactions", "list", "view_history"],
+      "description": "Read-only transaction retrieval."
+    },
+    "payment_initiation": {
+      "delta": 0.25,
+      "risk_keywords": ["pay", "payment", "transfer", "send_money", "disburse", "remit", "send", "wire"],
+      "description": "Money movement — user must be in the loop."
+    },
+    "withdrawal": {
+      "delta": 0.1,
+      "risk_keywords": ["withdraw", "cash_out", "debit", "pull", "drain"],
+      "description": "Removing funds. High risk for agentic drift."
+    },
+    "high_value_transfer": {
+      "delta": 0.2,
+      "risk_keywords": ["transfer", "wire", "swift", "ach", "sepa", "high_value", "large_amount", "bulk", "offshore", "external_bank"],
+      "description": "Large or bulk transfers. Requires multi-factor approval."
+    },
+    "stripe_refund": {
+      "delta": 0.3,
+      "risk_keywords": ["refund", "create_refund", "reverse_charge", "credit_back", "stripe_refund", "charge_id"],
+      "description": "Stripe: Reversing completed transactions."
+    },
+    "stripe_payout": {
+      "delta": 0.15,
+      "risk_keywords": ["payout", "transfer_to_bank", "create_payout", "stripe_payout", "disburse", "destination"],
+      "description": "Stripe: Moving funds to external bank accounts."
+    },
+    "stripe_subscription": {
+      "delta": 0.4,
+      "risk_keywords": ["subscription", "create_subscription", "stripe_subscription", "billing_cycle", "invoice", "recurring", "cancel"],
+      "description": "Stripe: Recurring billing and subscription management."
+    },
+    "compliance_check": {
+      "delta": 0.9,
+      "risk_keywords": ["kyc", "aml", "sanctions", "screen", "verify", "compliance", "customer_id"],
+      "description": "Regulatory checks. Low direct financial risk."
+    },
+    "social_engineering": {
+      "delta": 0.12,
+      "risk_keywords": ["urgent", "ceo", "bypass", "override", "emergency", "secret", "confidential", "immediately", "asap", "don't tell", "do not tell", "without approval", "skip approval", "unauthorized"],
+      "description": "Indicators of social engineering or policy circumvention."
+    },
+    "obfuscated_attack": {
+      "delta": 0.08,
+      "risk_keywords": ["fraudulent", "exfiltrate", "siphon", "launder", "mule", "shell", "front company", "fake vendor", "ghost employee", "round-tripping"],
+      "description": "Advanced persistent threat indicators in agent commands."
+    },
+    "communication": {
+      "delta": 0.3,
+      "risk_keywords": ["email", "send", "message", "notify", "alert", "sms", "outbound", "external"],
+      "description": "Communication channels that could leak data."
+    }
+  }
+}

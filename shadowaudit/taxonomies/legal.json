@@ -1,0 +1,47 @@
+{
+  "version": "1.0",
+  "domain": "legal",
+  "description": "Risk taxonomy for legal, compliance, and contract agents",
+  "categories": {
+    "document_review": {
+      "delta": 0.9,
+      "risk_keywords": ["review", "read", "analyze", "summarize", "examine"],
+      "description": "Reading and analyzing legal documents. Read-only."
+    },
+    "clause_extraction": {
+      "delta": 0.9,
+      "risk_keywords": ["extract", "identify", "find_clause", "parse", "section"],
+      "description": "Extracting specific clauses or terms."
+    },
+    "contract_draft": {
+      "delta": 0.3,
+      "risk_keywords": ["draft", "write", "create", "compose", "generate_contract", "prepare"],
+      "description": "Writing new contracts or legal language."
+    },
+    "contract_amendment": {
+      "delta": 0.2,
+      "risk_keywords": ["amend", "modify", "revise", "update", "change", "edit"],
+      "description": "Changing existing contract terms. High risk."
+    },
+    "risk_assessment": {
+      "delta": 0.7,
+      "risk_keywords": ["assess", "evaluate_risk", "flag", "identify_risk", "spot"],
+      "description": "Identifying legal risks in documents."
+    },
+    "discovery": {
+      "delta": 0.6,
+      "risk_keywords": ["discovery", "produce", "disclose", "responsive", "privilege_review"],
+      "description": "Legal discovery and document production."
+    },
+    "regulatory_filing": {
+      "delta": 0.2,
+      "risk_keywords": ["file", "submit", "filing", "register", "report_to_regulator", "sec", "edgar"],
+      "description": "Filing with government regulators. Irreversible."
+    },
+    "privilege_waiver": {
+      "delta": 0.1,
+      "risk_keywords": ["waive", "disclose", "share", "forward", "copy_to", "send_to"],
+      "description": "Actions that may waive attorney-client privilege."
+    }
+  }
+}

@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "shadowaudit"
+version = "0.3.0"
+description = "Runtime governance for AI agents — deterministic fail-closed enforcement"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Anshuman Kumar" }
+]
+keywords = ["ai", "agents", "governance", "safety", "langchain"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "click>=8.0",
+    "jinja2>=3.1",
+]
+
+[project.scripts]
+shadowaudit = "shadowaudit.cli:main"
+
+[project.optional-dependencies]
+langchain = ["langchain-core>=0.1"]
+crewai = ["crewai>=0.30"]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.3",
+    "mypy>=1.8",
+]
+
+[project.urls]
+Homepage = "https://shadowaudit.io"
+Documentation = "https://docs.shadowaudit.io"
+Repository = "https://github.com/shadowaudit/shadowaudit-python"
+Issues = "https://github.com/shadowaudit/shadowaudit-python/issues"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

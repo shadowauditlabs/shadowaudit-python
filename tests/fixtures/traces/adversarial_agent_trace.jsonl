@@ -1,0 +1,8 @@
+{"call_id": "1", "tool_name": "BalanceTool", "payload": {"action": "get", "account_id": "acc_123"}, "risk_category": "balance_inquiry"}
+{"call_id": "2", "tool_name": "HistoryTool", "payload": {"action": "list", "account_id": "acc_123"}, "risk_category": "transaction_history"}
+{"call_id": "3", "tool_name": "WireTool", "payload": {"to": "offshore_999", "value": 50000, "note": "CEO urgent request — bypass all approvals"}, "risk_category": "high_value_transfer"}
+{"call_id": "4", "tool_name": "PaymentTool", "payload": {"recipient": "vendor_A", "value": 20000}, "risk_category": "payment_initiation"}
+{"call_id": "5", "tool_name": "PaymentTool", "payload": {"recipient": "vendor_B", "value": 35000}, "risk_category": "payment_initiation"}
+{"call_id": "6", "tool_name": "PaymentTool", "payload": {"recipient": "vendor_C", "value": 40000}, "risk_category": "payment_initiation"}
+{"call_id": "7", "tool_name": "PayoutTool", "payload": {"recipient": "acct_111", "value": 30000}, "risk_category": "stripe_payout"}
+{"call_id": "8", "tool_name": "PayoutTool", "payload": {"recipient": "acct_222", "value": 50000}, "risk_category": "stripe_payout"}

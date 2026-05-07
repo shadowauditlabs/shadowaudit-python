@@ -1,0 +1,171 @@
+{
+  "version": "1.0",
+  "domain": "financial",
+  "description": "Risk taxonomy for fintech, banking, and payment agents",
+  "categories": {
+    "balance_inquiry": {
+      "delta": 1.0,
+      "risk_keywords": [
+        "balance",
+        "check",
+        "view",
+        "get_balance",
+        "inquiry"
+      ],
+      "description": "Read-only balance checks. Lowest risk."
+    },
+    "transaction_history": {
+      "delta": 1.0,
+      "risk_keywords": [
+        "history",
+        "statement",
+        "transactions",
+        "list",
+        "view_history"
+      ],
+      "description": "Read-only transaction retrieval."
+    },
+    "payment_initiation": {
+      "delta": 0.3,
+      "risk_keywords": [
+        "pay",
+        "payment",
+        "transfer",
+        "send_money",
+        "disburse",
+        "remit",
+        "send",
+        "wire"
+      ],
+      "description": "Money movement \u2014 user must be in the loop."
+    },
+    "withdrawal": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "withdraw",
+        "cash_out",
+        "debit",
+        "pull",
+        "drain"
+      ],
+      "description": "Removing funds. High risk for agentic drift."
+    },
+    "account_modification": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "change_address",
+        "update_email",
+        "modify_account",
+        "reset_password",
+        "change_pin"
+      ],
+      "description": "Account metadata changes. Risk of takeover."
+    },
+    "compliance_check": {
+      "delta": 0.8,
+      "risk_keywords": [
+        "kyc",
+        "aml",
+        "sanctions",
+        "screen",
+        "verify",
+        "compliance"
+      ],
+      "description": "Regulatory checks. Low direct financial risk."
+    },
+    "high_value_transfer": {
+      "delta": 0.15,
+      "risk_keywords": [
+        "transfer",
+        "wire",
+        "swift",
+        "ach",
+        "sepa",
+        "high_value",
+        "large_amount",
+        "bulk"
+      ],
+      "description": "Large or bulk transfers. Requires multi-factor approval."
+    },
+    "stripe_payment_initiation": {
+      "delta": 0.3,
+      "risk_keywords": [
+        "charge",
+        "payment_intent",
+        "create_charge",
+        "process_payment",
+        "stripe_charge",
+        "capture",
+        "confirm_payment"
+      ],
+      "description": "Stripe: Initiating customer charges or payments via Stripe API"
+    },
+    "stripe_refund": {
+      "delta": 0.4,
+      "risk_keywords": [
+        "refund",
+        "create_refund",
+        "reverse_charge",
+        "credit_back",
+        "stripe_refund"
+      ],
+      "description": "Stripe: Reversing completed transactions via Stripe API"
+    },
+    "stripe_payout": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "payout",
+        "transfer_to_bank",
+        "create_payout",
+        "stripe_payout",
+        "disburse"
+      ],
+      "description": "Stripe: Moving funds to external bank accounts"
+    },
+    "stripe_subscription": {
+      "delta": 0.35,
+      "risk_keywords": [
+        "subscription",
+        "create_subscription",
+        "stripe_subscription",
+        "billing_cycle",
+        "invoice",
+        "recurring"
+      ],
+      "description": "Stripe: Recurring billing and subscription management"
+    },
+    "stripe_issuing_card": {
+      "delta": 0.1,
+      "risk_keywords": [
+        "create_card",
+        "issue_card",
+        "cardholder",
+        "create_cardholder",
+        "stripe_issuing"
+      ],
+      "description": "Stripe: Creating payment cards and cardholders via Stripe Issuing"
+    },
+    "stripe_customer_mgmt": {
+      "delta": 0.5,
+      "risk_keywords": [
+        "create_customer",
+        "update_customer",
+        "stripe_customer",
+        "customer",
+        "attach_payment_method"
+      ],
+      "description": "Stripe: Customer and payment method management"
+    },
+    "stripe_dispute": {
+      "delta": 0.25,
+      "risk_keywords": [
+        "dispute",
+        "create_dispute",
+        "stripe_dispute",
+        "evidence",
+        "chargeback"
+      ],
+      "description": "Stripe: Handling payment disputes and chargebacks"
+    }
+  }
+}
