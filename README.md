@@ -77,11 +77,19 @@ For the full CLI reference (all 7 commands with flags and examples), see [docs/C
 ```python
 from shadowaudit import Gate
 
-gate = Gate(taxonomy="general")
-result = gate.evaluate({"tool": "shell", "command": "rm -rf /"})
-print(result.passed)   # False
-print(result.reason)   # "drift_detected"
+gate = Gate()
+result = gate.evaluate(
+    agent_id="agent-1",
+    task_context="shell_tool",
+    risk_category="execute",
+    payload={"command": "rm -rf /"},
+)
+print(result.passed)        # False
+print(result.risk_score)    # 0.11 (varies by payload)
+print(result.reason)        # "drift_detected"
 ```
+
+Framework adapters: LangChain (`ShadowAuditTool`), CrewAI (`ShadowAuditCrewAITool`), LangGraph (`ShadowAuditToolNode`), OpenAI Agents SDK (`ShadowAuditOpenAITool`), and MCP (`MCPGatewayServer` + `ShadowAuditMCPSession`). See `examples/` for runnable scripts for each.
 
 See [`examples/`](examples/) for runnable scripts covering every framework adapter.
 
@@ -108,28 +116,28 @@ No cloud. No LLM calls. No API keys. SQLite-backed state and audit log. Single `
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                      ShadowAudit                         │
-├───────────┬───────────┬───────────┬───────────┬─────────┤
-│  CLI      │ LangChain │  CrewAI   │  Direct   │  MCP    │
-│  (click)  │  Adapter  │  Adapter  │   Gate    │ Gateway │
-├───────────┴───────────┴───────────┴───────────┴─────────┤
-│                    Core Gate Engine                       │
-│  ┌─────────┐  ┌──────────┐  ┌────────┐  ┌────────────┐  │
-│  │ Scorer  │  │ Taxonomy │  │  FSM   │  │ Audit Log  │  │
-│  │(pluggable)│ │ Loader  │  │(fail-closed)│ │(Hash-chained│  │
-│  └─────────┘  └──────────┘  └────────┘  │ + Ed25519) │  │
-│  ┌──────────┐  ┌──────────┐             └────────────┘  │
-│  │  State   │  │   Hash   │                             │
-│  │ (SQLite) │  │ (SHA-256)│                             │
-│  └──────────┘  └──────────┘                             │
-├─────────────────────────────────────────────────────────┤
-│                  Assessment & Reporting                   │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐ │
-│  │ Scanner  │  │ Reporter │  │Simulator │  │ Builder │ │
-│  │          │  │ (Jinja2) │  │          │  │         │ │
-│  └──────────┘  └──────────┘  └──────────┘  └─────────┘ │
-└─────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────┐
+│                      ShadowAudit                           │
+├───────────┬───────────┬───────────┬───────────┬───────────┤
+│  CLI      │ LangChain │  CrewAI   │  Direct   │  MCP      │
+│  (click)  │  Adapter  │  Adapter  │   Gate    │  Gateway  │
+├───────────┴───────────┴───────────┴───────────┴───────────┤
+│                    Core Gate Engine                        │
+│ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌────────────┐ │
+│ │  Scorer   │ │  Taxonomy │ │    FSM    │ │  Audit Log │ │
+│ │ pluggable │ │   Loader  │ │ fail-closed│ │Hash-chained│ │
+│ └───────────┘ └───────────┘ └───────────┘ │  + Ed25519 │ │
+│ ┌───────────┐ ┌───────────┐               └────────────┘ │
+│ │   State   │ │   Hash    │                              │
+│ │  (SQLite) │ │ (SHA-256) │                              │
+│ └───────────┘ └───────────┘                              │
+├───────────────────────────────────────────────────────────┤
+│                  Assessment & Reporting                    │
+│ ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌────────────┐ │
+│ │  Scanner  │ │  Reporter │ │ Simulator │ │   Builder  │ │
+│ │           │ │  (Jinja2) │ │           │ │            │ │
+│ └───────────┘ └───────────┘ └───────────┘ └────────────┘ │
+└───────────────────────────────────────────────────────────┘
 ```
 
 ### How a tool call is evaluated
@@ -140,7 +148,6 @@ No cloud. No LLM calls. No API keys. SQLite-backed state and audit log. Single `
 4. **Threshold comparison** → score vs. taxonomy delta determines pass/fail
 5. **FSM transition** → fail-closed state machine: anything not an explicit pass is a block
 6. **Audit log** → decision recorded with timestamp, agent ID, payload hash, and reason
-7. **State update** → K (trust) and V (velocity) metrics updated for adaptive scoring
 
 ## Installation
 
@@ -195,7 +202,7 @@ For the full testing guide, see [`docs/TESTING_GUIDE.md`](docs/TESTING_GUIDE.md)
 
 ## Project Status
 
-ShadowAudit is in **alpha** (v0.4.0). The core gate, CLI, framework adapters, and assessment tools are functional and tested. APIs may evolve before v1.0.0.
+ShadowAudit is **v0.4.0 — production-ready for audit-time scanning and assessment workflows; runtime gating is in early-adopter use.** APIs may evolve before v1.0.0; breaking changes require a major version bump and migration guide.
 
 - ✅ Core gate + 5 framework adapters (LangChain, CrewAI, LangGraph, OpenAI Agents, MCP)
 - ✅ Hash-chained, Ed25519-signed audit log with integrity verification

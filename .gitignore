@@ -6,8 +6,16 @@
 !CONTRIBUTING.md
 !CODE_OF_CONDUCT.md
 !SECURITY.md
-!CHANGES_TO_APPLY_MANUALLY.md
 !docs/*.md
+
+# Internal review artifacts (do not commit)
+docs/CODE_REVIEW_*.md
+docs/REVIEW_*.md
+docs/*_REVIEW.md
+docs/INTERNAL_*.md
+BUILDPLAN.md
+TRADE_SECRET*.md
+CHANGES_TO_APPLY_MANUALLY.md
 
 # Private Cloud repo — decoupled from OSS
 shadowaudit-cloud/
