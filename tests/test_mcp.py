@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from shadowaudit.core.gate import Gate
 from shadowaudit.core.fsm import FailClosedFSM
 from shadowaudit.types import GateResult
