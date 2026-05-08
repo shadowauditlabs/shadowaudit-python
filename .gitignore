@@ -2,6 +2,12 @@
 # README.md is explicitly allowed (needed for PyPI/GitHub)
 *.md
 !README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!CODE_OF_CONDUCT.md
+!SECURITY.md
+!CHANGES_TO_APPLY_MANUALLY.md
+!docs/*.md
 
 # Private Cloud repo — decoupled from OSS
 shadowaudit-cloud/
