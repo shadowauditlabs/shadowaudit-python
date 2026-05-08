@@ -6,6 +6,7 @@ Proprietary taxonomies are loaded from user-provided JSON or cloud API.
 
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 from typing import Any, cast
@@ -33,8 +34,9 @@ class TaxonomyLoader:
 
     @classmethod
     def load(cls, path: str | Path | None = None) -> dict[str, Any]:
-        if cls._cache is not None and path is None:
-            return cls._cache
+        cache_key = str(path) if path is not None else "__default__"
+        if cls._cache is not None and cache_key == "__default__":
+            return copy.deepcopy(cls._cache)
 
         if path is not None:
             name = str(path)
@@ -43,7 +45,7 @@ class TaxonomyLoader:
                 if starter_path.exists():
                     with open(starter_path, "r", encoding="utf-8") as f:
                         data: dict[str, Any] = cast(dict[str, Any], json.load(f))
-                    return data
+                    return copy.deepcopy(data)
             with open(path, "r", encoding="utf-8") as f:
                 data = cast(dict[str, Any], json.load(f))
         else:
@@ -51,7 +53,7 @@ class TaxonomyLoader:
 
         if path is None:
             cls._cache = data
-        return data
+        return copy.deepcopy(data)
 
     @classmethod
     def lookup(

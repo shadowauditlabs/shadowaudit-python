@@ -1,0 +1,123 @@
+{
+  "version": "1.0",
+  "domain": "financial_plaid",
+  "description": "Risk taxonomy for Plaid-powered fintech agents — account linking, balance checks, transactions, transfers, and identity verification",
+  "categories": {
+    "plaid_auth": {
+      "delta": 0.8,
+      "risk_keywords": [
+        "auth",
+        "account_number",
+        "routing_number",
+        "bank_account",
+        "plaid_auth"
+      ],
+      "description": "Plaid Auth: Retrieve bank account numbers for ACH. Low direct risk, sensitive data."
+    },
+    "plaid_balance": {
+      "delta": 1.0,
+      "risk_keywords": [
+        "balance",
+        "current_balance",
+        "available_balance",
+        "plaid_balance",
+        "get_balance"
+      ],
+      "description": "Plaid Balance: Real-time balance checks. Read-only, lowest risk."
+    },
+    "plaid_transactions": {
+      "delta": 1.0,
+      "risk_keywords": [
+        "transactions",
+        "get_transactions",
+        "transaction_history",
+        "plaid_transactions",
+        "statement"
+      ],
+      "description": "Plaid Transactions: Retrieve transaction history. Read-only."
+    },
+    "plaid_identity": {
+      "delta": 0.7,
+      "risk_keywords": [
+        "identity",
+        "owner",
+        "names",
+        "addresses",
+        "phone_numbers",
+        "emails",
+        "plaid_identity"
+      ],
+      "description": "Plaid Identity: Retrieve account owner identity info. PII access."
+    },
+    "plaid_income": {
+      "delta": 0.6,
+      "risk_keywords": [
+        "income",
+        "payroll",
+        "employer",
+        "salary",
+        "plaid_income",
+        "deposit"
+      ],
+      "description": "Plaid Income / Payroll: Income verification. Sensitive financial data."
+    },
+    "plaid_transfer": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "transfer",
+        "plaid_transfer",
+        "credit_transfer",
+        "debit_transfer",
+        "ach_transfer",
+        "send_funds"
+      ],
+      "description": "Plaid Transfer: Initiate ACH transfers via Plaid. High risk — moves money."
+    },
+    "plaid_link_token": {
+      "delta": 0.9,
+      "risk_keywords": [
+        "link_token",
+        "create_link_token",
+        "plaid_link",
+        "public_token",
+        "exchange_token"
+      ],
+      "description": "Plaid Link: Token creation and exchange. Account linking setup."
+    },
+    "plaid_item_mgmt": {
+      "delta": 0.5,
+      "risk_keywords": [
+        "item",
+        "remove_item",
+        "update_item",
+        "plaid_item",
+        "disconnect",
+        "delete_item"
+      ],
+      "description": "Plaid Item Management: Add, update, or remove linked bank items."
+    },
+    "plaid_liabilities": {
+      "delta": 0.7,
+      "risk_keywords": [
+        "liabilities",
+        "credit_card",
+        "mortgage",
+        "student_loan",
+        "plaid_liabilities",
+        "debt"
+      ],
+      "description": "Plaid Liabilities: Retrieve credit card, mortgage, and loan data."
+    },
+    "plaid_investments": {
+      "delta": 0.8,
+      "risk_keywords": [
+        "investments",
+        "holdings",
+        "securities",
+        "plaid_investments",
+        "portfolio"
+      ],
+      "description": "Plaid Investments: Retrieve investment holdings and transactions."
+    }
+  }
+}

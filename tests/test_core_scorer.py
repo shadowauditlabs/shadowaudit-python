@@ -61,8 +61,13 @@ class TestAdaptiveScorer:
 
 
 class TestLoadScorer:
-    def test_loads_keyword_by_default(self):
+    def test_loads_hardened_by_default(self):
         s = load_scorer(prefer_native=False)
+        from shadowaudit.core.scorer import RegexASTScorer
+        assert isinstance(s, RegexASTScorer)
+
+    def test_loads_keyword_when_hardened_disabled(self):
+        s = load_scorer(prefer_native=False, use_hardened=False)
         assert isinstance(s, KeywordScorer)
 
     def test_loads_adaptive_with_state(self):
@@ -76,4 +81,5 @@ class TestLoadScorer:
 
     def test_enterprise_binary_not_present(self):
         s = load_scorer(prefer_native=True, state_store=None)
-        assert isinstance(s, KeywordScorer)
+        from shadowaudit.core.scorer import RegexASTScorer
+        assert isinstance(s, RegexASTScorer)

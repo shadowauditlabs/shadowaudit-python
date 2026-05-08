@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShadowAudit Assessment — src/</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --critical: #7c2d12;
+            --critical-bg: #fef2f2;
+            --high: #dc2626;
+            --high-bg: #fef2f2;
+            --medium: #d97706;
+            --medium-bg: #fffbeb;
+            --low: #059669;
+            --low-bg: #f0fdf4;
+            --safe: #2563eb;
+            --safe-bg: #eff6ff;
+            --code-bg: #f1f5f9;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        
+        header {
+            margin-bottom: 32px;
+        }
+        
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        
+        header .subtitle {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+        
+        /* Score Card */
+        .score-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        
+        .score-display {
+            text-align: center;
+            min-width: 140px;
+        }
+        
+        .score-number {
+            font-size: 64px;
+            font-weight: 800;
+            line-height: 1;
+            color: #059669;
+        }
+        
+        .score-label {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #059669;
+            margin-top: 8px;
+        }
+        
+        .score-details {
+            flex: 1;
+        }
+        
+        .score-details h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+        
+        .metric {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .metric .ungated { color: var(--high); }
+        .metric .gated { color: var(--low); }
+        .metric .coverage { color: var(--safe); }
+        
+        /* Section Cards */
+        .section {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+        
+        .section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Coverage Bar */
+        .coverage-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .coverage-fill {
+            height: 100%;
+            background: var(--safe);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .coverage-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+        }
+        
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        
+        tr:hover td {
+            background: var(--bg);
+        }
+        
+        .risk-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .risk-critical { background: var(--critical-bg); color: var(--critical); }
+        .risk-high { background: var(--high-bg); color: var(--high); }
+        .risk-medium { background: var(--medium-bg); color: var(--medium); }
+        .risk-low { background: var(--low-bg); color: var(--low); }
+        
+        .status-wrapped {
+            color: var(--low);
+            font-weight: 600;
+        }
+        
+        .status-ungated {
+            color: var(--high);
+            font-weight: 600;
+        }
+        
+        code {
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 13px;
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .remediation {
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        
+        .remediation code {
+            display: block;
+            background: none;
+            padding: 4px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        /* Empty State */
+        .empty {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+            margin-top: 16px;
+        }
+        
+        footer .version {
+            font-weight: 500;
+            color: var(--text);
+        }
+        
+        /* Coverage Grid */
+        .coverage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .coverage-cell {
+            border-radius: 8px;
+            padding: 14px 16px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+            border: 2px solid transparent;
+            transition: transform 0.15s ease;
+        }
+
+        .coverage-cell:hover {
+            transform: scale(1.02);
+        }
+
+        .coverage-gated {
+            background: var(--low-bg);
+            border-color: var(--low);
+            color: var(--low);
+        }
+
+        .coverage-ungated {
+            background: var(--high-bg);
+            border-color: var(--high);
+            color: var(--high);
+        }
+
+        .coverage-tool-name {
+            display: block;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .coverage-status {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .coverage-legend {
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            margin-right: 12px;
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        /* Implementation Plan */
+        .impl-step {
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--safe);
+        }
+
+        .impl-step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .impl-step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--safe);
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .impl-step-name {
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .impl-step-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .impl-step-code {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 14px 18px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .impl-step-code code {
+            background: none;
+            padding: 0;
+            white-space: pre;
+        }
+
+        /* Taxonomy JSON */
+        .taxonomy-json {
+            background: var(--code-bg);
+            border-radius: 10px;
+            padding: 20px 24px;
+            overflow-x: auto;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .taxonomy-json code {
+            background: none;
+            padding: 0;
+            white-space: pre;
+        }
+
+        /* Print */
+        @media print {
+            body { background: white; }
+            .container { padding: 0; max-width: none; }
+            .section, .score-card { box-shadow: none; border: 1px solid #ddd; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ShadowAudit Assessment</h1>
+            <p class="subtitle">Scanned: <code>src</code> · Taxonomy: financial · 8 file(s)</p>
+        </header>
+        
+        
+        <!-- Risk Score Card -->
+        <div class="score-card">
+            <div class="score-display">
+                <div class="score-number">22</div>
+                <div class="score-label">LOW</div>
+            </div>
+            <div class="score-details">
+                <h2>Executive Summary</h2>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-value">8</div>
+                        <div class="metric-label">Total Tools</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value gated">6</div>
+                        <div class="metric-label">Gated ✓</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value ungated">2</div>
+                        <div class="metric-label">Ungated ⚠</div>
+                    </div>
+                    
+                    <div class="metric">
+                        <div class="metric-value ungated">1</div>
+                        <div class="metric-label">Critical Risk</div>
+                    </div>
+                    
+                    <div class="metric">
+                        <div class="metric-value coverage">66.7%</div>
+                        <div class="metric-label">Coverage</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Coverage Map -->
+        <div class="section">
+            <h2>Coverage Map</h2>
+            <div class="coverage-grid">
+                
+                <div class="coverage-cell coverage-gated"
+                     title="PaymentTool: Gated — payment_initiation (HIGH)">
+                    <span class="coverage-tool-name">PaymentTool</span>
+                    <span class="coverage-status">Gated</span>
+                </div>
+                
+                <div class="coverage-cell coverage-gated"
+                     title="RefundTool: Gated — payment_initiation (HIGH)">
+                    <span class="coverage-tool-name">RefundTool</span>
+                    <span class="coverage-status">Gated</span>
+                </div>
+                
+                <div class="coverage-cell coverage-ungated"
+                     title="WireTransferTool: Ungated — payment_initiation (HIGH)">
+                    <span class="coverage-tool-name">WireTransfer..</span>
+                    <span class="coverage-status">Ungated</span>
+                </div>
+                
+                <div class="coverage-cell coverage-gated"
+                     title="BalanceInquiryTool: Gated — read_only (LOW)">
+                    <span class="coverage-tool-name">BalanceInqui..</span>
+                    <span class="coverage-status">Gated</span>
+                </div>
+                
+                <div class="coverage-cell coverage-gated"
+                     title="TransactionHistoryTool: Gated — read_only (LOW)">
+                    <span class="coverage-tool-name">TransactionH..</span>
+                    <span class="coverage-status">Gated</span>
+                </div>
+                
+                <div class="coverage-cell coverage-gated"
+                     title="DeleteAccountTool: Gated — delete (CRITICAL)">
+                    <span class="coverage-tool-name">DeleteAccoun..</span>
+                    <span class="coverage-status">Gated</span>
+                </div>
+                
+                <div class="coverage-cell coverage-gated"
+                     title="UpdateAccountTool: Gated — update (HIGH)">
+                    <span class="coverage-tool-name">UpdateAccoun..</span>
+                    <span class="coverage-status">Gated</span>
+                </div>
+                
+                <div class="coverage-cell coverage-ungated"
+                     title="BulkDataExportTool: Ungated — data_export (CRITICAL)">
+                    <span class="coverage-tool-name">BulkDataExpo..</span>
+                    <span class="coverage-status">Ungated</span>
+                </div>
+                
+            </div>
+            <p class="coverage-text">
+                <span class="coverage-legend">
+                    <span class="legend-dot" style="background: var(--low)"></span> Gated: 6
+                    <span class="legend-dot" style="background: var(--high)"></span> Ungated: 2
+                </span>
+                6 of 6 risky tools are protected with ShadowAuditTool.
+            </p>
+        </div>
+        
+        <!-- Tool Inventory -->
+        <div class="section">
+            <h2>Tool Inventory</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tool</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Risk</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td>
+                            <code>PaymentTool</code>
+                            
+                            <br><small style="color: var(--text-secondary)">langchain</small>
+                            
+                        </td>
+                        <td>
+                            payment_initiation
+                            
+                            <br><small style="color: var(--text-secondary)">Money movement — user must be in the loop.</small>
+                            
+                        </td>
+                        <td>
+                            
+                            <span class="status-wrapped">✓ Gated</span>
+                            
+                        </td>
+                        <td>
+                            <span class="risk-badge risk-high">HIGH</span>
+                        </td>
+                        <td>
+                            <code>payment_tools.py:10</code>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>
+                            <code>RefundTool</code>
+                            
+                            <br><small style="color: var(--text-secondary)">langchain</small>
+                            
+                        </td>
+                        <td>
+                            payment_initiation
+                            
+                            <br><small style="color: var(--text-secondary)">Money movement — user must be in the loop.</small>
+                            
+                        </td>
+                        <td>
+                            
+                            <span class="status-wrapped">✓ Gated</span>
+                            
+                        </td>
+                        <td>
+                            <span class="risk-badge risk-high">HIGH</span>
+                        </td>
+                        <td>
+                            <code>payment_tools.py:23</code>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>
+                            <code>WireTransferTool</code>
+                            
+                            <br><small style="color: var(--text-secondary)">langchain</small>
+                            
+                        </td>
+                        <td>
+                            payment_initiation
+                            
+                            <br><small style="color: var(--text-secondary)">Money movement — user must be in the loop.</small>
+                            
+                        </td>
+                        <td>
+                            
+                            <span class="status-ungated">❌ Ungated</span>
+                            
+                        </td>
+                        <td>
+                            <span class="risk-badge risk-high">HIGH</span>
+                        </td>
+                        <td>
+                            <code>payment_tools.py:37</code>
+                        </td>
+                    </tr>
+                    
+                    <tr style="background: var(--bg)">
+                        <td colspan="5">
+                            <div class="remediation">
+                                <strong>Remediation:</strong>
+                                <code>Wrap with ShadowAuditTool: ShadowAuditTool(tool=WireTransferTool(), agent_id=&#34;YOUR_AGENT_ID&#34;, risk_category=&#34;payment_initiation&#34;)</code>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>
+                            <code>BalanceInquiryTool</code>
+                            
+                            <br><small style="color: var(--text-secondary)">langchain</small>
+                            
+                        </td>
+                        <td>
+                            read_only
+                            
+                            <br><small style="color: var(--text-secondary)">Unknown category</small>
+                            
+                        </td>
+                        <td>
+                            
+                            <span class="status-wrapped">✓ Gated</span>
+                            
+                        </td>
+                        <td>
+                            <span class="risk-badge risk-low">LOW</span>
+                        </td>
+                        <td>
+                            <code>readonly_tools.py:9</code>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>
+                            <code>TransactionHistoryTool</code>
+                            
+                            <br><small style="color: var(--text-secondary)">langchain</small>
+                            
+                        </td>
+                        <td>
+                            read_only
+                            
+                            <br><small style="color: var(--text-secondary)">Unknown category</small>
+                            
+                        </td>
+                        <td>
+                            
+                            <span class="status-wrapped">✓ Gated</span>
+                            
+                        </td>
+                        <td>
+                            <span class="risk-badge risk-low">LOW</span>
+                        </td>
+                        <td>
+                            <code>readonly_tools.py:22</code>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>
+                            <code>DeleteAccountTool</code>
+                            
+                            <br><small style="color: var(--text-secondary)">langchain</small>
+                            
+                        </td>
+                        <td>
+                            delete
+                            
+                            <br><small style="color: var(--text-secondary)">Unknown category</small>
+                            
+                        </td>
+                        <td>
+                            
+                            <span class="status-wrapped">✓ Gated</span>
+                            
+                        </td>
+                        <td>
+                            <span class="risk-badge risk-critical">CRITICAL</span>
+                        </td>
+                        <td>
+                            <code>account_tools.py:9</code>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>
+                            <code>UpdateAccountTool</code>
+                            
+                            <br><small style="color: var(--text-secondary)">langchain</small>
+                            
+                        </td>
+                        <td>
+                            update
+                            
+                            <br><small style="color: var(--text-secondary)">Unknown category</small>
+                            
+                        </td>
+                        <td>
+                            
+                            <span class="status-wrapped">✓ Gated</span>
+                            
+                        </td>
+                        <td>
+                            <span class="risk-badge risk-high">HIGH</span>
+                        </td>
+                        <td>
+                            <code>account_tools.py:22</code>
+                        </td>
+                    </tr>
+                    
+                    
+                    <tr>
+                        <td>
+                            <code>BulkDataExportTool</code>
+                            
+                            <br><small style="color: var(--text-secondary)">langchain</small>
+                            
+                        </td>
+                        <td>
+                            data_export
+                            
+                            <br><small style="color: var(--text-secondary)">Unknown category</small>
+                            
+                        </td>
+                        <td>
+                            
+                            <span class="status-ungated">❌ Ungated</span>
+                            
+                        </td>
+                        <td>
+                            <span class="risk-badge risk-critical">CRITICAL</span>
+                        </td>
+                        <td>
+                            <code>account_tools.py:35</code>
+                        </td>
+                    </tr>
+                    
+                    <tr style="background: var(--bg)">
+                        <td colspan="5">
+                            <div class="remediation">
+                                <strong>Remediation:</strong>
+                                <code>Wrap with ShadowAuditTool: ShadowAuditTool(tool=BulkDataExportTool(), agent_id=&#34;YOUR_AGENT_ID&#34;, risk_category=&#34;data_export&#34;)</code>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Category Breakdown -->
+        
+        <div class="section">
+            <h2>Category Breakdown</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Total</th>
+                        <th>Gated</th>
+                        <th>Ungated</th>
+                        <th>Critical/High</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td><code>payment_initiation</code></td>
+                        <td>3</td>
+                        <td style="color: var(--low)">2</td>
+                        <td style="color: var(--high)">
+                            1
+                        </td>
+                        <td>
+                            
+                            <span class="risk-badge risk-high">1</span>
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><code>read_only</code></td>
+                        <td>2</td>
+                        <td style="color: var(--low)">2</td>
+                        <td style="color: var(--text-secondary)">
+                            0
+                        </td>
+                        <td>
+                            
+                            —
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><code>delete</code></td>
+                        <td>1</td>
+                        <td style="color: var(--low)">1</td>
+                        <td style="color: var(--text-secondary)">
+                            0
+                        </td>
+                        <td>
+                            
+                            —
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><code>update</code></td>
+                        <td>1</td>
+                        <td style="color: var(--low)">1</td>
+                        <td style="color: var(--text-secondary)">
+                            0
+                        </td>
+                        <td>
+                            
+                            —
+                            
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td><code>data_export</code></td>
+                        <td>1</td>
+                        <td style="color: var(--low)">0</td>
+                        <td style="color: var(--high)">
+                            1
+                        </td>
+                        <td>
+                            
+                            <span class="risk-badge risk-high">1</span>
+                            
+                        </td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+        
+
+        <!-- Recommended Taxonomy -->
+        
+        <div class="section">
+            <h2>Recommended Taxonomy</h2>
+            <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 14px;">
+                Auto-generated taxonomy based on detected tools. Save as a <code>.json</code> file for reuse with <code>--taxonomy</code>.
+            </p>
+            <pre class="taxonomy-json"><code>{
+  "payment_initiation": {
+    "delta": 0.3,
+    "risk_keywords": [
+      "pay",
+      "payment",
+      "transfer",
+      "send_money",
+      "disburse",
+      "remit",
+      "send",
+      "wire"
+    ],
+    "description": "Money movement — user must be in the loop."
+  },
+  "read_only": {
+    "delta": 1.0,
+    "risk_keywords": [
+    ],
+    "description": "Unknown category"
+  },
+  "delete": {
+    "delta": 0.2,
+    "risk_keywords": [
+    ],
+    "description": "Unknown category"
+  },
+  "update": {
+    "delta": 0.3,
+    "risk_keywords": [
+    ],
+    "description": "Unknown category"
+  },
+  "data_export": {
+    "delta": 0.15,
+    "risk_keywords": [
+    ],
+    "description": "Unknown category"
+  }
+}</code></pre>
+        </div>
+        
+
+        <!-- Implementation Plan -->
+        
+        <div class="section">
+            <h2>Implementation Plan</h2>
+            <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 14px;">
+                Step-by-step instructions to wrap each ungated tool with ShadowAudit enforcement.
+            </p>
+            
+            <div class="impl-step">
+                <div class="impl-step-header">
+                    <span class="impl-step-num">1</span>
+                    <span class="impl-step-name">WireTransferTool</span>
+                    <span class="risk-badge risk-high">HIGH</span>
+                </div>
+                <p class="impl-step-desc">
+                    Wrap <code>WireTransferTool</code> (category: <code>payment_initiation</code>) with ShadowAuditTool to enforce runtime governance.
+                </p>
+                <pre class="impl-step-code"><code>from shadowaudit.framework.langchain import ShadowAuditTool
+wiretransfertool_safe = ShadowAuditTool(
+    tool=WireTransferTool(),
+    agent_id=&#34;YOUR_AGENT_ID&#34;,
+    risk_category=&#34;payment_initiation&#34;
+)</code></pre>
+            </div>
+            
+            <div class="impl-step">
+                <div class="impl-step-header">
+                    <span class="impl-step-num">2</span>
+                    <span class="impl-step-name">BulkDataExportTool</span>
+                    <span class="risk-badge risk-critical">CRITICAL</span>
+                </div>
+                <p class="impl-step-desc">
+                    Wrap <code>BulkDataExportTool</code> (category: <code>data_export</code>) with ShadowAuditTool to enforce runtime governance.
+                </p>
+                <pre class="impl-step-code"><code>from shadowaudit.framework.langchain import ShadowAuditTool
+bulkdataexporttool_safe = ShadowAuditTool(
+    tool=BulkDataExportTool(),
+    agent_id=&#34;YOUR_AGENT_ID&#34;,
+    risk_category=&#34;data_export&#34;
+)</code></pre>
+            </div>
+            
+        </div>
+        
+        
+        
+        
+        <footer>
+            <p>Generated by <span class="version">ShadowAudit v0.3.0</span></p>
+            
+            <p style="margin-top: 8px">Need runtime enforcement? ShadowAudit Enterprise provides adaptive behavioral scoring with zero cloud dependencies.</p>
+            
+        </footer>
+    </div>
+</body>
+</html>

@@ -91,6 +91,8 @@ class Gate:
 
         # 3. Score payload risk with pluggable scorer
         # Inject risk category name so scorer can make category-aware decisions
+        # IMPORTANT: copy the dict to avoid mutating the cached taxonomy object
+        taxonomy_entry = dict(taxonomy_entry)
         taxonomy_entry["name"] = risk_category
         risk_score = score_payload(payload, risk_keywords, self._scorer, taxonomy_entry, agent_id=agent_id)
 

@@ -240,6 +240,7 @@ def scan_file(
     filepath: Path,
     *,
     global_wrapped: set[str] | None = None,
+    _cached_tree: ast.AST | None = None,
 ) -> list[ToolFinding]:
     """Scan a single Python file for ungated tool classes.
     
@@ -247,17 +248,23 @@ def scan_file(
         filepath: Path to Python source file
         global_wrapped: Optional pre-computed set of wrapped tool names
                         from all files (enables cross-file detection).
+        _cached_tree: Optional pre-parsed AST to avoid re-parsing.
         
     Returns:
         List of ToolFinding objects describing discovered tools
     """
-    try:
-        source = filepath.read_text(encoding="utf-8")
-        tree = ast.parse(source, filename=str(filepath))
-    except SyntaxError:
-        return []
-    except UnicodeDecodeError:
-        return []
+    if _cached_tree is not None:
+        tree = _cached_tree
+    else:
+        try:
+            source = filepath.read_text(encoding="utf-8")
+            tree = ast.parse(source, filename=str(filepath))
+        except SyntaxError:
+            return []
+        except UnicodeDecodeError:
+            return []
+        except PermissionError:
+            return []
     
     tools = _find_tool_classes(tree)
     local_wrapped = _find_shadowaudit_wrappers(tree)
@@ -285,6 +292,7 @@ def scan_file(
 
 def _collect_all_wrappers(
     pyfiles: list[Path],
+    ast_cache: dict[Path, ast.AST] | None = None,
 ) -> set[str]:
     """Collect all ShadowAuditTool-wrapped class names across multiple files.
     
@@ -293,13 +301,25 @@ def _collect_all_wrappers(
     """
     all_wrapped: set[str] = set()
     for pyfile in pyfiles:
-        try:
-            source = pyfile.read_text(encoding="utf-8")
-            tree = ast.parse(source, filename=str(pyfile))
-        except (SyntaxError, UnicodeDecodeError):
+        tree = _parse_file_cached(pyfile, ast_cache)
+        if tree is None:
             continue
         all_wrapped |= _find_shadowaudit_wrappers(tree)
     return all_wrapped
+
+
+def _parse_file_cached(pyfile: Path, ast_cache: dict[Path, ast.AST] | None = None) -> ast.AST | None:
+    """Parse a Python file, using cache if provided."""
+    if ast_cache is not None and pyfile in ast_cache:
+        return ast_cache[pyfile]
+    try:
+        source = pyfile.read_text(encoding="utf-8")
+        tree = ast.parse(source, filename=str(pyfile))
+    except (SyntaxError, UnicodeDecodeError, PermissionError):
+        return None
+    if ast_cache is not None:
+        ast_cache[pyfile] = tree
+    return tree
 
 
 def scan_directory(
@@ -333,16 +353,21 @@ def scan_directory(
         # Collect all Python files first
         pyfiles: list[Path] = []
         for pyfile in path.rglob(pattern):
-            if any(part in exclude_dirs for part in pyfile.parts):
+            if any(str(part) in exclude_dirs for part in pyfile.parts):
                 continue
             pyfiles.append(pyfile)
         
-        # Pass 1: collect all wrapped tool names across all files
-        global_wrapped = _collect_all_wrappers(pyfiles)
+        # Shared AST cache to avoid double-parsing
+        ast_cache: dict[Path, ast.AST] = {}
         
-        # Pass 2: scan each file with the global wrapped set
+        # Pass 1: collect all wrapped tool names across all files
+        global_wrapped = _collect_all_wrappers(pyfiles, ast_cache=ast_cache)
+        
+        # Pass 2: scan each file with the global wrapped set (reuse cached ASTs)
         for pyfile in pyfiles:
-            findings.extend(scan_file(pyfile, global_wrapped=global_wrapped))
+            tree = _parse_file_cached(pyfile, ast_cache)
+            if tree is not None:
+                findings.extend(scan_file(pyfile, global_wrapped=global_wrapped, _cached_tree=tree))
     
     return findings
 

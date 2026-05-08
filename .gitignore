@@ -3,6 +3,9 @@
 *.md
 !README.md
 
+# Private Cloud repo — decoupled from OSS
+shadowaudit-cloud/
+
 # Python
 __pycache__/
 *.py[cod]

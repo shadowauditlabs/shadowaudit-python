@@ -95,3 +95,21 @@ class TestGateEvaluate:
         events = audit.get_events(agent_id="audit-test")
         assert len(events) == 1
         assert events[0]["decision"] == "pass"
+        assert events[0]["entry_hash"]  # hash chain populated
+        assert events[0]["prev_hash"] == ""  # first entry
+
+    def test_audit_chain_verification(self):
+        """Audit log chain verifies after multiple decisions."""
+        from shadowaudit.core.audit import AuditLogger
+        audit = AuditLogger()
+        gate = Gate(audit_logger=audit)
+        for i in range(3):
+            gate.evaluate(
+                agent_id="chain-test",
+                task_context=f"t{i}",
+                risk_category="read_only",
+                payload={"action": "view"},
+            )
+        valid, errors = audit.verify()
+        assert valid is True
+        assert errors == []

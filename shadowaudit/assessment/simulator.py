@@ -61,8 +61,9 @@ class TraceSimulator:
     to surface differences in blocking decisions.
     """
 
-    def __init__(self, taxonomy_path: str | None = "general") -> None:
+    def __init__(self, taxonomy_path: str | None = "general", taxonomy_paths: list[str] | None = None) -> None:
         self._taxonomy_path = taxonomy_path
+        self._taxonomy_paths = taxonomy_paths
 
     def run(
         self,
@@ -93,6 +94,16 @@ class TraceSimulator:
             state_store=store,
         )
 
+        # Multi-pack gates if requested
+        multi_static_gates: list[Gate] = []
+        multi_adaptive_gates: list[Gate] = []
+        if self._taxonomy_paths:
+            for tp in self._taxonomy_paths:
+                multi_static_gates.append(Gate(taxonomy_path=tp, scorer=KeywordScorer()))
+                multi_adaptive_gates.append(
+                    Gate(taxonomy_path=tp, scorer=AdaptiveScorer(state_store=store), state_store=store)
+                )
+
         for call in calls:
             call_id = call.get("call_id", "unknown")
             tool_name = call.get("tool_name", "unknown")
@@ -119,6 +130,19 @@ class TraceSimulator:
             adaptive_score = adaptive_result.risk_score or 0.0
             adaptive_delta = adaptive_score - static_score if adaptive_score > static_score else None
 
+            # Multi-pack evaluation: track if any pack blocks
+            if multi_static_gates and multi_adaptive_gates:
+                for sg in multi_static_gates:
+                    sr = sg.evaluate(agent_id=agent_id, task_context=tool_name, risk_category=risk_category, payload=payload)
+                    if not sr.passed:
+                        static_blocked = True
+                        break
+                for ag in multi_adaptive_gates:
+                    ar = ag.evaluate(agent_id=agent_id, task_context=tool_name, risk_category=risk_category, payload=payload)
+                    if not ar.passed:
+                        adaptive_blocked = True
+                        break
+
             result = TraceReplayResult(
                 call_id=call_id,
                 tool_name=tool_name,
@@ -130,6 +154,7 @@ class TraceSimulator:
                 adaptive_score=adaptive_score,
                 adaptive_delta=adaptive_delta,
             )
+            # Attach multi-pack flags as metadata (not in dataclass, so skip for now)
             summary.results.append(result)
 
             if static_blocked:

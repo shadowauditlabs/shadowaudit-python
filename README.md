@@ -30,11 +30,28 @@ Agent → ShadowAudit Gate → Tool (allowed)
 | Problem | ShadowAudit's Answer |
 |---|---|
 | Agents execute arbitrary shell commands | Keyword-based risk scoring with configurable thresholds |
-| No audit trail for agent decisions | Append-only SQLite audit log with payload hashing |
+| No audit trail for agent decisions | **Hash-chained, tamper-evident** SQLite audit log with payload hashing |
 | Can't prove compliance to auditors | Professional HTML reports with SOX/PCI-DSS mappings |
 | Agent behavior drifts over time | Adaptive scoring with behavioral state tracking (K/V metrics) |
 | CI/CD deploys unsafe agents | `--fail-on-ungated` flag blocks deployments |
 | Legal team blocks cloud-dependent tools | Works fully offline — zero external calls |
+| EU AI Act Annex IV evidence required | Annex IV evidence-pack generator built-in |
+
+### vs Microsoft Agent Governance Toolkit (AGT)
+
+> "AGT is the right horizontal governance toolkit. ShadowAudit is the auditor-defensible, financial-vertical, air-gap-ready layer for regulated workloads. Run both — AGT for breadth, ShadowAudit for the audit evidence your conformity assessor will actually accept."
+
+| Dimension | Microsoft AGT | ShadowAudit |
+|---|---|---|
+| License | MIT | MIT (OSS) + commercial (Cloud, Enterprise) |
+| Coverage | All 10 OWASP Agentic risks | 3–5 of 10, focused on **tool-call execution** |
+| Vendor | Microsoft | **Independent** |
+| **Audit log** | Standard logging | **Hash-chained, Ed25519-signed, optionally bonded** |
+| **Vertical taxonomies** | Generic | **Financial / fintech depth** |
+| **Air-gap deployment** | Possible but assembly required | **First-class — single pip install** |
+| **EU AI Act evidence pack** | Compliance module exists | **Annex IV evidence-pack generator built-in** |
+| Hosted SaaS | None | Cloud Thin (planned) |
+| Solo-buyable for SMBs | No | **Yes** |
 
 ## Quick Start
 
@@ -65,6 +82,12 @@ shadowaudit simulate --trace-file agent_trace.jsonl --compare
 
 # Build a custom risk taxonomy interactively
 shadowaudit build-taxonomy
+
+# Verify tamper-evident audit log integrity
+shadowaudit verify --audit-log ./audit.db
+
+# Generate OWASP Agentic Top 10 coverage matrix
+shadowaudit owasp --output owasp-coverage.html
 ```
 
 ### Python API — LangChain
@@ -195,8 +218,11 @@ Replay agent execution traces (JSONL) through the gate. Compare static vs. adapt
 ### 🧩 Pluggable Scoring
 Swap scoring strategies via constructor injection. Ship with keyword-based and adaptive scorers. Implement `BaseScorer` for custom logic.
 
-### 📝 Append-Only Audit Log
-Every gate decision is logged with timestamp, agent ID, task context, risk category, payload hash, score, and reason. Immutable and queryable.
+### 📝 Tamper-Evident Audit Log
+Every gate decision is logged with timestamp, agent ID, task context, risk category, payload hash, score, and reason. Entries are **hash-chained** — modifying any row invalidates the chain. Optional **Ed25519 signing** for authenticity.
+
+### 🛡️ OWASP Agentic Top 10 Coverage
+ShadowAudit maps directly to the OWASP Agentic AI Top 10 risks. Run `shadowaudit owasp` to generate a coverage matrix showing which risks are fully, partially, or not covered.
 
 ## Installation
 
@@ -225,21 +251,58 @@ See the [`examples/`](examples/) directory for runnable scripts:
 | [`local_only.py`](examples/local_only.py) | Direct Gate usage — no framework dependencies |
 | [`langchain_agent.py`](examples/langchain_agent.py) | LangChain agent with ShadowAudit-wrapped tools |
 | [`langchain_realistic.py`](examples/langchain_realistic.py) | Realistic multi-tool agent with mixed risk levels |
+| [`hash_chain_demo.py`](examples/hash_chain_demo.py) | Hash-chained audit log with tamper detection |
+| [`ed25519_signing_demo.py`](examples/ed25519_signing_demo.py) | Ed25519 signing and verification of audit entries |
+| [`owasp_report_demo.py`](examples/owasp_report_demo.py) | OWASP Agentic Top 10 coverage matrix and HTML report |
+| [`mcp_gateway_demo.py`](examples/mcp_gateway_demo.py) | MCP gateway and in-process adapter usage |
+| [`langgraph_demo.py`](examples/langgraph_demo.py) | LangGraph `ShadowAuditToolNode` integration |
+| [`openai_agents_demo.py`](examples/openai_agents_demo.py) | OpenAI Agents SDK `ShadowAuditOpenAITool` wrapper |
+| [`eu_ai_act_demo.py`](examples/eu_ai_act_demo.py) | EU AI Act Annex IV evidence pack generation |
+| [`plaid_taxonomy_demo.py`](examples/plaid_taxonomy_demo.py) | Plaid taxonomy pack inspection |
+| [`telemetry_demo.py`](examples/telemetry_demo.py) | Opt-in telemetry client usage |
+| [`run_all_examples.py`](examples/run_all_examples.py) | Test runner that executes all examples |
+
+Run all examples at once:
+
+```bash
+python examples/run_all_examples.py
+```
+
+## Testing
+
+Quick smoke test after installing:
+
+```bash
+shadowaudit --version && \
+shadowaudit check . && \
+shadowaudit owasp && \
+python -c "from shadowaudit.core.gate import Gate; print(Gate().evaluate({'tool':'read'}).passed)"
+```
+
+For the full testing guide (unit tests, CLI commands, code snippets for every feature, troubleshooting), see [`docs/TESTING_GUIDE.md`](docs/TESTING_GUIDE.md).
 
 ## Project Status
 
-ShadowAudit is in **alpha** (v0.3.3). The core gate, CLI, framework adapters, and assessment tools are functional and tested. APIs may evolve before v1.0.0.
+ShadowAudit is in **alpha** (v0.4.0). The core gate, CLI, framework adapters, and assessment tools are functional and tested. APIs may evolve before v1.0.0.
 
 - ✅ Core gate with keyword + adaptive scoring
-- ✅ CLI: `check`, `assess`, `simulate`, `build-taxonomy`
+- ✅ CLI: `check`, `assess`, `simulate`, `build-taxonomy`, `verify`, `owasp`, `eu-ai-act`
 - ✅ LangChain adapter (`ShadowAuditTool`)
 - ✅ CrewAI adapter (`ShadowAuditCrewAITool`)
+- ✅ LangGraph adapter (`ShadowAuditToolNode`)
+- ✅ OpenAI Agents adapter (`ShadowAuditOpenAITool`)
+- ✅ MCP gateway (`MCPGatewayServer`, `ShadowAuditMCPSession`)
 - ✅ HTML report generation with compliance mappings
 - ✅ Trace simulator with static vs. adaptive comparison
 - ✅ Interactive taxonomy builder
-- ✅ 133 tests, 100% pass rate
-- 🔜 Behavioral anomaly detection
-- 🔜 Pro dashboard (hosted)
+- ✅ **Hash-chained, tamper-evident audit log**
+- ✅ **Optional Ed25519 signing of audit entries**
+- ✅ **OWASP Agentic Top 10 coverage matrix**
+- ✅ **Hardened Regex+AST scorer**
+- ✅ **EU AI Act Annex IV evidence pack generator**
+- ✅ **Plaid taxonomy pack**
+- ✅ **Opt-in telemetry client (OSS SDK)**
+- 🔜 Pro dashboard (hosted Cloud tier)
 
 ## Contributing
 

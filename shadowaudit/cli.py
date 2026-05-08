@@ -28,10 +28,16 @@ from shadowaudit.assessment.scanner import scan_assessment, AssessmentData
 from shadowaudit.assessment.reporter import generate_html_report
 from shadowaudit.assessment.simulator import TraceSimulator
 from shadowaudit.assessment.builder import TaxonomyBuilder
+from shadowaudit.assessment.owasp import generate_owasp_context
+from shadowaudit.assessment.eu_ai_act import generate_evidence_pack
+from shadowaudit.core.audit import AuditLogger
+
+
+__version__ = "0.4.0"
 
 
 @click.group()
-@click.version_option(version="0.3.3", prog_name="shadowaudit")
+@click.version_option(version=__version__, prog_name="shadowaudit")
 def main() -> None:
     """ShadowAudit — fail-closed deterministic enforcement for AI agent tool calls."""
     pass
@@ -176,7 +182,7 @@ def assess(path: Path, output: Path | None, taxonomy: str | None, compliance: bo
         try:
             template = env.get_template("report_compliance.html")
             ctx = data.to_dict()
-            ctx["version"] = "0.3.0"
+            ctx["version"] = __version__
             ctx["compliance_mappings"] = _get_compliance_context(data)
             html = template.render(**ctx)
             report_path.write_text(html, encoding="utf-8")
@@ -212,16 +218,20 @@ def _get_compliance_context(data: AssessmentData) -> dict[str, Any]:
               help="Path to JSONL trace file")
 @click.option("--taxonomy", type=str, default="general",
               help="Taxonomy to use for simulation")
+@click.option("--taxonomy-pack", "-p", type=str, multiple=True,
+              help="Additional taxonomy packs to evaluate (multi-pack mode)")
 @click.option("--compare", is_flag=True,
               help="Show static vs adaptive side-by-side comparison")
 @click.option("--output", "-o", type=click.Path(path_type=Path), default=None,
               help="Write simulation report to JSON file")
-def simulate(trace_file: Path, taxonomy: str, compare: bool, output: Path | None) -> None:
+def simulate(trace_file: Path, taxonomy: str, taxonomy_pack: tuple[str, ...], compare: bool, output: Path | None) -> None:
     """Replay agent execution traces through ShadowAudit gate."""
     click.echo(f"[SIMULATE] Replaying trace: {trace_file}")
-    click.echo(f"[SIMULATE] Using taxonomy: {taxonomy}")
+    click.echo(f"[SIMULATE] Primary taxonomy: {taxonomy}")
+    if taxonomy_pack:
+        click.echo(f"[SIMULATE] Additional packs: {', '.join(taxonomy_pack)}")
 
-    sim = TraceSimulator(taxonomy_path=taxonomy)
+    sim = TraceSimulator(taxonomy_path=taxonomy, taxonomy_paths=list(taxonomy_pack) if taxonomy_pack else None)
     summary = sim.run(trace_file=trace_file, verbose=False)
 
     click.echo()
@@ -286,6 +296,96 @@ def build_taxonomy(output: Path | None) -> None:
     path = output or Path(f"custom_taxonomy_{taxonomy['domain']}.json")
     builder.save(taxonomy, path)
     click.echo(f"\nTaxonomy saved to: {path}")
+
+
+@main.command(name="verify")
+@click.option("--audit-log", "-a", type=click.Path(exists=True, path_type=Path), required=True,
+              help="Path to SQLite audit log database")
+def verify(audit_log: Path) -> None:
+    """Verify hash-chain integrity of an audit log database."""
+    audit = AuditLogger(db_path=audit_log)
+    valid, errors = audit.verify()
+    if valid:
+        click.echo("[VERIFY] Audit chain: VALID")
+        click.echo("  No tampering detected.")
+    else:
+        click.echo("[VERIFY] Audit chain: INVALID", err=True)
+        click.echo(f"  {len(errors)} error(s) detected:", err=True)
+        for e in errors:
+            click.echo(f"    - {e}", err=True)
+        sys.exit(3)
+
+
+@main.command(name="owasp")
+@click.option("--output", "-o", type=click.Path(path_type=Path), default=None,
+              help="Write OWASP coverage matrix HTML report")
+def owasp(output: Path | None) -> None:
+    """Generate OWASP Agentic Top 10 coverage matrix."""
+    ctx = generate_owasp_context()
+    summary = ctx["summary"]
+    click.echo("[OWASP] Agentic AI Top 10 Coverage Matrix")
+    click.echo()
+    click.echo(f"  Full coverage:     {summary['full']}")
+    click.echo(f"  Partial coverage:  {summary['partial']}")
+    click.echo(f"  Planned:           {summary['planned']}")
+    click.echo(f"  Not applicable:    {summary['not_applicable']}")
+    click.echo(f"  Covered:           {summary['covered']}/{summary['total']} ({summary['coverage_percent']}%)")
+    click.echo()
+    click.echo(f"{'ID':<6} {'Risk':<30} {'Covered':<10} {'Level':<12}")
+    click.echo("-" * 70)
+    for item in ctx["items"]:
+        covered = "Yes" if item["covered"] else "No"
+        click.echo(f"{item['risk_id']:<6} {item['risk_name']:<30} {covered:<10} {item['coverage_level']:<12}")
+
+    if output:
+        from shadowaudit.assessment.reporter import _get_template_dir, _risk_color, _risk_bg
+        tpl_dir = _get_template_dir()
+        import jinja2
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(str(tpl_dir)),
+            autoescape=jinja2.select_autoescape(["html", "xml"]),
+        )
+        env.filters["risk_color"] = _risk_color
+        env.filters["risk_bg"] = _risk_bg
+        try:
+            template = env.get_template("report_owasp.html")
+            html = template.render(**ctx)
+            output.write_text(html, encoding="utf-8")
+            click.echo(f"\nOWASP report written to: {output}")
+        except jinja2.TemplateNotFound:
+            click.echo("[ERROR] report_owasp.html template not found.", err=True)
+            sys.exit(1)
+
+
+@main.command(name="eu-ai-act")
+@click.argument("path", type=click.Path(exists=True, path_type=Path))
+@click.option("--taxonomy", "-t", type=str, default="general",
+              help="Taxonomy to use for assessment")
+@click.option("--output", "-o", type=click.Path(path_type=Path), default=None,
+              help="Write EU AI Act evidence pack HTML report")
+@click.option("--json-output", "j", type=click.Path(path_type=Path), default=None,
+              help="Write EU AI Act evidence pack JSON file")
+@click.option("--system-name", type=str, default="ShadowAudit-Governed Agent",
+              help="System name for the evidence pack")
+def eu_ai_act(path: Path, taxonomy: str, output: Path | None, j: Path | None, system_name: str) -> None:
+    """Generate EU AI Act Annex IV evidence pack from codebase assessment."""
+    click.echo(f"[EU AI ACT] Assessing {path} with taxonomy '{taxonomy}'...")
+    data = scan_assessment(path, taxonomy_path=taxonomy)
+    pack = generate_evidence_pack(data, system_name=system_name)
+
+    click.echo(f"  Risk score: {pack.risk_management.get('risk_score', 'N/A')}")
+    click.echo(f"  Risk label: {pack.risk_management.get('risk_label', 'N/A')}")
+    click.echo(f"  Tools: {pack.risk_management.get('tool_count', 0)}")
+    click.echo(f"  Ungated: {pack.risk_management.get('ungated_tools', 0)}")
+    click.echo(f"  Critical ungated: {pack.risk_management.get('critical_ungated', 0)}")
+
+    if output:
+        pack.write_html(output)
+        click.echo(f"\nEvidence pack (HTML) written to: {output}")
+
+    if j:
+        pack.write_json(j)
+        click.echo(f"Evidence pack (JSON) written to: {j}")
 
 
 if __name__ == "__main__":
