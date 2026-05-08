@@ -236,11 +236,17 @@ def _find_shadowaudit_wrappers(tree: ast.AST) -> set[str]:
     return wrapped
 
 
-def scan_file(filepath: Path) -> list[ToolFinding]:
+def scan_file(
+    filepath: Path,
+    *,
+    global_wrapped: set[str] | None = None,
+) -> list[ToolFinding]:
     """Scan a single Python file for ungated tool classes.
     
     Args:
         filepath: Path to Python source file
+        global_wrapped: Optional pre-computed set of wrapped tool names
+                        from all files (enables cross-file detection).
         
     Returns:
         List of ToolFinding objects describing discovered tools
@@ -254,7 +260,10 @@ def scan_file(filepath: Path) -> list[ToolFinding]:
         return []
     
     tools = _find_tool_classes(tree)
-    wrapped = _find_shadowaudit_wrappers(tree)
+    local_wrapped = _find_shadowaudit_wrappers(tree)
+    
+    # Merge local and global wrapped sets for cross-file detection
+    wrapped = local_wrapped | (global_wrapped or set())
     
     findings: list[ToolFinding] = []
     for name, line, framework in tools:
@@ -274,6 +283,25 @@ def scan_file(filepath: Path) -> list[ToolFinding]:
     return findings
 
 
+def _collect_all_wrappers(
+    pyfiles: list[Path],
+) -> set[str]:
+    """Collect all ShadowAuditTool-wrapped class names across multiple files.
+    
+    First pass: parse every file and extract wrapper targets.
+    Returns the union of all wrapped tool names.
+    """
+    all_wrapped: set[str] = set()
+    for pyfile in pyfiles:
+        try:
+            source = pyfile.read_text(encoding="utf-8")
+            tree = ast.parse(source, filename=str(pyfile))
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+        all_wrapped |= _find_shadowaudit_wrappers(tree)
+    return all_wrapped
+
+
 def scan_directory(
     path: Path,
     *,
@@ -281,6 +309,10 @@ def scan_directory(
     exclude_dirs: set[str] | None = None,
 ) -> list[ToolFinding]:
     """Recursively scan a directory for ungated AI agent tools.
+    
+    Uses a two-pass approach for cross-file wrapper detection:
+    1. First pass: collect all ShadowAuditTool-wrapped class names
+    2. Second pass: scan each file with the global wrapped set
     
     Args:
         path: Directory or file to scan
@@ -298,11 +330,19 @@ def scan_directory(
     if path.is_file() and path.suffix == ".py":
         findings.extend(scan_file(path))
     elif path.is_dir():
+        # Collect all Python files first
+        pyfiles: list[Path] = []
         for pyfile in path.rglob(pattern):
-            # Skip excluded directories
             if any(part in exclude_dirs for part in pyfile.parts):
                 continue
-            findings.extend(scan_file(pyfile))
+            pyfiles.append(pyfile)
+        
+        # Pass 1: collect all wrapped tool names across all files
+        global_wrapped = _collect_all_wrappers(pyfiles)
+        
+        # Pass 2: scan each file with the global wrapped set
+        for pyfile in pyfiles:
+            findings.extend(scan_file(pyfile, global_wrapped=global_wrapped))
     
     return findings
 

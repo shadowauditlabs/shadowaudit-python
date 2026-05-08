@@ -31,14 +31,14 @@ from shadowaudit.assessment.builder import TaxonomyBuilder
 
 
 @click.group()
-@click.version_option(version="0.3.2", prog_name="shadowaudit")
+@click.version_option(version="0.3.3", prog_name="shadowaudit")
 def main() -> None:
     """ShadowAudit — fail-closed deterministic enforcement for AI agent tool calls."""
     pass
 
 
 @main.command()
-@click.argument("path", type=click.Path(exists=True, path_type=Path))
+@click.argument("path", type=click.Path(exists=True, path_type=Path), default=".")
 @click.option("--framework", "-f", type=str, default=None,
               help="Filter by framework (langchain, crewai, autogen)")
 @click.option("--output", "-o", type=click.Path(path_type=Path), default=None,

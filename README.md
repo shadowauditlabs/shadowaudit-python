@@ -228,7 +228,7 @@ See the [`examples/`](examples/) directory for runnable scripts:
 
 ## Project Status
 
-ShadowAudit is in **alpha** (v0.3.2). The core gate, CLI, framework adapters, and assessment tools are functional and tested. APIs may evolve before v1.0.0.
+ShadowAudit is in **alpha** (v0.3.3). The core gate, CLI, framework adapters, and assessment tools are functional and tested. APIs may evolve before v1.0.0.
 
 - ✅ Core gate with keyword + adaptive scoring
 - ✅ CLI: `check`, `assess`, `simulate`, `build-taxonomy`
