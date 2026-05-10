@@ -1,0 +1,169 @@
+# ShadowAudit Threat Model
+
+This document describes what ShadowAudit catches, what it doesn't, where it falls short, and what additional layers a production deployment requires. It is written for security engineers, compliance auditors, and architects evaluating ShadowAudit for regulated workloads.
+
+---
+
+## What ShadowAudit Is
+
+ShadowAudit is a **fail-closed, rule-based runtime gate** for AI agent tool calls. It runs synchronously before each tool call executes, evaluates the call's payload against a risk taxonomy, and either permits or blocks the call. It also maintains a tamper-evident audit log of every decision.
+
+ShadowAudit is **not** a general-purpose firewall, LLM input/output filter, or intrusion detection system. It is purpose-built for the specific problem of agentic drift: an LLM-driven agent taking a tool action that the operator did not intend.
+
+---
+
+## Attack Surface
+
+The agent pipeline has five trust boundaries ShadowAudit addresses:
+
+```
+[User/LLM Prompt] → [Agent Orchestrator] → [Tool Call Payload] ←→ [ShadowAudit Gate] → [Tool Execution]
+                                                                         ↓
+                                                                   [Audit Log DB]
+                                                                         ↓
+                                                                   [Evidence Pack]
+```
+
+1. **Tool call payload** — the dict passed to each tool. ShadowAudit inspects this.
+2. **Risk taxonomy** — the configured thresholds. ShadowAudit enforces these.
+3. **Audit log** — the SQLite DB of decisions. ShadowAudit signs and chains these.
+4. **Gate process** — the Python process running the gate. ShadowAudit cannot protect itself from a compromised runtime.
+5. **Cross-agent boundaries** — data flowing from one agent to another. See [Gap 6](#what-shadowaudit-does-not-catch).
+
+---
+
+## What ShadowAudit Catches
+
+### 1. Direct keyword-based risk signals
+
+A payload containing risk keywords from the configured taxonomy is flagged. For example, in the financial taxonomy, `create_payout`, `wire`, `bulk`, and `disburse` are high-risk keywords for the `stripe_payout` category. Any payload containing enough of these words to exceed the category delta threshold is blocked.
+
+**Detection mechanism:** KeywordScorer (substring match) or RegexASTScorer (whole-word regex + AST analysis).
+
+**Coverage:** Good for well-named payloads where LLM-generated field names or values mirror API semantics.
+
+### 2. Python AST patterns in code-execution payloads
+
+When a payload field contains Python source code (e.g., a `code` or `script` field in a code-execution tool), ShadowAudit's `RegexASTScorer` parses the AST and flags dangerous constructs: `exec`, `eval`, `subprocess.run`, `os.system`, `__import__`, and similar.
+
+**Detection mechanism:** Python `ast.parse()` + walk for dangerous node types.
+
+**Coverage:** Catches common prompt-injection → code-execution chains. Does not catch obfuscated code or non-Python execution.
+
+### 3. Behavioral drift via K/V tracking
+
+The `AgentStateStore` maintains a decision history per agent. The K metric (decision velocity) and V metric (decision variance) allow future adaptive scorers to detect anomalous patterns: an agent making 50 payment calls in 10 minutes when the baseline is 3/hour.
+
+**Detection mechanism:** K/V state stored in SQLite, used by the AdaptiveScorer.
+
+**Coverage:** OSS version uses these metrics for logging. Enterprise native binary uses them for active blocking. The open-source AdaptiveScorer applies RegexAST scoring with state context.
+
+### 4. Tamper detection in audit log
+
+Every audit log entry is SHA-256 hashed over its content + the previous entry's hash. Any modification to a stored entry (changing a decision from `fail` to `pass`, altering a risk_score, deleting a row) causes `shadowaudit verify` to report the chain break with the exact entry ID.
+
+**Detection mechanism:** Hash chain. Run `shadowaudit verify --audit-log audit.db`.
+
+**Coverage:** Detects post-hoc modification. Does NOT prevent modification — that requires append-only storage (see below).
+
+### 5. Codebase-level ungated tool detection
+
+`shadowaudit check ./src` performs static analysis on Python source and identifies tool classes that are not wrapped with ShadowAudit. This catches the "forgot to add a gate" deployment error before it reaches production.
+
+**Detection mechanism:** AST scan for tool class patterns by framework (LangChain, CrewAI, OpenAI Agents, LangGraph, MCP).
+
+### 6. EU AI Act / OWASP Agentic Top 10 compliance evidence
+
+`shadowaudit eu-ai-act` and `shadowaudit owasp` generate machine-readable evidence artifacts. These are **evidence generators**, not detectors — they document what controls are present, not whether an attack is occurring.
+
+---
+
+## What ShadowAudit Does Not Catch
+
+These are gaps by design, by technical limitation, or because the threat requires additional layers. We document them honestly so deployments can compensate.
+
+### G1 — Semantically dangerous payloads with no keyword match
+
+A payload like `{"recipient": "attacker_account_123", "qty": 50000}` for a high-value transfer tool contains no taxonomy keywords. The keyword scorer returns 0.0, below any threshold, and the call passes. This is the core false-negative scenario for keyword-based scoring.
+
+**Mitigation:** Tune taxonomy keywords to cover your specific API's field names. Use `shadowaudit tune --audit-log` to identify gaps. Enable `observe` mode on new categories before enforcing.
+
+**Out-of-scope for ShadowAudit:** Semantic understanding requires an LLM-based evaluator (e.g., a secondary guard LLM). ShadowAudit is intentionally LLM-free to guarantee determinism and zero-latency.
+
+### G2 — Prompt injection that does not produce risky tool calls immediately
+
+A prompt injection that instructs the agent to exfiltrate data slowly over many small, individually-safe transactions is not caught by per-call evaluation. ShadowAudit evaluates calls in isolation; it has no concept of multi-call sequences that are collectively risky.
+
+**Mitigation:** K/V behavioral tracking (enterprise) can detect velocity anomalies. For now, set low amount thresholds and low-value transaction limits at the API level.
+
+### G3 — Cross-agent trust boundary violations
+
+Agent A's output becomes Agent B's tool call input without re-evaluation. If Agent A is a low-trust external agent (processing user-supplied content) and its output reaches Agent B's payment tool without trust annotation, ShadowAudit evaluates the payload at face value without knowing it originated from an untrusted source.
+
+**Mitigation:** Use the `shadowaudit.flow.FlowTracer` (see `shadowaudit/flow/`) to annotate cross-agent data flows with trust labels. This is available in v0.5.0+. Until then, treat all payloads as untrusted.
+
+### G4 — Attacks that modify the gate itself
+
+If an attacker can modify the Python process memory, inject code into the gate module, patch `Gate.evaluate`, or replace the taxonomy file at rest, all protection is bypassed. ShadowAudit assumes it runs in a trusted execution environment.
+
+**Mitigation:** Standard supply chain hygiene (pinned dependencies, signed releases, immutable infrastructure). ShadowAudit's own releases are signed; verify before deploying.
+
+### G5 — Audit log modification before detection
+
+The hash chain detects tampering after the fact. An attacker with write access to the SQLite file could delete the file entirely, or replace it with a fresh chain. `shadowaudit verify` would report the new chain as valid.
+
+**Mitigation:** Store the audit log on append-only storage: S3 with Object Lock, GCS with retention policy, a WORM drive, or a blockchain anchor (the `sign_entries=True` flag + external key storage). The hash chain is evidence of what was logged; it requires write-once infrastructure to be tamper-proof end-to-end.
+
+### G6 — Non-Python agentic runtimes
+
+ShadowAudit is Python-only. Java, Node.js, Go, or Rust agent runtimes are not covered.
+
+### G7 — LLM-level attacks that bypass tool calling
+
+A sufficiently capable adversarial prompt might cause an LLM to construct a system prompt that instructs another LLM to perform risky actions through a separate, unmonitored channel. ShadowAudit only gates tool calls that flow through the configured gate instance.
+
+### G8 — False negatives in the AST scanner
+
+The AST scanner uses a fixed list of dangerous function names (`exec`, `eval`, `subprocess.run`, etc.). An attacker using `__builtins__['exec']`, `importlib.import_module`, or a custom loader can bypass the AST check. The AST scanner is a detection-in-depth layer, not a sandbox.
+
+### G9 — Side-channel information leakage
+
+ShadowAudit logs `payload_hash` (a hash of the full payload) not the payload itself. An attacker with access to both the payload and the audit log can confirm a match. This is intentional: the hash commits to the content without storing it, enabling verification without exposure.
+
+---
+
+## Recommended Additional Layers
+
+ShadowAudit is one layer in a defense-in-depth stack. For regulated workloads (EU AI Act high-risk, PCI-DSS, SOX), we recommend:
+
+| Layer | Tool / Approach |
+|---|---|
+| Input sanitisation | Structured LLM output schemas (Pydantic); reject unstructured tool calls |
+| Output guardrails | NeMo Guardrails / LlamaFirewall on LLM output before tool call construction |
+| Semantic risk evaluation | Secondary guard LLM as a pre-gate evaluator for ambiguous payloads |
+| Append-only audit storage | S3 Object Lock, WORM drive, or blockchain anchor for the SQLite file |
+| Human-in-the-loop for irreversible actions | Approval workflows for wire transfers, bulk payouts, account closures |
+| Rate limiting | Per-agent and per-category rate limits at the API gateway layer |
+| Network egress filtering | Block agent process from reaching unexpected external endpoints |
+| Dependency pinning | Pin and sign all ShadowAudit releases; run `pip-audit` on your venv |
+| Cross-agent flow tracing | `shadowaudit.flow.FlowTracer` for multi-agent deployments (v0.5.0+) |
+
+---
+
+## False-Positive Runbook
+
+When ShadowAudit blocks a legitimate tool call:
+
+1. **Check the audit log** — `shadowaudit verify --audit-log audit.db` to confirm the log is intact.
+2. **Inspect the blocked call** — `shadowaudit tune --audit-log audit.db` shows block rates and suggests threshold adjustments.
+3. **Use observe mode for tuning** — Set `Gate(mode="observe")`, run the workload, check `metadata["would_have_blocked"]` on results. Adjust taxonomy thresholds without blocking production.
+4. **Apply a bypass if urgent** — Use `gate.bypass(agent_id, reason="approved by oncall #1234")` as a context manager. The bypass is recorded in the audit log with the reason string. Do not use `mode="observe"` as a permanent bypass — it disables enforcement entirely.
+5. **Tune the taxonomy** — Apply the suggested threshold changes from `shadowaudit tune`. Validate with `shadowaudit simulate --trace-file <trace> --compare` before rolling out.
+
+---
+
+## Security Contact
+
+Report vulnerabilities to: security@shadowaudit.dev (or open a GitHub Security Advisory on the repository). We follow responsible disclosure and aim to respond within 72 hours.
+
+See [SECURITY.md](../SECURITY.md) for the full disclosure policy and PGP key.

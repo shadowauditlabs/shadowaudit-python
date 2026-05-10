@@ -8,7 +8,7 @@
   <a href="https://pypi.org/project/shadowaudit/"><img src="https://img.shields.io/pypi/v/shadowaudit?color=blue" alt="PyPI version"></a>
   <a href="https://pypi.org/project/shadowaudit/"><img src="https://img.shields.io/pypi/pyversions/shadowaudit" alt="Python versions"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"></a>
-  <img src="https://img.shields.io/badge/tests-205%20passed-brightgreen" alt="Tests: 205 passed">
+  <img src="https://img.shields.io/badge/tests-226%20passed-brightgreen" alt="Tests: 226 passed">
 </p>
 
 ---
@@ -68,9 +68,12 @@ shadowaudit assess ./src --taxonomy financial --compliance
 
 # 3. Verify your audit log hasn't been tampered with
 shadowaudit verify audit.db
+
+# 4. Analyse decisions and get threshold tuning suggestions
+shadowaudit tune --audit-log audit.db
 ```
 
-For the full CLI reference (all 7 commands with flags and examples), see [docs/CLI.md](docs/CLI.md).
+For the full CLI reference (all 8 commands with flags and examples), see [docs/CLI.md](docs/CLI.md).
 
 ### Python API — wrap any tool in 5 lines
 
@@ -96,22 +99,57 @@ See [`examples/`](examples/) for runnable scripts covering every framework adapt
 ## Features
 
 ### Tamper-Evident Audit
-Every gate decision is recorded in an append-only SQLite log. Entries are **hash-chained** via SHA-256 — modify any row and the chain breaks. Optional **Ed25519 signing** cryptographically proves authenticity. Verified with `shadowaudit verify`.
+Every gate decision is recorded in an append-only SQLite log. Entries are **hash-chained** via SHA-256 — modify any row and the chain breaks. Optional **Ed25519 signing** cryptographically proves authenticity. Verified with `shadowaudit verify`. See [`examples/tamper_demo.py`](examples/tamper_demo.py) for a live demonstration.
+
+### Observe Mode & Bypass
+Roll out enforcement gradually with `Gate(mode="observe")`: decisions are logged but never blocked, and `result.metadata["would_have_blocked"]` tells you what enforce mode would have done. For human-approved overrides, use the `bypass()` context manager — every bypass is recorded in the audit log with a mandatory reason string.
+
+```python
+# Shadow mode — log everything, block nothing
+gate = Gate(mode="observe")
+result = gate.evaluate(agent_id, task, category, payload)
+print(result.metadata["would_have_blocked"])   # True if enforce would have blocked
+
+# Bypass with immutable audit trail
+with gate.bypass("agent-1", reason="approved by oncall #4521"):
+    result = gate.evaluate("agent-1", task, category, payload)
+```
+
+Use `shadowaudit tune --audit-log audit.db` to analyse block rates per category and get threshold adjustment suggestions.
+
+### Multi-Agent Trust Propagation
+`FlowTracer` tracks how data moves between agents and propagates trust downward. If Agent A processes untrusted web content, any payload that flows from A into Agent B's tool call is automatically tagged `UNTRUSTED` — regardless of B's own trust level.
+
+```python
+from shadowaudit import FlowTracer, TrustLevel
+
+tracer = FlowTracer()
+tracer.record_output("web-scraper", scraped_data, trust=TrustLevel.UNTRUSTED)
+tracer.record_flow("web-scraper", "summariser", parsed_data)
+
+annotation = tracer.annotate(
+    receiving_agent="payment-agent",
+    source_agents=["summariser"],
+    declared_trust=TrustLevel.SYSTEM,
+)
+print(annotation.effective_trust)   # TrustLevel.UNTRUSTED
+print(annotation.contaminated_by)   # ['web-scraper']
+```
 
 ### Vertical Taxonomies
-Built-in starter packs for general, financial, legal, and **Plaid** workloads. Each taxonomy defines risk keywords, threshold deltas, severity levels, and compliance framework mappings. Build custom taxonomies interactively with `shadowaudit build-taxonomy`.
+Built-in starter packs across **6 domains**: general, financial (32 categories — Stripe, Plaid, wire transfers, KYC/AML), financial crypto (18 categories), healthcare (17 categories), legal, and open banking. Each taxonomy defines risk keywords, threshold deltas, severity levels, and compliance mappings. Build custom taxonomies interactively with `shadowaudit build-taxonomy`.
 
 ### Framework Coverage
 First-class adapters for **LangChain**, **CrewAI**, **LangGraph**, **OpenAI Agents SDK**, and **MCP** (gateway + in-process). Drop-in wrappers — same interface, automatic enforcement. Works with any tool that has `name`, `description`, and `run()`.
 
 ### Compliance Reporting
-Generate professional HTML reports with executive summaries, risk breakdowns, and remediation plans. Built-in **OWASP Agentic Top 10 coverage matrix** (`shadowaudit owasp`) and **EU AI Act Annex IV evidence pack generator** (`shadowaudit eu-ai-act`) for regulatory submission.
+Generate professional HTML reports with executive summaries, risk breakdowns, and remediation plans. Built-in **OWASP Agentic Top 10 coverage matrix** (`shadowaudit owasp`) and **EU AI Act Annex IV evidence pack generator** (`shadowaudit eu-ai-act`) for regulatory submission. For an honest account of what ShadowAudit catches and misses, see [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
 
 ### Offline-First
 No cloud. No LLM calls. No API keys. SQLite-backed state and audit log. Single `pip install shadowaudit` deploys everything needed for runtime governance inside air-gapped VPCs and on-prem environments.
 
 ### CI/CD Integration
-`shadowaudit check --fail-on-ungated` exits non-zero if high-risk tools are ungated. Drop into any pipeline to block unsafe deploys. Trace simulator replays agent execution logs through the gate for regression testing.
+`shadowaudit check --fail-on-ungated` exits non-zero if high-risk tools are ungated. Drop into any pipeline to block unsafe deploys. Trace simulator replays agent execution logs through the gate for regression testing. A labelled corpus of 130 traces (50 benign / 50 risky / 30 edge cases) in `tests/corpus/` lets you validate scoring changes before shipping.
 
 ## Architecture
 
@@ -146,8 +184,9 @@ No cloud. No LLM calls. No API keys. SQLite-backed state and audit log. Single `
 2. **Taxonomy lookup** → finds risk category config (keywords, threshold delta, severity)
 3. **Scoring** → pluggable scorer computes risk score from payload content
 4. **Threshold comparison** → score vs. taxonomy delta determines pass/fail
-5. **FSM transition** → fail-closed state machine: anything not an explicit pass is a block
-6. **Audit log** → decision recorded with timestamp, agent ID, payload hash, and reason
+5. **Mode / bypass check** → observe mode always passes; active `bypass()` overrides a block
+6. **FSM transition** → fail-closed state machine: anything not an explicit pass is a block
+7. **Audit log** → decision recorded with timestamp, agent ID, payload hash, and reason
 
 ## Installation
 
@@ -176,6 +215,8 @@ See the [`examples/`](examples/) directory for runnable scripts:
 | [`local_only.py`](examples/local_only.py) | Direct Gate usage — no framework dependencies |
 | [`langchain_agent.py`](examples/langchain_agent.py) | LangChain agent with ShadowAudit-wrapped tools |
 | [`hash_chain_demo.py`](examples/hash_chain_demo.py) | Hash-chained audit log with tamper detection |
+| [`tamper_demo.py`](examples/tamper_demo.py) | Live tamper-evidence demo: corrupt a row, watch the chain break |
+| [`fintech_payment_agent.py`](examples/fintech_payment_agent.py) | Production-style payment agent with Gate enforcement and retry logic |
 | [`langgraph_demo.py`](examples/langgraph_demo.py) | LangGraph `ShadowAuditToolNode` integration |
 | [`eu_ai_act_demo.py`](examples/eu_ai_act_demo.py) | EU AI Act Annex IV evidence pack generation |
 
@@ -185,7 +226,7 @@ Run all examples at once:
 python examples/run_all_examples.py
 ```
 
-For the full example index (12 scripts covering every v0.4.0 feature), see [`docs/FEATURES.md`](docs/FEATURES.md).
+For the full example index (14 scripts covering every v0.4.0 feature), see [`docs/FEATURES.md`](docs/FEATURES.md).
 
 ## Testing
 
@@ -206,8 +247,12 @@ ShadowAudit is **v0.4.0 — production-ready for audit-time scanning and assessm
 
 - ✅ Core gate + 5 framework adapters (LangChain, CrewAI, LangGraph, OpenAI Agents, MCP)
 - ✅ Hash-chained, Ed25519-signed audit log with integrity verification
-- ✅ Vertical taxonomies (general, financial, legal, Plaid) + interactive builder
+- ✅ Observe mode, bypass context manager, and threshold tuning CLI
+- ✅ Multi-agent trust propagation via `FlowTracer`
+- ✅ Vertical taxonomies (general, financial 32-cat, financial_crypto, healthcare, legal, Plaid) + interactive builder
+- ✅ Labelled test corpus (130 traces) + scorer benchmark
 - ✅ Compliance reporting (OWASP matrix, EU AI Act Annex IV evidence packs)
+- ✅ Honest threat model — what ShadowAudit catches and what it doesn't ([docs/THREAT_MODEL.md](docs/THREAT_MODEL.md))
 - ✅ Offline-first — zero external calls, air-gap ready
 
 ## Contributing

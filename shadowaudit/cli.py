@@ -5,6 +5,8 @@ Commands:
     assess          Generate detailed HTML assessment report
     simulate        Replay agent traces through ShadowAudit gate
     build-taxonomy  Interactive taxonomy builder
+    verify          Verify hash-chain integrity of an audit log
+    tune            Analyze audit log and suggest threshold adjustments
 
 Usage:
     shadowaudit check ./src
@@ -12,12 +14,16 @@ Usage:
     shadowaudit check ./src --framework=langchain --fail-on-ungated
     shadowaudit simulate --trace-file agent_trace.jsonl --compare
     shadowaudit build-taxonomy
+    shadowaudit verify --audit-log audit.db
+    shadowaudit tune --audit-log audit.db
 """
 
 from __future__ import annotations
 
 import json
+import statistics
 import sys
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -386,6 +392,93 @@ def eu_ai_act(path: Path, taxonomy: str, output: Path | None, j: Path | None, sy
     if j:
         pack.write_json(j)
         click.echo(f"Evidence pack (JSON) written to: {j}")
+
+
+@main.command(name="tune")
+@click.option("--audit-log", "-a", type=click.Path(exists=True, path_type=Path), required=True,
+              help="Path to SQLite audit log database")
+@click.option("--agent-id", type=str, default=None,
+              help="Filter to a specific agent (default: all agents)")
+@click.option("--window", type=int, default=200,
+              help="Number of recent decisions to analyse (default: 200)")
+@click.option("--false-positive-budget", type=float, default=0.05,
+              help="Acceptable false-positive rate (default: 0.05 = 5%)")
+def tune(
+    audit_log: Path,
+    agent_id: str | None,
+    window: int,
+    false_positive_budget: float,
+) -> None:
+    """Analyse audit log and suggest per-category threshold adjustments.
+
+    Reads recent gate decisions from the audit log and identifies categories
+    where the current threshold is either too tight (high block rate on
+    low-risk payloads) or too loose (low block rate despite risky payloads).
+
+    Prints per-category recommendations you can apply to your taxonomy file.
+    """
+    audit = AuditLogger(db_path=audit_log)
+    events = audit.get_events(agent_id=agent_id, limit=window)
+
+    if not events:
+        click.echo("[TUNE] No events found in audit log.", err=True)
+        sys.exit(1)
+
+    click.echo(f"[TUNE] Analysing {len(events)} recent decisions"
+               + (f" for agent '{agent_id}'" if agent_id else "") + "...")
+    click.echo()
+
+    # Group by risk_category
+    by_category: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for ev in events:
+        cat = ev.get("risk_category") or "unknown"
+        by_category[cat].append(ev)
+
+    has_suggestions = False
+    click.echo(f"{'Category':<30} {'N':<6} {'BlockRate':<12} {'AvgScore':<12} {'CurrThresh':<12} {'Suggestion'}")
+    click.echo("-" * 95)
+
+    for category, evts in sorted(by_category.items()):
+        scores = [e["risk_score"] for e in evts if e.get("risk_score") is not None]
+        thresholds = [e["threshold"] for e in evts if e.get("threshold") is not None]
+        blocked = sum(1 for e in evts if e["decision"] == "fail")
+
+        if not scores or not thresholds:
+            continue
+
+        avg_score = statistics.mean(scores)
+        block_rate = blocked / len(evts)
+        curr_threshold = thresholds[-1]  # most recent threshold
+
+        # Suggest raising threshold if block rate >> false_positive_budget
+        # and most scores are low (suggesting false positives dominate)
+        p95_score = sorted(scores)[int(len(scores) * 0.95)]
+        suggestion = "OK"
+
+        if block_rate > false_positive_budget and avg_score < curr_threshold * 0.5:
+            # Blocking a lot but avg score is well below threshold — likely false positives
+            suggestion = f"RAISE to ~{round(p95_score * 1.1, 3)} (high block rate, low avg score)"
+        elif block_rate == 0 and avg_score > curr_threshold * 0.7:
+            # Never blocking but scores are getting close — threshold may be too loose
+            suggestion = f"LOWER to ~{round(avg_score * 0.9, 3)} (never blocking, scores approaching threshold)"
+        elif block_rate > 0.5:
+            suggestion = f"RAISE to ~{round(p95_score * 1.05, 3)} (>50% block rate)"
+        has_suggestions = has_suggestions or suggestion != "OK"
+
+        click.echo(
+            f"{category:<30} {len(evts):<6} {block_rate:<12.1%} {avg_score:<12.3f} "
+            f"{curr_threshold:<12.3f} {suggestion}"
+        )
+
+    click.echo()
+    if has_suggestions:
+        click.echo("[TUNE] Suggestions found. Review and apply to your taxonomy JSON.")
+        click.echo("       Test each change with: shadowaudit simulate --trace-file <file> --compare")
+    else:
+        click.echo("[TUNE] Current thresholds look well-calibrated for this window.")
+
+    click.echo()
+    click.echo("[TUNE] Tip: run with --false-positive-budget 0.01 for stricter calibration.")
 
 
 if __name__ == "__main__":

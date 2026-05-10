@@ -29,6 +29,8 @@ from shadowaudit.framework.openai_agents import ShadowAuditOpenAITool
 from shadowaudit.mcp.gateway import MCPGatewayServer
 from shadowaudit.mcp.adapter import ShadowAuditMCPSession
 from shadowaudit.telemetry.client import TelemetryClient
+from shadowaudit.flow.tracer import FlowTracer, FlowEdge, TrustLevel
+from shadowaudit.core.gate import GATE_MODE_ENFORCE, GATE_MODE_OBSERVE
 
 __all__ = [
     "Gate",
@@ -74,5 +76,10 @@ __all__ = [
     "MCPGatewayServer",
     "ShadowAuditMCPSession",
     "TelemetryClient",
+    "FlowTracer",
+    "FlowEdge",
+    "TrustLevel",
+    "GATE_MODE_ENFORCE",
+    "GATE_MODE_OBSERVE",
 ]
 
