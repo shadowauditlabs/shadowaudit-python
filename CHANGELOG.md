@@ -13,6 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Placeholder for upcoming changes.
 
+## [0.4.1] - 2026-05-10
+
+### Changed
+- README overhaul: hero section with three AGT differentiators, collapsed feature list into 6 categories, honest positioning docs.
+- Added CHANGELOG.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, SECURITY.md, docs/CLI.md, docs/FEATURES.md, docs/POSITIONING.md.
+- Added GitHub issue templates and pull request template.
+
+### Fixed
+- Removed unused `pytest` import in `tests/test_mcp.py` (CI ruff failure).
+- Added `mypy` `ignore_missing_imports` for `cryptography` and `shadowaudit._native` (CI mypy failure).
+- Fixed README Python API example to match real `Gate.evaluate()` signature.
+- Fixed ASCII architecture diagram alignment.
+
 ## [0.4.0] - 2026-05-08
 
 ### Added
