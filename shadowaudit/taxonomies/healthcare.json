@@ -1,0 +1,92 @@
+{
+  "version": "1.0",
+  "domain": "healthcare",
+  "description": "Risk taxonomy for healthcare AI agent operations. Covers HIPAA, HL7 FHIR, and clinical workflow risks.",
+  "categories": {
+    "patient_read": {
+      "delta": 0.8,
+      "risk_keywords": ["get_patient", "read_patient", "patient_lookup", "patient_search", "demographics"],
+      "description": "Read-only patient demographic queries. PHI access requires audit trail."
+    },
+    "clinical_notes_read": {
+      "delta": 0.7,
+      "risk_keywords": ["get_notes", "clinical_notes", "progress_notes", "discharge_summary", "soap_note", "read_chart"],
+      "description": "Read-only access to clinical notes. Sensitive PHI."
+    },
+    "lab_results_read": {
+      "delta": 0.8,
+      "risk_keywords": ["lab_results", "get_labs", "diagnostic_results", "pathology_report", "blood_test", "culture_result"],
+      "description": "Read-only lab and diagnostic results."
+    },
+    "medication_read": {
+      "delta": 0.8,
+      "risk_keywords": ["medication_list", "get_medications", "prescription_history", "active_medications", "drug_list"],
+      "description": "Read-only medication and prescription queries."
+    },
+    "medication_order": {
+      "delta": 0.1,
+      "risk_keywords": ["prescribe", "order_medication", "create_prescription", "medication_order", "administer", "dispense", "dose"],
+      "description": "Medication ordering or administration. Highest clinical risk — requires prescriber authority."
+    },
+    "medication_modify": {
+      "delta": 0.1,
+      "risk_keywords": ["modify_prescription", "change_dose", "stop_medication", "cancel_order", "hold_medication", "discontinue"],
+      "description": "Modifying or cancelling a medication order."
+    },
+    "procedure_order": {
+      "delta": 0.15,
+      "risk_keywords": ["order_procedure", "schedule_surgery", "create_order", "procedure_request", "diagnostic_order", "imaging_order"],
+      "description": "Ordering clinical procedures, imaging, or surgery."
+    },
+    "patient_record_modify": {
+      "delta": 0.15,
+      "risk_keywords": ["update_patient", "modify_record", "edit_demographics", "change_address", "update_contact", "amend_record"],
+      "description": "Modifying patient demographic or administrative records."
+    },
+    "diagnosis_create": {
+      "delta": 0.2,
+      "risk_keywords": ["create_diagnosis", "add_diagnosis", "icd_code", "diagnosis_code", "problem_list", "condition_create"],
+      "description": "Adding or modifying a diagnosis to a patient record."
+    },
+    "appointment_schedule": {
+      "delta": 0.5,
+      "risk_keywords": ["schedule_appointment", "book_appointment", "create_encounter", "schedule_visit", "referral"],
+      "description": "Scheduling patient appointments or referrals."
+    },
+    "claims_submit": {
+      "delta": 0.2,
+      "risk_keywords": ["submit_claim", "insurance_claim", "billing_claim", "cpt_code", "create_claim", "claim_submission"],
+      "description": "Submitting insurance or billing claims. Financial risk + false claims risk."
+    },
+    "phi_export": {
+      "delta": 0.05,
+      "risk_keywords": ["export_phi", "bulk_export", "fhir_export", "data_export", "download_records", "extract_records", "hipaa_export"],
+      "description": "Bulk PHI export. Maximum HIPAA risk — requires explicit authorisation."
+    },
+    "consent_manage": {
+      "delta": 0.2,
+      "risk_keywords": ["record_consent", "update_consent", "consent_form", "patient_consent", "treatment_consent", "research_consent"],
+      "description": "Managing patient consent records."
+    },
+    "access_log_read": {
+      "delta": 0.9,
+      "risk_keywords": ["access_log", "audit_trail", "hipaa_log", "who_accessed", "phi_access_log"],
+      "description": "Read-only HIPAA access log queries. Very low risk."
+    },
+    "emergency_override": {
+      "delta": 0.05,
+      "risk_keywords": ["break_glass", "emergency_access", "override_restriction", "bypass_consent", "emergency_override"],
+      "description": "Emergency access override. Requires strong audit trail — very high sensitivity."
+    },
+    "imaging_access": {
+      "delta": 0.7,
+      "risk_keywords": ["dicom", "get_image", "radiology_image", "ct_scan", "mri_image", "xray"],
+      "description": "Access to diagnostic imaging (DICOM). PHI in pixel data."
+    },
+    "care_plan_modify": {
+      "delta": 0.15,
+      "risk_keywords": ["care_plan", "update_care_plan", "treatment_plan", "care_goal", "modify_plan", "clinical_pathway"],
+      "description": "Modifying a patient's care or treatment plan."
+    }
+  }
+}

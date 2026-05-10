@@ -166,6 +166,231 @@
         "chargeback"
       ],
       "description": "Stripe: Handling payment disputes and chargebacks"
+    },
+    "loan_origination": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "create_loan",
+        "originate_loan",
+        "loan_application",
+        "approve_loan",
+        "disburse_loan",
+        "loan_offer",
+        "underwrite"
+      ],
+      "description": "Loan creation and origination. Creates binding financial obligation."
+    },
+    "loan_modification": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "modify_loan",
+        "loan_restructure",
+        "defer_payment",
+        "extend_term",
+        "rate_change",
+        "forbearance",
+        "loan_forgiveness"
+      ],
+      "description": "Modifying existing loan terms."
+    },
+    "loan_disbursement": {
+      "delta": 0.15,
+      "risk_keywords": [
+        "disburse_loan",
+        "fund_loan",
+        "loan_payout",
+        "drawdown",
+        "advance_funds",
+        "credit_line_draw"
+      ],
+      "description": "Disbursing approved loan funds. Irreversible cash movement."
+    },
+    "credit_decision": {
+      "delta": 0.25,
+      "risk_keywords": [
+        "credit_score",
+        "credit_check",
+        "approve_credit",
+        "deny_credit",
+        "credit_limit",
+        "set_limit",
+        "risk_grade"
+      ],
+      "description": "Automated credit decisions. ECOA / fair lending risk."
+    },
+    "account_closure": {
+      "delta": 0.1,
+      "risk_keywords": [
+        "close_account",
+        "terminate_account",
+        "freeze_account",
+        "restrict_account",
+        "block_account",
+        "suspend_account"
+      ],
+      "description": "Account closure or restriction. Irreversible access removal."
+    },
+    "kyc_create": {
+      "delta": 0.3,
+      "risk_keywords": [
+        "create_kyc",
+        "submit_kyc",
+        "kyc_verification",
+        "identity_verify",
+        "id_check",
+        "document_upload"
+      ],
+      "description": "KYC/identity verification creation. PII handling and regulatory compliance."
+    },
+    "aml_flag": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "flag_transaction",
+        "suspicious_activity",
+        "sar_report",
+        "file_sar",
+        "aml_alert",
+        "freeze_funds",
+        "hold_funds"
+      ],
+      "description": "AML flagging or SAR filing. Regulatory action with third-party implications."
+    },
+    "sanctions_screening": {
+      "delta": 0.3,
+      "risk_keywords": [
+        "sanctions_check",
+        "ofac_screen",
+        "pep_screen",
+        "watchlist_match",
+        "sanctions_hit",
+        "block_sanctioned"
+      ],
+      "description": "OFAC/PEP/sanctions screening. False positives can block legitimate customers."
+    },
+    "fx_conversion": {
+      "delta": 0.25,
+      "risk_keywords": [
+        "fx_convert",
+        "currency_exchange",
+        "exchange_rate",
+        "convert_currency",
+        "forex",
+        "spot_rate",
+        "fx_trade"
+      ],
+      "description": "Foreign exchange conversion. Rate risk and execution risk."
+    },
+    "recurring_payment_setup": {
+      "delta": 0.25,
+      "risk_keywords": [
+        "setup_mandate",
+        "direct_debit",
+        "autopay",
+        "recurring_transfer",
+        "standing_order",
+        "mandate_create",
+        "preauthorised"
+      ],
+      "description": "Setting up recurring payment mandates. Creates ongoing withdrawal authority."
+    },
+    "beneficiary_add": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "add_beneficiary",
+        "new_payee",
+        "add_recipient",
+        "trusted_contact",
+        "whitelist_account",
+        "save_payee"
+      ],
+      "description": "Adding a new payment beneficiary. Classic account takeover vector."
+    },
+    "report_generate": {
+      "delta": 0.7,
+      "risk_keywords": [
+        "generate_report",
+        "export_transactions",
+        "download_statement",
+        "bulk_download",
+        "data_extract",
+        "csv_export"
+      ],
+      "description": "Generating financial reports or bulk data exports. PII/PCI data risk."
+    },
+    "investment_order": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "buy_stock",
+        "sell_stock",
+        "place_order",
+        "market_buy",
+        "market_sell",
+        "equity_trade",
+        "options_trade",
+        "futures_trade"
+      ],
+      "description": "Securities trading orders. Market impact and suitability risk."
+    },
+    "portfolio_rebalance": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "rebalance",
+        "portfolio_rebalance",
+        "auto_invest",
+        "drift_correction",
+        "robo_rebalance",
+        "sell_holdings"
+      ],
+      "description": "Automated portfolio rebalancing. Can trigger large sell orders."
+    },
+    "card_control": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "freeze_card",
+        "block_card",
+        "cancel_card",
+        "replace_card",
+        "set_pin",
+        "card_limit",
+        "virtual_card_create"
+      ],
+      "description": "Card management operations."
+    },
+    "open_banking_consent": {
+      "delta": 0.3,
+      "risk_keywords": [
+        "consent_grant",
+        "oauth_consent",
+        "open_banking_auth",
+        "psd2_consent",
+        "data_sharing_consent",
+        "revoke_consent"
+      ],
+      "description": "Open Banking / PSD2 consent management. Third-party access to account data."
+    },
+    "fee_override": {
+      "delta": 0.25,
+      "risk_keywords": [
+        "waive_fee",
+        "override_fee",
+        "fee_reversal",
+        "refund_fee",
+        "apply_discount",
+        "promotional_rate"
+      ],
+      "description": "Fee waivers or overrides. Revenue risk."
+    },
+    "document_sign": {
+      "delta": 0.2,
+      "risk_keywords": [
+        "esign",
+        "docusign",
+        "sign_agreement",
+        "execute_contract",
+        "accept_terms",
+        "sign_document"
+      ],
+      "description": "Electronic document signing. Creates legally binding obligations."
     }
   }
 }

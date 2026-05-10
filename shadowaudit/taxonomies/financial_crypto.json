@@ -1,0 +1,97 @@
+{
+  "version": "1.0",
+  "domain": "financial_crypto",
+  "description": "Risk taxonomy for cryptocurrency, DeFi, and blockchain agent operations",
+  "categories": {
+    "wallet_read": {
+      "delta": 1.0,
+      "risk_keywords": ["balance", "get_balance", "wallet_balance", "address_lookup", "check_address"],
+      "description": "Read-only wallet balance and address lookups. Lowest risk."
+    },
+    "transaction_query": {
+      "delta": 1.0,
+      "risk_keywords": ["tx_history", "transaction_list", "block_explorer", "get_transactions", "receipt"],
+      "description": "Read-only transaction history queries."
+    },
+    "token_transfer": {
+      "delta": 0.2,
+      "risk_keywords": ["transfer", "send_token", "erc20_transfer", "token_send", "transfer_from", "send_eth"],
+      "description": "ERC-20 or native token transfers. High irreversibility risk."
+    },
+    "eth_send": {
+      "delta": 0.15,
+      "risk_keywords": ["send_eth", "send_ether", "eth_transfer", "value_transfer", "transfer_eth", "wei", "gwei"],
+      "description": "Native ETH transfers. Extremely irreversible — no refund path."
+    },
+    "smart_contract_deploy": {
+      "delta": 0.1,
+      "risk_keywords": ["deploy", "deploy_contract", "create_contract", "bytecode", "constructor", "compile_deploy"],
+      "description": "Smart contract deployment. Permanent on-chain code execution."
+    },
+    "smart_contract_call": {
+      "delta": 0.25,
+      "risk_keywords": ["call_contract", "execute_function", "contract_call", "abi_call", "write_contract", "transact"],
+      "description": "Arbitrary smart contract function calls. Scope depends on contract."
+    },
+    "defi_swap": {
+      "delta": 0.25,
+      "risk_keywords": ["swap", "exchange_token", "uniswap_swap", "dex_swap", "amm_trade", "slippage", "router_swap"],
+      "description": "DEX swaps. Slippage and MEV risks."
+    },
+    "defi_liquidity": {
+      "delta": 0.2,
+      "risk_keywords": ["add_liquidity", "remove_liquidity", "provide_liquidity", "lp_deposit", "lp_withdraw", "pool"],
+      "description": "DeFi liquidity provision or withdrawal. Impermanent loss risk."
+    },
+    "defi_borrow": {
+      "delta": 0.3,
+      "risk_keywords": ["borrow", "flashloan", "flash_loan", "collateral", "leverage", "margin", "aave_borrow", "compound_borrow"],
+      "description": "DeFi borrowing or flash loans. Protocol risk + liquidation risk."
+    },
+    "private_key_ops": {
+      "delta": 0.05,
+      "risk_keywords": ["private_key", "seed_phrase", "mnemonic", "sign_tx", "sign_message", "keystore", "export_key", "decrypt_key"],
+      "description": "Any operation involving private keys or seed phrases. Maximum risk."
+    },
+    "bridge_transfer": {
+      "delta": 0.15,
+      "risk_keywords": ["bridge", "cross_chain", "l2_bridge", "polygon_bridge", "arbitrum_bridge", "wormhole", "layerzero"],
+      "description": "Cross-chain bridge transfers. Irreversible and bridge exploit risk."
+    },
+    "nft_transfer": {
+      "delta": 0.3,
+      "risk_keywords": ["nft_transfer", "transfer_nft", "safeTransferFrom", "erc721_transfer", "nft_sell", "list_nft"],
+      "description": "NFT transfers or marketplace listings."
+    },
+    "wallet_create": {
+      "delta": 0.5,
+      "risk_keywords": ["create_wallet", "new_wallet", "generate_address", "create_account", "new_address"],
+      "description": "Wallet creation. Lower risk but needs audit trail."
+    },
+    "gas_management": {
+      "delta": 0.6,
+      "risk_keywords": ["gas_price", "set_gas", "gas_limit", "priority_fee", "max_fee", "gas_estimate"],
+      "description": "Gas parameter configuration. Can cause stuck or expensive transactions."
+    },
+    "exchange_api": {
+      "delta": 0.2,
+      "risk_keywords": ["place_order", "market_order", "limit_order", "binance_order", "coinbase_order", "kraken_order", "cancel_order"],
+      "description": "CEX trading API order placement."
+    },
+    "exchange_withdrawal": {
+      "delta": 0.1,
+      "risk_keywords": ["withdraw_exchange", "exchange_withdrawal", "binance_withdraw", "coinbase_withdraw", "send_from_exchange"],
+      "description": "Withdrawing funds from a centralised exchange. Irreversible."
+    },
+    "staking": {
+      "delta": 0.35,
+      "risk_keywords": ["stake", "unstake", "staking_deposit", "validator_deposit", "liquid_staking", "lido_stake"],
+      "description": "Staking or unstaking. Lockup periods vary from days to weeks."
+    },
+    "approval": {
+      "delta": 0.2,
+      "risk_keywords": ["approve", "set_approval", "approve_token", "allowance", "increase_allowance", "permit"],
+      "description": "ERC-20 approval grants. Unlimited approvals are a major attack vector."
+    }
+  }
+}
