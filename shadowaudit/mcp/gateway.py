@@ -27,6 +27,7 @@ from typing import Any
 from shadowaudit.core.gate import Gate
 from shadowaudit.core.fsm import FailClosedFSM
 from shadowaudit.types import GateResult
+from shadowaudit.errors import GatewayError
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +199,7 @@ class MCPGatewayServer:
         """Start the gateway and block on stdio proxying."""
         self._proc = self._start_upstream()
         if self._proc.stdout is None:
-            raise RuntimeError("Failed to start upstream process")
+            raise GatewayError("Failed to start upstream process")
 
         # Thread to forward upstream stderr to our stderr for debugging
         def _drain_stderr() -> None:

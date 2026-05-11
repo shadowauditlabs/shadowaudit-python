@@ -40,7 +40,9 @@ Usage::
 
 from __future__ import annotations
 
+import threading
 import time
+from collections import deque
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Any
@@ -91,7 +93,8 @@ _DEFAULT_MAX_EDGES = 10_000
 class FlowTracer:
     """Records and analyses data flows between agents in a multi-agent system.
 
-    Not thread-safe — use one instance per thread or add external locking.
+    Thread-safe via an internal RLock; one instance can be shared by
+    concurrent agents in the same process.
 
     Example — detect that a payment payload originated from untrusted content::
 
@@ -122,12 +125,15 @@ class FlowTracer:
     """
 
     def __init__(self, max_edges: int = _DEFAULT_MAX_EDGES) -> None:
-        self._edges: list[FlowEdge] = []
+        # deque gives O(1) popleft for FIFO eviction; list.pop(0) is O(n).
+        self._edges: deque[FlowEdge] = deque()
         self._max_edges = max_edges
         # agent_id → minimum trust level seen in its outputs
         self._agent_min_trust: dict[str, TrustLevel] = {}
-        # Reverse index: agent_id → list of edge_ids produced by that agent (O(1) lookup)
-        self._edges_by_agent: dict[str, list[str]] = {}
+        # Reverse index: agent_id → deque of edge_ids (FIFO, so evicted id is at head).
+        self._edges_by_agent: dict[str, deque[str]] = {}
+        # Protects all mutable state for concurrent agent threads.
+        self._lock = threading.RLock()
 
     @staticmethod
     def _make_edge_id(data: Any) -> str:
@@ -138,12 +144,13 @@ class FlowTracer:
     def _register_edge(self, edge: FlowEdge) -> None:
         """Append edge, update reverse index, and evict oldest if over cap."""
         if len(self._edges) >= self._max_edges:
-            evicted = self._edges.pop(0)
+            evicted = self._edges.popleft()
             agent_edges = self._edges_by_agent.get(evicted.source_agent)
-            if agent_edges and evicted.edge_id in agent_edges:
-                agent_edges.remove(evicted.edge_id)
+            # FIFO invariant: evicted edge_id is at the head of its agent's deque.
+            if agent_edges and agent_edges[0] == evicted.edge_id:
+                agent_edges.popleft()
         self._edges.append(edge)
-        self._edges_by_agent.setdefault(edge.source_agent, []).append(edge.edge_id)
+        self._edges_by_agent.setdefault(edge.source_agent, deque()).append(edge.edge_id)
 
     def _create_edge(
         self,
@@ -185,9 +192,10 @@ class FlowTracer:
             The recorded FlowEdge.
         """
         edge = self._create_edge(source_agent, None, data, trust, metadata)
-        self._register_edge(edge)
-        current_min = self._agent_min_trust.get(source_agent, trust)
-        self._agent_min_trust[source_agent] = min(current_min, trust)
+        with self._lock:
+            self._register_edge(edge)
+            current_min = self._agent_min_trust.get(source_agent, trust)
+            self._agent_min_trust[source_agent] = min(current_min, trust)
         return edge
 
     def record_flow(
@@ -210,13 +218,14 @@ class FlowTracer:
             trust: Trust level override. If None, uses source agent's min trust.
             metadata: Optional metadata.
         """
-        resolved_trust = trust if trust is not None else self._agent_min_trust.get(
-            source_agent, TrustLevel.INTERNAL
-        )
-        edge = self._create_edge(source_agent, destination_agent, data, resolved_trust, metadata)
-        self._register_edge(edge)
-        current_min = self._agent_min_trust.get(destination_agent, resolved_trust)
-        self._agent_min_trust[destination_agent] = min(current_min, resolved_trust)
+        with self._lock:
+            resolved_trust = trust if trust is not None else self._agent_min_trust.get(
+                source_agent, TrustLevel.INTERNAL
+            )
+            edge = self._create_edge(source_agent, destination_agent, data, resolved_trust, metadata)
+            self._register_edge(edge)
+            current_min = self._agent_min_trust.get(destination_agent, resolved_trust)
+            self._agent_min_trust[destination_agent] = min(current_min, resolved_trust)
         return edge
 
     def annotate(
@@ -242,20 +251,21 @@ class FlowTracer:
         contaminated_by: list[str] = []
         contributing_edges: list[str] = []
 
-        for agent_id in source_agents:
-            agent_trust = self._agent_min_trust.get(agent_id, declared_trust)
-            if agent_trust < effective:
-                effective = agent_trust
-                contaminated_by.append(agent_id)
-            # O(1) lookup via reverse index instead of scanning all edges
-            contributing_edges.extend(self._edges_by_agent.get(agent_id, []))
+        with self._lock:
+            for agent_id in source_agents:
+                agent_trust = self._agent_min_trust.get(agent_id, declared_trust)
+                if agent_trust < effective:
+                    effective = agent_trust
+                    contaminated_by.append(agent_id)
+                # O(1) lookup via reverse index instead of scanning all edges
+                contributing_edges.extend(self._edges_by_agent.get(agent_id, []))
 
-        # Also consider the receiving agent's own trust history
-        receiver_trust = self._agent_min_trust.get(receiving_agent, declared_trust)
-        if receiver_trust < effective:
-            effective = receiver_trust
-            if receiving_agent not in contaminated_by:
-                contaminated_by.append(receiving_agent)
+            # Also consider the receiving agent's own trust history
+            receiver_trust = self._agent_min_trust.get(receiving_agent, declared_trust)
+            if receiver_trust < effective:
+                effective = receiver_trust
+                if receiving_agent not in contaminated_by:
+                    contaminated_by.append(receiving_agent)
 
         return TrustAnnotation(
             payload_agent=receiving_agent,
@@ -268,37 +278,40 @@ class FlowTracer:
 
     def get_agent_trust(self, agent_id: str) -> TrustLevel:
         """Return the current minimum trust level for an agent."""
-        return self._agent_min_trust.get(agent_id, TrustLevel.INTERNAL)
+        with self._lock:
+            return self._agent_min_trust.get(agent_id, TrustLevel.INTERNAL)
 
     def flow_summary(self) -> dict[str, Any]:
         """Return a summary of all recorded flows for reporting."""
-        agents = set()
-        for e in self._edges:
-            agents.add(e.source_agent)
-            if e.destination_agent:
-                agents.add(e.destination_agent)
+        with self._lock:
+            agents: set[str] = set()
+            for e in self._edges:
+                agents.add(e.source_agent)
+                if e.destination_agent:
+                    agents.add(e.destination_agent)
 
-        trust_distribution: dict[str, int] = {t.name: 0 for t in TrustLevel}
-        for e in self._edges:
-            trust_distribution[e.trust.name] += 1
+            trust_distribution: dict[str, int] = {t.name: 0 for t in TrustLevel}
+            for e in self._edges:
+                trust_distribution[e.trust.name] += 1
 
-        contaminated_agents = [
-            a for a, t in self._agent_min_trust.items()
-            if t < TrustLevel.INTERNAL
-        ]
+            contaminated_agents = [
+                a for a, t in self._agent_min_trust.items()
+                if t < TrustLevel.INTERNAL
+            ]
 
-        return {
-            "total_flows": len(self._edges),
-            "agents": sorted(agents),
-            "trust_distribution": trust_distribution,
-            "contaminated_agents": contaminated_agents,
-            "agent_trust_levels": {
-                a: t.name for a, t in self._agent_min_trust.items()
-            },
-        }
+            return {
+                "total_flows": len(self._edges),
+                "agents": sorted(agents),
+                "trust_distribution": trust_distribution,
+                "contaminated_agents": contaminated_agents,
+                "agent_trust_levels": {
+                    a: t.name for a, t in self._agent_min_trust.items()
+                },
+            }
 
     def reset(self) -> None:
         """Clear all recorded flows. Useful between test scenarios."""
-        self._edges.clear()
-        self._agent_min_trust.clear()
-        self._edges_by_agent.clear()
+        with self._lock:
+            self._edges.clear()
+            self._agent_min_trust.clear()
+            self._edges_by_agent.clear()

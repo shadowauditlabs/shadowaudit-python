@@ -25,19 +25,13 @@ from typing import Any, Callable
 
 from shadowaudit.core.gate import Gate
 from shadowaudit.core.fsm import FailClosedFSM
-from shadowaudit.types import GateResult
+from shadowaudit.errors import AgentActionBlocked
+from shadowaudit.framework._base import _GuardedToolMixin
+
+__all__ = ["ShadowAuditTool", "AgentActionBlocked", "shadowaudit_guard"]
 
 
-class AgentActionBlocked(Exception):
-    """Raised when ShadowAudit blocks a tool execution."""
-
-    def __init__(self, detail: str, gate_result: GateResult | None = None) -> None:
-        super().__init__(detail)
-        self.detail = detail
-        self.gate_result = gate_result
-
-
-class ShadowAuditTool:
+class ShadowAuditTool(_GuardedToolMixin):
     """Transparent wrapper adding deterministic gate enforcement to any tool.
 
     Implements the same interface as the wrapped tool for drop-in replacement.
@@ -61,31 +55,18 @@ class ShadowAuditTool:
         self.description = getattr(tool, "description", "")
 
     def run(self, tool_input: str | dict[str, Any], **kwargs: Any) -> Any:
-        """Run the tool after gate evaluation."""
-        # Normalize input to dict for gating
-        if isinstance(tool_input, str):
-            payload = {"input": tool_input}
-        else:
-            payload = dict(tool_input)
+        """Run the wrapped tool after a synchronous gate check."""
+        payload = self._build_payload(tool_input)
+        self._check(payload)
+        return self._tool.run(tool_input, **kwargs)
 
-        # Evaluate
-        result = self._gate.evaluate(
-            agent_id=self._agent_id,
-            task_context=self.name,
-            risk_category=self._risk_category,
-            payload=payload,
-        )
-
-        # FSM transition — fail-closed
-        outcome = self._fsm.transition(result)
-
-        if outcome.decision != "pass":
-            raise AgentActionBlocked(
-                detail=outcome.detail,
-                gate_result=result,
-            )
-
-        # Execute wrapped tool
+    async def arun(self, tool_input: str | dict[str, Any], **kwargs: Any) -> Any:
+        """Async variant. Runs the gate check off the event loop, then awaits
+        the wrapped tool's ``arun`` if it has one (otherwise falls back to sync ``run``)."""
+        payload = self._build_payload(tool_input)
+        await self._acheck(payload)
+        if hasattr(self._tool, "arun"):
+            return await self._tool.arun(tool_input, **kwargs)
         return self._tool.run(tool_input, **kwargs)
 
     def __getattr__(self, name: str) -> Any:

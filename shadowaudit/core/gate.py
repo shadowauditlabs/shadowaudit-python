@@ -6,8 +6,10 @@ Works offline. No API key needed. SQLite-backed state tracking.
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import logging
+import threading
 import time
 from typing import Any, Generator
 
@@ -17,6 +19,7 @@ from shadowaudit.core.taxonomy import TaxonomyLoader
 from shadowaudit.core.hash import compute_payload_hash
 from shadowaudit.core.audit import AuditLogger
 from shadowaudit.core.scorer import BaseScorer, KeywordScorer, load_scorer
+from shadowaudit.errors import ConfigurationError
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +87,7 @@ class Gate:
         mode: str = GATE_MODE_ENFORCE,
     ) -> None:
         if mode not in (GATE_MODE_ENFORCE, GATE_MODE_OBSERVE):
-            raise ValueError(f"Invalid gate mode '{mode}'. Use 'enforce' or 'observe'.")
+            raise ConfigurationError(f"Invalid gate mode '{mode}'. Use 'enforce' or 'observe'.")
         self._store = state_store or AgentStateStore()
         self._taxonomy_path = taxonomy_path
         self._cloud = cloud_client
@@ -93,6 +96,8 @@ class Gate:
         self._mode = mode
         # Per-agent bypass stack: agent_id → list[reason]
         self._bypass_stack: dict[str, list[str]] = {}
+        # Protects _bypass_stack from concurrent agents sharing one Gate.
+        self._bypass_lock = threading.RLock()
 
     @property
     def mode(self) -> str:
@@ -113,20 +118,23 @@ class Gate:
             # result.passed is True; audit log shows bypass_reason
         """
         if not reason or not reason.strip():
-            raise ValueError("bypass() requires a non-empty reason for audit trail.")
-        stack = self._bypass_stack.setdefault(agent_id, [])
-        stack.append(reason)
+            raise ConfigurationError("bypass() requires a non-empty reason for audit trail.")
+        with self._bypass_lock:
+            stack = self._bypass_stack.setdefault(agent_id, [])
+            stack.append(reason)
         try:
             yield
         finally:
-            stack.pop()
-            if not stack:
-                del self._bypass_stack[agent_id]
+            with self._bypass_lock:
+                stack.pop()
+                if not stack:
+                    self._bypass_stack.pop(agent_id, None)
 
     def _bypass_reason(self, agent_id: str) -> str | None:
         """Return active bypass reason for agent_id, or None."""
-        stack = self._bypass_stack.get(agent_id)
-        return stack[-1] if stack else None
+        with self._bypass_lock:
+            stack = self._bypass_stack.get(agent_id)
+            return stack[-1] if stack else None
 
     def evaluate(
         self,
@@ -248,6 +256,30 @@ class Gate:
                 logger.debug("Cloud telemetry fire-and-forget failed for agent_id=%s", agent_id)
 
         return result
+
+    async def evaluate_async(
+        self,
+        agent_id: str,
+        task_context: str,
+        risk_category: str | None,
+        payload: dict[str, Any],
+    ) -> GateResult:
+        """Async wrapper around :meth:`evaluate`.
+
+        Runs the synchronous scoring + SQLite I/O on the default thread-pool
+        executor so an event loop is never blocked. Use this from async agent
+        frameworks (LangChain ``ainvoke``, LangGraph async nodes, OpenAI
+        Agents SDK, MCP).
+        """
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            self.evaluate,
+            agent_id,
+            task_context,
+            risk_category,
+            payload,
+        )
 
     def _extract_amount(self, payload: dict[str, Any]) -> float | None:
         """Extract monetary amount from common payload fields."""

@@ -26,7 +26,7 @@ class AgentStateStore:
         self._lock = threading.RLock()
         self._persistent_conn: sqlite3.Connection | None = None
         if self._db_path == ":memory:":
-            self._persistent_conn = sqlite3.connect(":memory:")
+            self._persistent_conn = sqlite3.connect(":memory:", check_same_thread=False)
         self._init_schema()
 
     def _connection(self) -> sqlite3.Connection:

@@ -35,7 +35,15 @@ try:
 except ImportError:
     _HAS_CRYPTOGRAPHY = False
 
-if not _HAS_CRYPTOGRAPHY:
+_FALLBACK_WARNED = False
+
+
+def _warn_fallback_once() -> None:
+    """Emit the HMAC-fallback warning exactly once, and only when signing is used."""
+    global _FALLBACK_WARNED
+    if _FALLBACK_WARNED or _HAS_CRYPTOGRAPHY:
+        return
+    _FALLBACK_WARNED = True
     logger.warning(
         "cryptography package not installed. Using fallback signing (HMAC-SHA256) "
         "which is NOT cryptographically equivalent to Ed25519. Install 'cryptography' "
@@ -79,6 +87,7 @@ def generate_keypair() -> tuple[str, str]:
     Returns:
         (public_key_b64, private_key_b64) base64-encoded keys.
     """
+    _warn_fallback_once()
     if _HAS_CRYPTOGRAPHY:
         private_key = Ed25519PrivateKey.generate()
         public_key = private_key.public_key()
@@ -152,6 +161,7 @@ def sign_entry(fields: dict[str, Any], private_key_b64: str) -> str:
     """
     if not private_key_b64:
         raise ValueError("private_key_b64 must not be empty")
+    _warn_fallback_once()
     canonical = json.dumps(fields, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
     message = canonical.encode("utf-8")
     priv_bytes = base64.b64decode(private_key_b64)

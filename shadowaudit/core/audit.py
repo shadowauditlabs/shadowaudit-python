@@ -29,7 +29,7 @@ class AuditLogger:
         if self._sign_entries:
             self._keypair = ensure_keypair()
         if self._db_path == ":memory:":
-            self._persistent_conn = sqlite3.connect(":memory:")
+            self._persistent_conn = sqlite3.connect(":memory:", check_same_thread=False)
         self._init_schema()
         self._migrate_legacy_entries()
 

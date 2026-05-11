@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shadowaudit"
-version = "0.4.1"
+version = "0.5.0"
 description = "Runtime governance for AI agents — deterministic fail-closed enforcement. Wraps any agent tool and blocks dangerous calls before execution. Zero LLM calls, zero cloud dependencies, works offline."
 readme = "README.md"
 license = { text = "MIT" }
@@ -29,15 +29,19 @@ keywords = [
     "tool-calling",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Security",
+    "Typing :: Typed",
 ]
 dependencies = [
     "click>=8.0",
@@ -79,3 +83,22 @@ ignore_missing_imports = true
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.hatch.build.targets.wheel]
+packages = ["shadowaudit"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"shadowaudit/py.typed" = "shadowaudit/py.typed"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "shadowaudit",
+    "tests",
+    "examples",
+    "docs",
+    "benchmarks",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "pyproject.toml",
+]

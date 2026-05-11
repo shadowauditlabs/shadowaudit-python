@@ -22,16 +22,11 @@ from typing import Any
 
 from shadowaudit.core.gate import Gate
 from shadowaudit.core.fsm import FailClosedFSM
+from shadowaudit.errors import AgentActionBlocked
+from shadowaudit.framework._risk import guess_risk_category
 from shadowaudit.types import GateResult
 
-
-class AgentActionBlocked(Exception):
-    """Raised when ShadowAudit blocks a tool execution."""
-
-    def __init__(self, detail: str, gate_result: GateResult | None = None) -> None:
-        super().__init__(detail)
-        self.detail = detail
-        self.gate_result = gate_result
+__all__ = ["ShadowAuditToolNode", "AgentActionBlocked"]
 
 
 class ShadowAuditToolNode:
@@ -54,57 +49,84 @@ class ShadowAuditToolNode:
         self._risk_category_map = risk_category_map or {}
 
     def _get_risk_category(self, tool_name: str) -> str | None:
-        """Look up risk category for a tool name."""
+        """Explicit map first, then fall back to the shared keyword heuristic."""
         if tool_name in self._risk_category_map:
             return self._risk_category_map[tool_name]
-        # Heuristic fallback
-        name = tool_name.lower()
-        if any(k in name for k in ("shell", "exec", "run", "command", "bash", "sh")):
-            return "command_execution"
-        if any(k in name for k in ("pay", "transfer", "send", "disburse", "stripe")):
-            return "payment_initiation"
-        if any(k in name for k in ("delete", "remove", "drop", "wipe")):
-            return "delete"
-        if any(k in name for k in ("write", "update", "modify", "patch")):
-            return "write"
-        if any(k in name for k in ("read", "get", "list", "view", "query")):
-            return "read_only"
-        return None
+        return guess_risk_category(tool_name)
 
-    def __call__(self, state: dict[str, Any]) -> dict[str, Any]:
-        """Execute tool calls from state['messages'] with gating."""
-        messages = state.get("messages", [])
+    @staticmethod
+    def _extract_calls(messages: list[Any]) -> list[dict[str, Any]]:
         tool_calls: list[dict[str, Any]] = []
         for msg in messages:
             if hasattr(msg, "tool_calls"):
                 tool_calls.extend(msg.tool_calls)
             elif isinstance(msg, dict) and "tool_calls" in msg:
                 tool_calls.extend(msg["tool_calls"])
+        return tool_calls
 
-        results: list[Any] = []
-        for call in tool_calls:
-            tool_name = call.get("name", call.get("function", {}).get("name", "unknown"))
-            arguments = call.get("args", call.get("arguments", {}))
-            call_id = call.get("id", "unknown")
+    @staticmethod
+    def _unpack_call(call: dict[str, Any]) -> tuple[str, dict[str, Any], str]:
+        tool_name = call.get("name", call.get("function", {}).get("name", "unknown"))
+        arguments = call.get("args", call.get("arguments", {}))
+        call_id = call.get("id", "unknown")
+        return tool_name, arguments, call_id
 
-            risk_category = self._get_risk_category(tool_name)
-            result = self._gate.evaluate(
-                agent_id=self._agent_id,
-                task_context=tool_name,
-                risk_category=risk_category,
-                payload=arguments,
+    def _enforce(self, tool_name: str, arguments: dict[str, Any]) -> GateResult:
+        result = self._gate.evaluate(
+            agent_id=self._agent_id,
+            task_context=tool_name,
+            risk_category=self._get_risk_category(tool_name),
+            payload=arguments,
+        )
+        outcome = self._fsm.transition(result)
+        if outcome.decision != "pass":
+            raise AgentActionBlocked(
+                detail=f"Tool '{tool_name}' blocked: {result.reason}",
+                gate_result=result,
             )
-            outcome = self._fsm.transition(result)
-            if outcome.decision != "pass":
-                raise AgentActionBlocked(
-                    detail=f"Tool '{tool_name}' blocked: {result.reason}",
-                    gate_result=result,
-                )
+        return result
 
+    async def _enforce_async(self, tool_name: str, arguments: dict[str, Any]) -> GateResult:
+        result = await self._gate.evaluate_async(
+            agent_id=self._agent_id,
+            task_context=tool_name,
+            risk_category=self._get_risk_category(tool_name),
+            payload=arguments,
+        )
+        outcome = self._fsm.transition(result)
+        if outcome.decision != "pass":
+            raise AgentActionBlocked(
+                detail=f"Tool '{tool_name}' blocked: {result.reason}",
+                gate_result=result,
+            )
+        return result
+
+    def __call__(self, state: dict[str, Any]) -> dict[str, Any]:
+        """Execute tool calls from state['messages'] with gating."""
+        results: list[Any] = []
+        for call in self._extract_calls(state.get("messages", [])):
+            tool_name, arguments, call_id = self._unpack_call(call)
+            self._enforce(tool_name, arguments)
             tool = self._tools.get(tool_name)
             if tool is None:
                 raise AgentActionBlocked(detail=f"Tool '{tool_name}' not found")
             tool_result = tool.invoke(arguments)
             results.append({"call_id": call_id, "tool_name": tool_name, "result": tool_result})
+        return {**state, "tool_results": results}
 
+    async def ainvoke(self, state: dict[str, Any]) -> dict[str, Any]:
+        """Async variant. Runs gate checks off the event loop and awaits
+        ``tool.ainvoke`` when available, falling back to ``tool.invoke``."""
+        results: list[Any] = []
+        for call in self._extract_calls(state.get("messages", [])):
+            tool_name, arguments, call_id = self._unpack_call(call)
+            await self._enforce_async(tool_name, arguments)
+            tool = self._tools.get(tool_name)
+            if tool is None:
+                raise AgentActionBlocked(detail=f"Tool '{tool_name}' not found")
+            if hasattr(tool, "ainvoke"):
+                tool_result = await tool.ainvoke(arguments)
+            else:
+                tool_result = tool.invoke(arguments)
+            results.append({"call_id": call_id, "tool_name": tool_name, "result": tool_result})
         return {**state, "tool_results": results}

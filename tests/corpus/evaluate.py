@@ -105,7 +105,7 @@ def main() -> None:
     total_traces = 0
     all_mismatches: list[dict] = []
 
-    files_to_run = [(f, l) for f, l in CORPUS_FILES
+    files_to_run = [(f, label) for f, label in CORPUS_FILES
                     if args.file is None or f == args.file]
 
     for filename, label in files_to_run:

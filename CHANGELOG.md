@@ -7,11 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-11
+
 ### Added
-- Placeholder for upcoming features.
+- **Multi-agent flow tracer** (`shadowaudit.flow.FlowTracer`). Records data flows between agents and propagates trust downward — UNTRUSTED data feeding a SYSTEM-trust agent contaminates that agent's effective trust. Reverse index keeps `annotate()` O(1) per source agent. Thread-safe via internal `RLock`. Configurable `max_edges` with FIFO eviction.
+- **Gate observe mode** (`Gate(mode="observe")`). Logs every decision without blocking. `result.metadata["would_have_blocked"]` reports what enforce mode would have done. Use for staged rollout before turning enforcement on.
+- **Gate bypass context manager** (`gate.bypass(agent_id, reason="...")`). Per-agent stack-based override with mandatory non-empty audit-trail reason. Thread-safe; reason is stored in the audit log.
+- **`shadowaudit tune` CLI command**. Reads recent gate decisions, groups by risk category, and suggests RAISE / LOWER / OK threshold adjustments based on block rate vs. average score.
+- **`evaluate_async()` on `Gate`**. Async wrapper that runs the synchronous scoring + SQLite I/O on the default thread-pool executor so an event loop is never blocked.
+- **`arun()` / `ainvoke()` on framework adapters**. `ShadowAuditTool` (LangChain), `ShadowAuditCrewAITool`, `ShadowAuditToolNode` (LangGraph) gained async variants that use `evaluate_async` and forward to the wrapped tool's async method when present. OpenAI Agents SDK and MCP adapters now use `evaluate_async` internally so the gate no longer blocks the event loop.
+- **Unified exception hierarchy** in `shadowaudit.errors`. `ShadowAuditError` base class with `AgentActionBlocked`, `ConfigurationError`, `AuditError`, `TaxonomyError`, `GatewayError` subclasses. `AgentActionBlocked` is now a single class re-exported by every framework module, so `except shadowaudit.AgentActionBlocked` catches blocks from any adapter.
+- **Expanded taxonomies**: `financial.json` grew from 14 to 32 categories (loan_origination, KYC, AML, sanctions, FX, card_control, open_banking_consent, etc.). New `financial_crypto.json` (18 categories) and `healthcare.json` (17 categories).
+- **Tamper-evidence demo** (`examples/tamper_demo.py`). Records 6 gate decisions, corrupts a row directly in SQLite, verifies the chain breaks, restores and re-verifies.
+- **Production-style fintech agent** (`examples/fintech_payment_agent.py`). 4 payment tools wrapped with the Gate; demonstrates idempotency keys, exponential backoff, and gate-driven early returns.
+- **Labelled test corpus** (`tests/corpus/`). 130 traces (50 benign / 50 risky / 30 edge cases) in JSONL with `evaluate.py` runner.
+- **Scorer benchmark** (`benchmarks/scorer_benchmark.py`). Compares KeywordScorer, RegexASTScorer, AdaptiveScorer on 10K synthetic traces with TPR/FPR/F1/latency. `benchmarks/README.md` documents how to read the results honestly.
+- **Threat model doc** (`docs/THREAT_MODEL.md`). Attack surface diagram, what ShadowAudit catches, what it misses (G1–G9), recommended additional layers, false-positive runbook.
+- **Top-level `__version__`** exposed via `shadowaudit.__version__`.
+- **`py.typed` marker**. Package now ships type information for mypy / pyright consumers.
 
 ### Changed
-- Placeholder for upcoming changes.
+- **Package classifier bumped to `Development Status :: 4 - Beta`**; added `Topic :: Security` and `Typing :: Typed` classifiers.
+- **`Gate._bypass_stack` is now thread-safe** via an internal `threading.RLock`; concurrent agents can share one `Gate` instance.
+- **`FlowTracer` is now thread-safe**. Previous docstring claim "use one instance per thread" removed.
+- **`Gate.__init__` and `Gate.bypass`** now raise `ConfigurationError` instead of bare `ValueError` (subclass of `ValueError` for backward compatibility).
+- **MCP gateway** now raises `GatewayError` instead of bare `RuntimeError` (subclass of `RuntimeError` for backward compatibility).
+- README rewritten with new features section (observe mode, FlowTracer, expanded taxonomies, threat model link); test badge updated to 226 passing.
+- Tests: 205 → 226 passing.
+
+### Fixed
+- Deduplicated `would_have_blocked` metadata assignment in `Gate.evaluate()`.
+- Removed dead `payload` parameter from `FlowTracer.annotate()` signature.
+- Replaced custom `_hash_data()` in FlowTracer with `compute_payload_hash` for consistency.
+- Hoisted `import statistics` / `from collections import defaultdict` in `cli.py` from inside `tune()` to module level.
 
 ## [0.4.1] - 2026-05-10
 

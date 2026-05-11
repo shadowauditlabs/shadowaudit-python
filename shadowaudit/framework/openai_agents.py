@@ -25,16 +25,9 @@ from typing import Any
 
 from shadowaudit.core.gate import Gate
 from shadowaudit.core.fsm import FailClosedFSM
-from shadowaudit.types import GateResult
+from shadowaudit.errors import AgentActionBlocked
 
-
-class AgentActionBlocked(Exception):
-    """Raised when ShadowAudit blocks a tool execution."""
-
-    def __init__(self, detail: str, gate_result: GateResult | None = None) -> None:
-        super().__init__(detail)
-        self.detail = detail
-        self.gate_result = gate_result
+__all__ = ["ShadowAuditOpenAITool", "AgentActionBlocked"]
 
 
 class ShadowAuditOpenAITool:
@@ -69,7 +62,7 @@ class ShadowAuditOpenAITool:
         except json.JSONDecodeError:
             arguments = {"raw_input": input_json}
 
-        result = self._gate.evaluate(
+        result = await self._gate.evaluate_async(
             agent_id=self._agent_id,
             task_context=self.name,
             risk_category=self._risk_category,

@@ -23,18 +23,12 @@ from typing import Any
 
 from shadowaudit.core.gate import Gate
 from shadowaudit.core.fsm import FailClosedFSM
-from shadowaudit.types import GateResult
+from shadowaudit.errors import AgentActionBlocked
+from shadowaudit.framework._risk import guess_risk_category
 
 logger = logging.getLogger(__name__)
 
-
-class AgentActionBlocked(Exception):
-    """Raised when ShadowAudit blocks an MCP tool call."""
-
-    def __init__(self, detail: str, gate_result: GateResult | None = None) -> None:
-        super().__init__(detail)
-        self.detail = detail
-        self.gate_result = gate_result
+__all__ = ["ShadowAuditMCPSession", "AgentActionBlocked"]
 
 
 class ShadowAuditMCPSession:
@@ -63,7 +57,7 @@ class ShadowAuditMCPSession:
     async def call_tool(self, name: str, arguments: dict[str, Any] | None = None) -> Any:
         """Call a tool through the ShadowAudit gate."""
         risk_category = self._default_risk_category or self._guess_category(name)
-        result = self._gate.evaluate(
+        result = await self._gate.evaluate_async(
             agent_id=self._agent_id,
             task_context=name,
             risk_category=risk_category,
@@ -82,18 +76,4 @@ class ShadowAuditMCPSession:
         # Forward to underlying session
         return await self._session.call_tool(name, arguments)
 
-    @staticmethod
-    def _guess_category(tool_name: str) -> str | None:
-        """Heuristic risk category from tool name."""
-        name = tool_name.lower()
-        if any(k in name for k in ("shell", "exec", "run", "command", "bash", "sh")):
-            return "command_execution"
-        if any(k in name for k in ("pay", "transfer", "send", "disburse", "stripe")):
-            return "payment_initiation"
-        if any(k in name for k in ("delete", "remove", "drop", "wipe")):
-            return "delete"
-        if any(k in name for k in ("write", "update", "modify", "patch")):
-            return "write"
-        if any(k in name for k in ("read", "get", "list", "view", "query")):
-            return "read_only"
-        return None
+    _guess_category = staticmethod(guess_risk_category)
