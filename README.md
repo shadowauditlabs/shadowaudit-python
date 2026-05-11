@@ -20,6 +20,15 @@ Agent → ShadowAudit Gate → Tool (allowed)
                          → Blocked (AgentActionBlocked raised)
 ```
 
+
+## Deployment Architecture & Roadmap
+
+ShadowAudit is designed to scale from local prototyping to sovereign banking infrastructure. 
+
+* **🟢 ShadowAudit OSS (Available Now):** Local, offline-first deterministic fail-closed execution. Static taxonomy gating and local hash-chaining.
+* **🟡 ShadowAudit Cloud (Private Beta - Join Waitlist):** Upgrades the local sensor with our Cloud Oracle API. Unlocks real-time dynamic drift scoring, fleet-wide telemetry dashboards, and one-click compliance exports. [Sign up for the early access waitlist here](https://forms.gle/jN46ek8iL5EpUjDL8).
+* **⏳ ShadowAudit Enterprise (Planned Q3/Q4):** Built for air-gapped sovereign environments. Features Hardware Security Module (HSM) integrations and Cryptographic Fiduciary Bonding (HMAC-SHA256) to cryptographically guarantee intent before a transaction hits your settlement layer.
+
 ## Why ShadowAudit?
 
 | Problem | ShadowAudit's Answer |
@@ -233,10 +242,7 @@ For the full example index (14 scripts covering every v0.4.0 feature), see [`doc
 Quick smoke test after installing:
 
 ```bash
-shadowaudit --version && \
-shadowaudit check . && \
-shadowaudit owasp && \
-python -c "from shadowaudit.core.gate import Gate; print(Gate().evaluate({'tool':'read'}).passed)"
+shadowaudit --version && shadowaudit check . && shadowaudit owasp && python -c "from shadowaudit.core.gate import Gate; print(Gate().evaluate({'tool':'read'}).passed)"
 ```
 
 For the full testing guide, see [`docs/TESTING_GUIDE.md`](docs/TESTING_GUIDE.md).
