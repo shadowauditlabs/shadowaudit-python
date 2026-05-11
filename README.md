@@ -208,7 +208,7 @@ pip install shadowaudit[dev]
 
 ## Examples
 
-See the [`examples/`](examples/) directory for runnable scripts:
+See the [`examples/`](examples/) directory for runnable scripts and the [**shadowaudit-showcase**](https://github.com/AnshumanKumar14/shadowaudit-showcase) repo for interactive demos and real-world scenarios:
 
 | Example | Description |
 |---|---|
