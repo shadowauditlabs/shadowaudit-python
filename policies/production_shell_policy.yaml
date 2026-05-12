@@ -1,0 +1,27 @@
+version: "1.0"
+policy_name: "production_shell_policy"
+description: "Fail-closed governance for shell command execution in production environments."
+enforcement_mode: "block"
+
+rules:
+  - id: "destructive_commands"
+    description: "Block any command that attempts to delete or overwrite critical filesystem paths."
+    match_keywords:
+      - "rm -rf"
+      - "mkfs"
+      - "dd if="
+      - "chmod 777"
+      - "chown"
+      - "wget"
+      - "curl"
+      - "exec"
+    threshold: 0.1
+    action: "block"
+
+  - id: "allowed_read_only"
+    description: "Allow specific read-only commands."
+    match_regex:
+      - "^ls -la /tmp"
+      - "^cat /var/log/.*"
+      - "^echo"
+    action: "allow"

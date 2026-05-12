@@ -1,0 +1,22 @@
+version: "1.0"
+policy_name: "filesystem_guard"
+description: "Governance for agentic filesystem operations."
+enforcement_mode: "block"
+
+rules:
+  - id: "sensitive_files"
+    description: "Block access to SSH keys, shadow files, and credential stores."
+    match_keywords:
+      - "/etc/shadow"
+      - "/etc/passwd"
+      - ".ssh/id_rsa"
+      - ".aws/credentials"
+      - ".kube/config"
+    threshold: 0.1
+    action: "block"
+
+  - id: "write_protection"
+    description: "Block arbitrary write operations outside the designated workspace."
+    match_regex:
+      - "^write\\(.*(?!(/tmp/agent_workspace)).*\\)"
+    action: "block"

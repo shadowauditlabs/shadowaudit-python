@@ -1,0 +1,22 @@
+version: "1.0"
+policy_name: "pci_payment_policy"
+description: "Strict enforcement for payment initiation and refund APIs."
+enforcement_mode: "block"
+
+rules:
+  - id: "unauthorized_transfers"
+    description: "Block wire transfers or payments exceeding the auto-approval limit."
+    match_keywords:
+      - "transfer_funds"
+      - "wire"
+      - "ach_push"
+      - "stripe.Transfer.create"
+    threshold: 0.5
+    action: "block"
+
+  - id: "large_refunds"
+    description: "Require explicit human approval for refunds over $1000."
+    match_regex:
+      - "\"amount\":\\s*[1-9][0-9]{3,}"
+      - "\"amount\":\\s*\"[1-9][0-9]{3,}\""
+    action: "block"

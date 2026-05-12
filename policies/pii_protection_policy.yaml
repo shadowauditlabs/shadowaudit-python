@@ -1,0 +1,19 @@
+version: "1.0"
+policy_name: "pii_protection_policy"
+description: "Block unauthorized extraction or logging of PII."
+enforcement_mode: "block"
+
+rules:
+  - id: "ssn_leakage"
+    description: "Detect and block payloads containing Social Security Numbers."
+    match_regex:
+      - "\\b[0-9]{3}-[0-9]{2}-[0-9]{4}\\b"
+    action: "block"
+
+  - id: "email_scraping"
+    description: "Prevent bulk extraction of email addresses from internal directories."
+    match_keywords:
+      - "SELECT email"
+      - "dump_directory"
+    threshold: 0.1
+    action: "block"
