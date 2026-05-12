@@ -37,6 +37,7 @@ from shadowaudit.assessment.builder import TaxonomyBuilder
 from shadowaudit.assessment.owasp import generate_owasp_context
 from shadowaudit.assessment.eu_ai_act import generate_evidence_pack
 from shadowaudit.core.audit import AuditLogger
+from shadowaudit.core.approvals import ApprovalManager
 
 
 __version__ = "0.4.0"
@@ -57,11 +58,17 @@ def main() -> None:
               help="Write HTML report to file")
 @click.option("--fail-on-ungated", is_flag=True,
               help="Exit with non-zero code if ungated high-risk tools found")
+@click.option("--strict", is_flag=True,
+              help="Exit with non-zero code if ANY ungated tools are found")
+@click.option("--report-json", is_flag=True,
+              help="Output findings in JSON format to stdout")
 def check(
     path: Path,
     framework: str | None,
     output: Path | None,
     fail_on_ungated: bool,
+    strict: bool,
+    report_json: bool,
 ) -> None:
     """Scan Python files for ungated AI agent tool classes."""
     if path.is_file():
@@ -73,22 +80,38 @@ def check(
         framework_lower = framework.lower()
         findings = [f for f in findings if f.framework and f.framework.lower() == framework_lower]
 
-    _print_findings(findings, path)
+    if report_json:
+        # Output JSON only
+        out = [{"name": f.name, "file": str(f.file), "line": f.line, "framework": f.framework, "category": f.category, "risk_delta": f.risk_delta, "is_wrapped": f.is_wrapped} for f in findings]
+        click.echo(json.dumps(out, indent=2))
+    else:
+        _print_findings(findings, path)
 
     if output:
         _write_html_report(findings, output, path)
-        click.echo(f"\nReport written to: {output}")
+        if not report_json:
+            click.echo(f"\nReport written to: {output}")
 
+    # strict means ANY ungated tool fails
+    if strict:
+        all_ungated = [f for f in findings if not f.is_wrapped]
+        if all_ungated:
+            if not report_json:
+                click.echo(f"\nCI FAILED (STRICT): {len(all_ungated)} ungated tool(s) found.", err=True)
+            sys.exit(1)
+            
     if fail_on_ungated:
         high_risk_ungated = [f for f in findings if not f.is_wrapped and f.risk_delta <= 0.2]
         if high_risk_ungated:
-            click.echo(
-                f"\nCI FAILED: {len(high_risk_ungated)} high-risk ungated tool(s) found.",
-                err=True,
-            )
+            if not report_json:
+                click.echo(
+                    f"\nCI FAILED: {len(high_risk_ungated)} high-risk ungated tool(s) found.",
+                    err=True,
+                )
             sys.exit(1)
         else:
-            click.echo("\nAll high-risk tools are gated.")
+            if not report_json:
+                click.echo("\nAll high-risk tools are gated.")
 
 
 def _print_findings(findings: list[ToolFinding], path: Path) -> None:
@@ -480,6 +503,120 @@ def tune(
     click.echo()
     click.echo("[TUNE] Tip: run with --false-positive-budget 0.01 for stricter calibration.")
 
+
+@main.command(name="pending-approvals")
+@click.option("--db-path", "-d", type=click.Path(path_type=Path), default="shadowaudit_approvals.db",
+              help="Path to approvals database")
+def pending_approvals(db_path: Path) -> None:
+    """List pending tool execution approvals."""
+    manager = ApprovalManager(db_path=db_path)
+    pending = manager.get_pending()
+    
+    if not pending:
+        click.echo("No pending approvals.")
+        return
+        
+    click.echo(f"{'ID':<40} {'Agent ID':<15} {'Tool':<25} {'Capability'}")
+    click.echo("-" * 100)
+    for req in pending:
+        cap = req.capability or "-"
+        click.echo(f"{req.id:<40} {req.agent_id:<15} {req.tool_name:<25} {cap}")
+
+@main.command(name="approve")
+@click.argument("request_id", type=str)
+@click.option("--db-path", "-d", type=click.Path(path_type=Path), default="shadowaudit_approvals.db",
+              help="Path to approvals database")
+@click.option("--user", "-u", type=str, default="cli_user", help="User approving the request")
+def approve(request_id: str, db_path: Path, user: str) -> None:
+    """Approve a pending tool execution."""
+    manager = ApprovalManager(db_path=db_path)
+    req = manager.get_request(request_id)
+    if not req:
+        click.echo(f"Request {request_id} not found.", err=True)
+        sys.exit(1)
+        
+    if req.status != "pending":
+        click.echo(f"Request {request_id} is already {req.status}.", err=True)
+        sys.exit(1)
+        
+    manager.approve(request_id, resolved_by=user)
+    click.echo(f"Request {request_id} approved.")
+
+@main.command(name="reject")
+@click.argument("request_id", type=str)
+@click.option("--db-path", "-d", type=click.Path(path_type=Path), default="shadowaudit_approvals.db",
+              help="Path to approvals database")
+@click.option("--user", "-u", type=str, default="cli_user", help="User rejecting the request")
+def reject(request_id: str, db_path: Path, user: str) -> None:
+    """Reject a pending tool execution."""
+    manager = ApprovalManager(db_path=db_path)
+    req = manager.get_request(request_id)
+    if not req:
+        click.echo(f"Request {request_id} not found.", err=True)
+        sys.exit(1)
+        
+    if req.status != "pending":
+        click.echo(f"Request {request_id} is already {req.status}.", err=True)
+        sys.exit(1)
+        
+    manager.reject(request_id, resolved_by=user)
+    click.echo(f"Request {request_id} rejected.")
+
+@main.command(name="logs")
+@click.option("--audit-log", "-a", type=click.Path(exists=True, path_type=Path), default="audit.db",
+              help="Path to SQLite audit log database")
+@click.option("--agent", type=str, default=None, help="Filter by agent ID")
+@click.option("--limit", type=int, default=50, help="Number of logs to show")
+def logs(audit_log: Path, agent: str | None, limit: int) -> None:
+    """View structured audit logs."""
+    audit = AuditLogger(db_path=audit_log)
+    events = audit.get_events(agent_id=agent, limit=limit)
+    
+    if not events:
+        click.echo("No audit events found.")
+        return
+        
+    for ev in events:
+        decision_color = "green" if ev["decision"] == "pass" else "red"
+        click.echo(f"[{ev['timestamp']}] ", nl=False)
+        click.secho(f"{ev['decision'].upper()}", fg=decision_color, nl=False)
+        click.echo(f" Agent: {ev['agent_id']} Tool: {ev['task_context']} Category: {ev.get('risk_category', '-')}")
+
+@main.command(name="trace")
+@click.argument("trace_id", type=str)
+@click.option("--audit-log", "-a", type=click.Path(exists=True, path_type=Path), default="audit.db")
+def trace(trace_id: str, audit_log: Path) -> None:
+    """View a detailed execution trace."""
+    # Assuming trace_id can be mapped to an agent_id or event hash for now.
+    # We will search by payload_hash or agent_id for demo.
+    audit = AuditLogger(db_path=audit_log)
+    events = audit.get_events(limit=1000)
+    
+    found = [e for e in events if e.get("entry_hash") == trace_id or e.get("payload_hash") == trace_id]
+    if not found:
+        click.echo(f"Trace {trace_id} not found.")
+        return
+        
+    for ev in found:
+        click.echo("=" * 60)
+        click.echo(f"Trace ID:      {trace_id}")
+        click.echo(f"Agent ID:      {ev['agent_id']}")
+        click.echo(f"Tool:          {ev['task_context']}")
+        click.echo(f"Decision:      {ev['decision']}")
+        click.echo(f"Reason:        {ev.get('reason')}")
+        click.echo(f"Risk Score:    {ev.get('risk_score')}")
+        click.echo("=" * 60)
+
+@main.command(name="replay")
+@click.argument("trace_file", type=click.Path(exists=True, path_type=Path))
+def replay(trace_file: Path) -> None:
+    """Replay trace for deterministic output."""
+    click.echo(f"Replaying trace from {trace_file}")
+    # Integration with TraceSimulator is already done in `simulate` command, 
+    # but the prompt specifically requested `shadowaudit replay trace.jsonl`.
+    sim = TraceSimulator()
+    summary = sim.run(trace_file=trace_file, verbose=True)
+    click.echo(f"Replayed {summary.total_calls} calls. Blocked: {summary.adaptive_blocked}")
 
 if __name__ == "__main__":
     main()

@@ -47,11 +47,15 @@ class MCPGatewayServer:
         gate: Gate | None = None,
         agent_id: str = "mcp-gateway",
         default_risk_category: str | None = None,
+        policy_path: str | None = None,
+        capability_map: dict[str, str] | None = None,
     ) -> None:
         self._upstream_command = upstream_command
         self._gate = gate or Gate()
         self._agent_id = agent_id
         self._default_risk_category = default_risk_category
+        self._policy_path = policy_path
+        self._capability_map = capability_map or {}
         self._fsm = FailClosedFSM()
         self._proc: subprocess.Popen[str] | None = None
         self._lock = threading.Lock()
@@ -161,11 +165,18 @@ class MCPGatewayServer:
         if risk_category is None:
             risk_category = self._guess_category(tool_name)
 
+        # Determine capability
+        capability = self._capability_map.get(tool_name)
+        if capability is None:
+            capability = self._guess_capability(tool_name)
+
         result = self._gate.evaluate(
             agent_id=self._agent_id,
             task_context=tool_name,
             risk_category=risk_category,
             payload=arguments,
+            capability=capability,
+            policy_path=self._policy_path,
         )
 
         outcome = self._fsm.transition(result)
@@ -194,6 +205,22 @@ class MCPGatewayServer:
         if any(k in name for k in ("read", "get", "list", "view", "query")):
             return "read_only"
         return None
+
+    @staticmethod
+    def _guess_capability(tool_name: str) -> str | None:
+        """Heuristic capability mapping from tool name."""
+        name = tool_name.lower()
+        if any(k in name for k in ("shell", "exec", "run", "command", "bash", "sh")):
+            return "shell.execute"
+        if any(k in name for k in ("pay", "transfer", "send", "disburse", "stripe")):
+            return "payments.transfer"
+        if any(k in name for k in ("delete", "remove", "drop", "wipe")):
+            return "filesystem.delete"
+        if any(k in name for k in ("write", "update", "modify", "patch")):
+            return "filesystem.write"
+        if any(k in name for k in ("read", "get", "list", "view", "query")):
+            return "filesystem.read"
+        return "mcp.tool.execute"
 
     def run(self) -> None:
         """Start the gateway and block on stdio proxying."""

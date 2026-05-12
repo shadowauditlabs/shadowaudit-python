@@ -16,9 +16,10 @@ from typing import Any, Generator
 from shadowaudit.types import GateResult
 from shadowaudit.core.state import AgentStateStore
 from shadowaudit.core.taxonomy import TaxonomyLoader
-from shadowaudit.core.hash import compute_payload_hash
 from shadowaudit.core.audit import AuditLogger
 from shadowaudit.core.scorer import BaseScorer, KeywordScorer, load_scorer
+from shadowaudit.core.policy import PolicyLoader, Policy
+from shadowaudit.core.approvals import ApprovalManager
 from shadowaudit.errors import ConfigurationError
 
 logger = logging.getLogger(__name__)
@@ -85,6 +86,8 @@ class Gate:
         audit_logger: AuditLogger | None = None,
         scorer: BaseScorer | None = None,
         mode: str = GATE_MODE_ENFORCE,
+        policy_loader: PolicyLoader | None = None,
+        approval_manager: ApprovalManager | None = None,
     ) -> None:
         if mode not in (GATE_MODE_ENFORCE, GATE_MODE_OBSERVE):
             raise ConfigurationError(f"Invalid gate mode '{mode}'. Use 'enforce' or 'observe'.")
@@ -94,6 +97,8 @@ class Gate:
         self._audit = audit_logger or AuditLogger()
         self._scorer = scorer or load_scorer(state_store=self._store)
         self._mode = mode
+        self._policy_loader = policy_loader or PolicyLoader()
+        self._approval_manager = approval_manager or ApprovalManager()
         # Per-agent bypass stack: agent_id → list[reason]
         self._bypass_stack: dict[str, list[str]] = {}
         # Protects _bypass_stack from concurrent agents sharing one Gate.
@@ -142,12 +147,17 @@ class Gate:
         task_context: str,
         risk_category: str | None,
         payload: dict[str, Any],
+        capability: str | None = None,
+        policy_path: str | None = None,
+        policy_context: dict[str, Any] | None = None,
+        require_human_approval: bool = False,
     ) -> GateResult:
         """Evaluate payload risk and return pass/fail decision.
 
         Always records decision for next K computation and audit log,
         even on failure.
         """
+        from shadowaudit.core.hash import compute_payload_hash
         start_ms = int(time.time() * 1000)
 
         taxonomy_entry = TaxonomyLoader.lookup(risk_category, taxonomy_path=self._taxonomy_path)
@@ -175,6 +185,60 @@ class Gate:
         raw_passed = risk_score <= threshold
         bypass_reason = self._bypass_reason(agent_id)
 
+        # --------------------------------------------------
+        # Policy & Approval Evaluation
+        # --------------------------------------------------
+        policy_action = None
+        if policy_path:
+            try:
+                policy = self._policy_loader.load(policy_path)
+                p_context = policy_context or {}
+                if capability:
+                    policy_action = policy.evaluate(capability, p_context, payload)
+                
+                # If no direct capability match, map risk_level to action
+                if policy_action is None:
+                    # simplistic mapping of score to risk level
+                    if risk_score > threshold * 1.5:
+                        rl = "critical"
+                    elif risk_score > threshold:
+                        rl = "high"
+                    elif risk_score > threshold * 0.5:
+                        rl = "medium"
+                    else:
+                        rl = "low"
+                    policy_action = policy.evaluate_risk_level(rl)
+            except Exception as e:
+                logger.warning("Policy evaluation failed: %s", e)
+
+        requires_approval_flag = require_human_approval or policy_action == "require_approval"
+
+        if requires_approval_flag:
+            # Check if there's a pending/approved request matching this payload
+            # For simplicity, if bypass isn't active, we fail closed with a reason of "approval_required"
+            # and insert into the approval queue.
+            # In a real async flow, this would pause execution. Here, we fail-closed.
+            if bypass_reason is None:
+                req = self._approval_manager.request_approval(
+                    agent_id=agent_id,
+                    tool_name=task_context,
+                    capability=capability,
+                    payload=payload,
+                    reason=f"Risk Score: {risk_score:.2f}, Category: {risk_category}",
+                )
+                raw_passed = False
+                bypass_reason = None
+                reason = f"approval_required: {req.id}"
+
+        if policy_action == "deny" or policy_action == "block":
+            raw_passed = False
+            if bypass_reason is None:
+                reason = "policy_deny"
+        elif policy_action == "allow":
+            if bypass_reason is None and not requires_approval_flag:
+                raw_passed = True
+                reason = "policy_allow"
+
         if bypass_reason is not None:
             # Bypass: always pass; audit trail records the override
             passed = True
@@ -182,10 +246,12 @@ class Gate:
         elif self._mode == GATE_MODE_OBSERVE:
             # Observe mode: always pass; metadata records what would have happened
             passed = True
-            reason = "observed"
+            if "approval_required" not in locals().get("reason", "") and policy_action != "deny":
+                reason = "observed"
         else:
             passed = raw_passed
-            reason = "pass" if passed else "drift_detected"
+            if "reason" not in locals() or (reason != "policy_allow" and reason != "policy_deny" and not reason.startswith("approval_required")):
+                reason = "pass" if passed else "drift_detected"
 
         payload_hash = compute_payload_hash(payload)
         tool_name = task_context

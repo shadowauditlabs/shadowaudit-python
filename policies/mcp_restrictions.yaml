@@ -1,0 +1,23 @@
+# MCP Restrictions Policy
+# Governs tools executed via the Model Context Protocol
+
+deny:
+  - capability: mcp.tool.execute
+    tool_name: "admin_*"
+
+require_approval:
+  - capability: mcp.tool.execute
+    risk_level: "high"
+
+allow:
+  - capability: mcp.tool.execute
+
+risk_levels:
+  low:
+    action: allow
+  medium:
+    action: warn
+  high:
+    action: require_approval
+  critical:
+    action: block

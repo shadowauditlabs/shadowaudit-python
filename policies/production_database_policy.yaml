@@ -1,0 +1,28 @@
+# Production Database Policy
+# Governance for database operations in production
+
+deny:
+  - capability: database.drop
+    environment: production
+  - capability: database.write
+    table: "audit_logs"
+
+require_approval:
+  - capability: database.write
+    environment: production
+
+allow:
+  - capability: database.read
+    environment: production
+  - capability: database.all
+    environment: development
+
+risk_levels:
+  low:
+    action: allow
+  medium:
+    action: allow
+  high:
+    action: require_approval
+  critical:
+    action: block
