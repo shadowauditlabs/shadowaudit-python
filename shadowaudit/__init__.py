@@ -3,7 +3,7 @@
 MIT licensed. Works offline. Rule-based gating with pluggable scoring.
 """
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 
 from shadowaudit.core.gate import Gate
 from shadowaudit.types import GateResult

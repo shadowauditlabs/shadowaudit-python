@@ -13,6 +13,8 @@
 
 ShadowAudit sits between AI agents and their tools to enforce deterministic authorization before execution happens.
 
+Release: v0.6.1 — 2026-05-13 — 253 tests passed
+
 Documentation: https://shadowauditlabs.github.io/shadowaudit-python/
 
 It is infrastructure for governing agent tool use at runtime: closer to IAM, Open Policy Agent, admission controllers, and API gateways than prompt guardrails or moderation.
