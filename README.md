@@ -40,7 +40,7 @@ Agent → ShadowAudit Gate → Tool Execution
 - MCP governance support
 - Tamper-evident SHA-256 + Ed25519 audit chain
 
-
+---
 
 # Dangerous Tool Execution Blocked
 
@@ -84,7 +84,7 @@ pip install shadowaudit
 ```
 
 ```python
-from shadowaudit.framework.langchain import ShadowAuditTool
+from shadowaudit import ShadowAuditTool
 from langchain.tools import ShellTool
 
 safe_tool = ShadowAuditTool(
