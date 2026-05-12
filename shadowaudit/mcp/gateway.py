@@ -22,7 +22,7 @@ import logging
 import subprocess
 import sys
 import threading
-from typing import Any
+from typing import Any, cast
 
 from shadowaudit.core.gate import Gate
 from shadowaudit.core.fsm import FailClosedFSM
@@ -93,7 +93,7 @@ class MCPGatewayServer:
 
         body = stream.read(length)
         try:
-            return json.loads(body)
+            return cast(dict[str, Any], json.loads(body))
         except json.JSONDecodeError:
             logger.warning("Invalid JSON from upstream: %s", body[:200])
             return None

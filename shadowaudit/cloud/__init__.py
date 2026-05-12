@@ -5,5 +5,6 @@ gating when offline, unauthorized, or rate-limited.
 """
 
 from shadowaudit.cloud.client import CloudClient
+from shadowaudit.cloud.evaluator import CloudInterceptor, RemoteEvaluator
 
-__all__ = ["CloudClient"]
+__all__ = ["CloudClient", "CloudInterceptor", "RemoteEvaluator"]

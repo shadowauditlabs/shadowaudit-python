@@ -208,7 +208,7 @@ def load_scorer(
     if prefer_native:
         try:
             # pylint: disable=import-outside-toplevel
-            from shadowaudit._native import AdaptiveScorer as NativeScorer  # type: ignore[import-untyped]
+            from shadowaudit._native import AdaptiveScorer as NativeScorer  # noqa: PGH003
 
             logger.info("Using enterprise native AdaptiveScorer from binary.")
             return NativeScorer()  # type: ignore[no-any-return]

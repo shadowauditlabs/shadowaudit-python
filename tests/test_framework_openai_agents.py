@@ -88,7 +88,7 @@ class TestShadowAuditOpenAITool:
             risk_category="execute",
         )
         with pytest.raises(AgentActionBlocked):
-            await wrapped.on_invoke_tool(None, json.dumps({"command": "rm -rf /"}))
+            await wrapped.on_invoke_tool(None, json.dumps({"command": "exec rm -rf /"}))
 
     @pytest.mark.asyncio
     async def test_on_invoke_tool_invalid_json(self):

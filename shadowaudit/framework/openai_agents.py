@@ -21,7 +21,7 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from shadowaudit.core.gate import Gate
 from shadowaudit.core.fsm import FailClosedFSM
@@ -77,7 +77,7 @@ class ShadowAuditOpenAITool:
 
         # Forward to underlying tool
         if hasattr(self._tool, "on_invoke_tool"):
-            return await self._tool.on_invoke_tool(context, input_json)
+            return cast(str, await self._tool.on_invoke_tool(context, input_json))
         elif hasattr(self._tool, "invoke"):
             return str(self._tool.invoke(arguments))
         else:
