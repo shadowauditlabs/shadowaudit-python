@@ -1,73 +1,113 @@
 # ShadowAudit
 
 <p align="center">
-  <strong>Runtime authorization and policy enforcement infrastructure for AI agents.</strong>
+  <strong>Deterministic runtime authorization and fail-closed governance for AI agent tool execution.</strong>
 </p>
 
 <p align="center">
   <a href="https://pypi.org/project/shadowaudit/"><img src="https://img.shields.io/pypi/v/shadowaudit?color=blue" alt="PyPI version"></a>
-  <a href="https://pypi.org/project/shadowaudit/"><img src="https://img.shields.io/pypi/pyversions/shadowaudit" alt="Python versions"></a>
+  <a href="https://img.shields.io/pypi/pyversions/shadowaudit"><img src="https://img.shields.io/pypi/pyversions/shadowaudit" alt="Python versions"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/tests-253%20passed-brightgreen" alt="Tests: 253 passed">
 </p>
 
 ---
 
-ShadowAudit provides runtime authorization and deterministic policy enforcement for AI agent execution. It sits between an agent and its tools to evaluate capabilities, apply context-aware policies, and deterministically block or pause unsafe actions before they reach your infrastructure.
+Your AI agents can execute shell commands, transfer money, modify databases, access MCP servers, and trigger production infrastructure workflows.
 
-## The Problem
+ShadowAudit sits between agents and their tools to enforce deterministic runtime authorization before execution happens.
 
-Agents can now execute real-world tools—writing to databases, provisioning infrastructure, and executing shell commands. However, existing security measures like prompt guardrails are fundamentally probabilistic. LLMs will ignore instructions during prompt injections, context overflows, or complex reasoning chains. 
+Unlike prompt guardrails or probabilistic moderation systems, ShadowAudit fail-closed blocks unsafe actions at runtime using explicit policies, replayable audit trails, and cryptographically verifiable enforcement logs.
 
-To run agents in production, execution boundaries require deterministic enforcement.
+```text
+Agent → ShadowAudit Gate → Tool Execution
+                           → Blocked (AgentActionBlocked)
+                           → Approval Queue
+```
 
-## Dangerous Tool Execution Blocked
+---
 
-ShadowAudit evaluates real tool arguments at runtime and fail-closed blocks dangerous actions before they reach the execution engine.
+## Runtime Governance Guarantees
+
+- Deterministic fail-closed enforcement
+- Cryptographically verifiable audit trails
+- Replayable execution decisions
+- Offline-first runtime governance
+- Zero LLM calls in enforcement path
+- Explainable enforcement outcomes
+- CI/CD deployment enforcement
+- Multi-agent trust propagation
+- MCP governance support
+- Tamper-evident SHA-256 + Ed25519 audit chain
+
+---
+
+# Why ShadowAudit Exists
+
+Agents now execute real-world tools:
+- shell commands
+- payment APIs
+- SQL queries
+- infrastructure workflows
+- MCP-connected services
+
+Prompt guardrails alone are insufficient because LLM behavior is fundamentally probabilistic under:
+- prompt injection
+- context overflow
+- tool confusion
+- long reasoning chains
+- multi-agent interactions
+
+Production agents require deterministic execution boundaries.
+
+ShadowAudit provides runtime authorization and governance infrastructure for AI agents the same way IAM systems provide authorization for APIs and cloud infrastructure.
+
+---
+
+# Dangerous Tool Execution Blocked
 
 ```python
 from shadowaudit.core.gate import Gate
 
 gate = Gate(policy_path="policies/production_shell_policy.yaml")
 
-# Agent attempts a destructive command
 result = gate.evaluate(
     agent_id="ops-agent-1",
     task_context="shell",
     capability="shell.execute",
-    payload={"command": "rm -rf /var/lib/postgresql"}
+    payload={
+        "command": "rm -rf /var/lib/postgresql"
+    }
 )
 
 if not result.passed:
     print("BLOCKED")
-    print(f"Capability: {result.metadata.get('capability', 'shell.execute')}")
-    print(f"Risk Level: critical")
-    print(f"Policy: production_shell_policy")
-    print(f"Action: denied")
+    print(f"Capability: shell.execute")
+    print(f"Decision: denied")
+    print(f"Reason: {result.reason}")
 ```
 
-**Expected Output:**
+Expected output:
+
 ```text
 BLOCKED
 Capability: shell.execute
-Risk Level: critical
-Policy: production_shell_policy
-Action: denied
+Decision: denied
+Reason: destructive_command_detected
 ```
 
-## Quickstart
+---
 
-Wrap any framework's tool with a lightweight ShadowAudit adapter to instantly govern execution.
+# Quickstart
 
 ```bash
-pip install shadowaudit pyyaml
+pip install shadowaudit
 ```
 
 ```python
 from shadowaudit.framework.langchain import ShadowAuditTool
 from langchain.tools import ShellTool
 
-# Wrap the tool to enforce policies transparently
 safe_tool = ShadowAuditTool(
     tool=ShellTool(),
     agent_id="ops-agent",
@@ -75,9 +115,17 @@ safe_tool = ShadowAuditTool(
 )
 ```
 
-## Policy-as-Code
+Supported integrations:
+- LangChain
+- LangGraph
+- CrewAI
+- OpenAI Agents SDK
+- MCP
+- Direct Python APIs
 
-ShadowAudit uses a deterministic, YAML-based policy engine designed for scale and enterprise environments.
+---
+
+# Policy-as-Code
 
 ```yaml
 deny:
@@ -92,7 +140,16 @@ allow:
   - capability: filesystem.read
 ```
 
-## Runtime Governance Lifecycle
+Policies support:
+- capability-based authorization
+- threshold enforcement
+- escalation workflows
+- environment-specific rules
+- replay + simulation testing
+
+---
+
+# Runtime Governance Lifecycle
 
 ```mermaid
 graph LR
@@ -100,117 +157,286 @@ graph LR
     B --> C[Policy Engine]
     C --> D[Risk Evaluation]
     D --> E{Enforcement Decision}
-    
+
     E -->|Allow| F[Tool Execution]
     E -->|Require Approval| G[Approval Queue]
     E -->|Deny| H[Blocked Response]
-    
+
     F -.-> I[(Audit Trace)]
     G -.-> I
     H -.-> I
 ```
 
-## Replay + Explainability
+Every decision is:
+- deterministic
+- replayable
+- explainable
+- cryptographically auditable
 
-ShadowAudit features a deterministic replay and trace engine. Every decision is cryptographically logged and explainable.
+---
 
-**Trace Execution:**
+# Tamper-Evident Audit Trails
+
+Every runtime decision is recorded in an append-only SQLite audit log.
+
+Audit entries are:
+- SHA-256 hash chained
+- replayable
+- tamper-evident
+- optionally signed with Ed25519
+
+Modify any row and the verification chain breaks.
+
 ```bash
-shadowaudit trace <trace_id>
+shadowaudit verify audit.db
 ```
-Output clearly shows the execution flow, triggered rules, capability mapping, and the exact enforcement chain.
 
-**Replay Historic Traces:**
+Example audit entry:
+
+```json
+{
+  "timestamp": 1715492534.123,
+  "agent_id": "finance-agent",
+  "capability": "payments.transfer",
+  "decision": "require_approval",
+  "payload_hash": "a8f5f167f44f...",
+  "previous_hash": "9ab12de...",
+  "signature": "ed25519:..."
+}
+```
+
+This enables:
+- forensic replay
+- compliance evidence
+- chain-of-custody verification
+- deterministic auditability
+
+---
+
+# Replay + Explainability
+
 ```bash
 shadowaudit replay trace.jsonl
 ```
-Test deterministic replay capabilities, analyze offline audit trails, and debug past sessions without executing actual tools.
 
-## Human Approval Workflows
+```bash
+shadowaudit trace <trace_id>
+```
 
-Not all actions should be instantly blocked or blindly allowed. Enterprise governance requires escalation flows. 
+Replay output includes:
+- triggered rules
+- capability mapping
+- enforcement chain
+- risk deltas
+- final decision path
+
+---
+
+# Observe Mode + Human Approval Workflows
+
+```python
+gate = Gate(mode="observe")
+```
+
+Observe mode:
+- logs all decisions
+- blocks nothing
+- records what would have been denied
 
 ```yaml
 require_approval:
   - capability: production.database.write
 ```
 
-When an agent attempts this action, execution pauses and the payload is pushed to an approval queue. Human operators authorize or reject the request via the CLI or an integrated Approval Provider plugin.
-
 ```bash
-# View pending requests
 shadowaudit pending-approvals
-
-# Approve request
 shadowaudit approve req-1234
 ```
 
-## MCP Governance
+Every override is permanently audit logged with reason tracking.
 
-ShadowAudit is the **runtime governance layer for MCP ecosystems**. 
+---
 
-While the Model Context Protocol (MCP) securely connects agents to tools, it does not provide granular authorization rules. ShadowAudit runs as a transparent gateway proxy to intercept JSON-RPC messages and enforce deterministic governance.
+# Multi-Agent Trust Propagation
+
+```python
+from shadowaudit import FlowTracer, TrustLevel
+
+tracer = FlowTracer()
+
+tracer.record_output(
+    "web-scraper",
+    scraped_data,
+    trust=TrustLevel.UNTRUSTED
+)
+
+tracer.record_flow(
+    "web-scraper",
+    "payment-agent",
+    parsed_data
+)
+
+annotation = tracer.annotate(
+    receiving_agent="payment-agent",
+    source_agents=["web-scraper"],
+    declared_trust=TrustLevel.SYSTEM,
+)
+
+print(annotation.effective_trust)
+```
+
+This enables governance across:
+- multi-agent systems
+- autonomous workflows
+- MCP ecosystems
+- chained execution graphs
+
+---
+
+# MCP Governance
 
 ```python
 from shadowaudit.mcp.gateway import MCPGatewayServer
 
 gateway = MCPGatewayServer(
-    upstream_command=["python", "-m", "mcp_server_filesystem", "/tmp"],
+    upstream_command=[
+        "python",
+        "-m",
+        "mcp_server_filesystem",
+        "/tmp"
+    ],
     policy_path="policies/mcp_restrictions.yaml"
 )
+
 gateway.run()
 ```
 
-## Policy Simulation
+---
 
-Safely test policy changes against historical traffic before enforcing them in production to evaluate risk deltas.
-
-```bash
-# Replay historical sessions to compare policy outcomes
-shadowaudit simulate session.json --policy alternative.yaml --compare
-```
-
-Simulation shows deterministic comparisons, revealing exactly where a new policy diverges from previous enforcement outcomes.
-
-## Structured Audit Logging
-
-Auditing is local-first, JSON-structured, and strictly deterministic.
+# CI/CD Enforcement
 
 ```bash
-shadowaudit logs --agent "finance-agent"
+shadowaudit check ./src --fail-on-ungated
 ```
 
-```json
-{
-  "timestamp": 1715492534.123,
-  "agent_id": "finance-agent",
-  "task_context": "stripe_transfer",
-  "capability": "payments.transfer",
-  "decision": "require_approval",
-  "payload_hash": "a8f5f167f44f..."
-}
+```bash
+shadowaudit simulate session.json   --policy alternative.yaml   --compare
 ```
-Audit logs remain completely isolated and replay-compatible.
 
-## Plugin Ecosystem
+This enables:
+- governance regression testing
+- enforcement simulation
+- policy diff analysis
+- safer rollout workflows
 
-ShadowAudit’s architecture is fully extensible. You can integrate custom logic into the policy evaluation chain.
+---
+
+# Compliance + Reporting
+
+ShadowAudit includes:
+- OWASP Agentic Top 10 mappings
+- EU AI Act Annex IV evidence packs
+- HTML governance reports
+- structured audit exports
+
+```bash
+shadowaudit owasp
+shadowaudit eu-ai-act
+```
+
+Designed for:
+- regulated workloads
+- fintech
+- healthcare
+- air-gapped environments
+- enterprise governance teams
+
+---
+
+# Architecture
 
 ```text
-plugins/
-  shell_guard/           # Advanced shell sandboxing heuristics
-  sql_risk_engine/       # AST parsing for destructive SQL
-  pii_detector/          # Regex/NER-based data exfiltration checks
-  mcp_governance/        # Specialized MCP connection routing
+┌─────────────────────────────────────────────────────┐
+│                  ShadowAudit                        │
+├─────────────┬─────────────┬─────────────┬──────────┤
+│ LangChain  │  CrewAI     │ LangGraph   │   MCP    │
+│ OpenAI SDK │ Direct Gate │ FlowTracer  │ Gateway  │
+├─────────────────────────────────────────────────────┤
+│               Core Gate Engine                      │
+│                                                     │
+│ Capability Mapper → Policy Engine → Enforcement FSM │
+│                                                     │
+│  Risk Engine    │ Replay Engine │ Audit Chain       │
+│  Thresholds     │ Simulator     │ SHA-256 + Ed25519 │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│          SQLite State + Audit Storage               │
+└─────────────────────────────────────────────────────┘
 ```
 
-## Integrations
-
-Wrap frameworks seamlessly without heavily modifying your orchestration logic:
-- LangChain
-- OpenAI Agents SDK
-- CrewAI
-- AutoGen
-- MCP (Model Context Protocol)
 ---
-*ShadowAudit provides runtime authorization and deterministic policy enforcement for AI agent execution.*
+
+# Examples
+
+See `examples/` for runnable demos including:
+- LangChain agents
+- MCP governance
+- tamper-evident audit verification
+- fintech payment agents
+- FlowTracer demos
+- observe mode rollouts
+- replay + simulation workflows
+
+```bash
+python examples/run_all_examples.py
+```
+
+---
+
+# Project Status
+
+ShadowAudit is production-ready for:
+- runtime tool gating
+- deterministic authorization
+- audit-time replay
+- governance enforcement
+- compliance workflows
+
+Current capabilities:
+- LangChain, CrewAI, LangGraph, OpenAI Agents, MCP adapters
+- hash-chained audit logs
+- Ed25519 signing
+- replay + simulation engine
+- FlowTracer trust propagation
+- vertical taxonomies
+- OWASP + EU AI Act reporting
+- offline-first operation
+- zero external dependencies
+
+---
+
+# Contributing
+
+```bash
+git clone https://github.com/AnshumanKumar14/shadowaudit-python.git
+
+cd shadowaudit-python
+
+pip install -e ".[dev]"
+
+pytest tests/ -q
+```
+
+Bug reports, governance plugins, framework adapters, and policy contributions are welcome.
+
+---
+
+# License
+
+MIT License
+
+---
+
+<p align="center">
+  <sub>Built by <a href="https://github.com/AnshumanKumar14">Anshuman Kumar</a></sub>
+</p>
