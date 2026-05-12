@@ -40,7 +40,7 @@ from shadowaudit.core.audit import AuditLogger
 from shadowaudit.core.approvals import ApprovalManager
 
 
-__version__ = "0.4.0"
+__version__ = "0.6.0"
 
 
 @click.group()
