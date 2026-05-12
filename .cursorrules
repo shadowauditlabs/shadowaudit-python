@@ -1,0 +1,29 @@
+# ShadowAudit Core Positioning and Philosophy
+
+ShadowAudit is a deterministic runtime authorization platform for AI agents and MCP ecosystems.
+
+Its core philosophy is:
+"Unsafe behavior is inevitable. Execution boundaries must be enforced deterministically."
+
+The project should feel closer to:
+- OPA (Open Policy Agent)
+- IAM (Identity and Access Management)
+- runtime firewalls
+- API gateways
+- policy-as-code infrastructure
+
+NOT:
+- AI moderation
+- prompt filtering
+- generic AI safety tooling
+
+## Prioritize:
+- deterministic enforcement
+- fail-closed behavior
+- replayability
+- explainability
+- capability-based governance
+- offline-first enforcement
+- runtime policy evaluation
+
+When writing code, documentation, or interacting with this repository, always align the tone, architecture, and design decisions with these principles.
