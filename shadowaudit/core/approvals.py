@@ -13,7 +13,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from shadowaudit.core.audit import AuditLogger
 
 
 @dataclass
@@ -203,7 +202,6 @@ class ApprovalManager:
     def has_approved_request(self, agent_id: str, tool_name: str, payload: dict[str, Any]) -> bool:
         """Check if there is an approved request for this exact payload."""
         import json
-        from shadowaudit.core.hash import compute_payload_hash
         
         target_payload_str = json.dumps(payload, sort_keys=True)
         
