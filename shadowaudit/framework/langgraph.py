@@ -41,12 +41,16 @@ class ShadowAuditToolNode:
         agent_id: str,
         gate: Gate | None = None,
         risk_category_map: dict[str, str] | None = None,
+        capability_map: dict[str, str] | None = None,
+        policy_path: str | None = None,
     ) -> None:
         self._tools = {t.name: t for t in tools}
         self._agent_id = agent_id
         self._gate = gate or Gate()
         self._fsm = FailClosedFSM()
         self._risk_category_map = risk_category_map or {}
+        self._capability_map = capability_map or {}
+        self._policy_path = policy_path
 
     def _get_risk_category(self, tool_name: str) -> str | None:
         """Explicit map first, then fall back to the shared keyword heuristic."""
@@ -77,6 +81,8 @@ class ShadowAuditToolNode:
             task_context=tool_name,
             risk_category=self._get_risk_category(tool_name),
             payload=arguments,
+            capability=self._capability_map.get(tool_name),
+            policy_path=self._policy_path,
         )
         outcome = self._fsm.transition(result)
         if outcome.decision != "pass":
@@ -92,6 +98,8 @@ class ShadowAuditToolNode:
             task_context=tool_name,
             risk_category=self._get_risk_category(tool_name),
             payload=arguments,
+            capability=self._capability_map.get(tool_name),
+            policy_path=self._policy_path,
         )
         outcome = self._fsm.transition(result)
         if outcome.decision != "pass":

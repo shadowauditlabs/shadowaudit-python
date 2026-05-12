@@ -18,7 +18,7 @@ from shadowaudit.core.state import AgentStateStore
 from shadowaudit.core.taxonomy import TaxonomyLoader
 from shadowaudit.core.audit import AuditLogger
 from shadowaudit.core.scorer import BaseScorer, KeywordScorer, load_scorer
-from shadowaudit.core.policy import PolicyLoader, Policy
+from shadowaudit.core.policy import PolicyLoader
 from shadowaudit.core.approvals import ApprovalManager
 from shadowaudit.errors import ConfigurationError
 
@@ -337,6 +337,10 @@ class Gate:
         task_context: str,
         risk_category: str | None,
         payload: dict[str, Any],
+        capability: str | None = None,
+        policy_path: str | None = None,
+        policy_context: dict[str, Any] | None = None,
+        require_human_approval: bool = False,
     ) -> GateResult:
         """Async wrapper around :meth:`evaluate`.
 
@@ -348,11 +352,17 @@ class Gate:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             None,
-            self.evaluate,
-            agent_id,
-            task_context,
-            risk_category,
-            payload,
+            lambda: self.evaluate(
+                agent_id,
+                task_context,
+                risk_category,
+                payload,
+                capability=capability,
+                policy_path=policy_path,
+                policy_context=policy_context,
+                require_human_approval=require_human_approval,
+            )
+
         )
 
     def _extract_amount(self, payload: dict[str, Any]) -> float | None:

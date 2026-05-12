@@ -41,11 +41,15 @@ class ShadowAuditOpenAITool:
         tool: Any,
         agent_id: str,
         risk_category: str | None = None,
+        capability: str | None = None,
+        policy_path: str | None = None,
         gate: Gate | None = None,
     ) -> None:
         self._tool = tool
         self._agent_id = agent_id
         self._risk_category = risk_category
+        self._capability = capability
+        self._policy_path = policy_path
         self._gate = gate or Gate()
         self._fsm = FailClosedFSM()
 
@@ -67,6 +71,8 @@ class ShadowAuditOpenAITool:
             task_context=self.name,
             risk_category=self._risk_category,
             payload=arguments,
+            capability=self._capability,
+            policy_path=self._policy_path,
         )
         outcome = self._fsm.transition(result)
         if outcome.decision != "pass":

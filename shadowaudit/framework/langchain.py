@@ -42,11 +42,15 @@ class ShadowAuditTool(_GuardedToolMixin):
         tool: Any,  # BaseTool or duck-typed
         agent_id: str,
         risk_category: str | None = None,
+        capability: str | None = None,
+        policy_path: str | None = None,
         gate: Gate | None = None,
     ) -> None:
         self._tool = tool
         self._agent_id = agent_id
         self._risk_category = risk_category
+        self._capability = capability
+        self._policy_path = policy_path
         self._gate = gate or Gate()
         self._fsm = FailClosedFSM()
 
@@ -79,6 +83,8 @@ class ShadowAuditTool(_GuardedToolMixin):
 def shadowaudit_guard(
     agent_id: str,
     risk_category: str | None = None,
+    capability: str | None = None,
+    policy_path: str | None = None,
     gate: Gate | None = None,
 ) -> Callable[..., Any]:
     """Decorator factory for function-based LangChain tools.
@@ -99,6 +105,8 @@ def shadowaudit_guard(
                 task_context=func.__name__,
                 risk_category=risk_category,
                 payload=payload,
+                capability=capability,
+                policy_path=policy_path,
             )
             outcome = _fsm.transition(result)
             if outcome.decision != "pass":

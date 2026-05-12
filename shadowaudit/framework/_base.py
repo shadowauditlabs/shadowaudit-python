@@ -25,6 +25,8 @@ class _GuardedToolMixin:
     _fsm: FailClosedFSM
     _agent_id: str
     _risk_category: str | None
+    _capability: str | None
+    _policy_path: str | None
     name: str
 
     @staticmethod
@@ -39,6 +41,8 @@ class _GuardedToolMixin:
             task_context=self.name,
             risk_category=self._risk_category,
             payload=payload,
+            capability=getattr(self, "_capability", None),
+            policy_path=getattr(self, "_policy_path", None),
         )
         outcome = self._fsm.transition(result)
         if outcome.decision != "pass":
@@ -50,6 +54,8 @@ class _GuardedToolMixin:
             task_context=self.name,
             risk_category=self._risk_category,
             payload=payload,
+            capability=getattr(self, "_capability", None),
+            policy_path=getattr(self, "_policy_path", None),
         )
         outcome = self._fsm.transition(result)
         if outcome.decision != "pass":
