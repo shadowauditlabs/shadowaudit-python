@@ -215,7 +215,15 @@ class Gate:
 
         if requires_approval_flag:
             # Check if there's a pending/approved request matching this payload
-            # For simplicity, if bypass isn't active, we fail closed with a reason of "approval_required"
+            if self._approval_manager.has_approved_request(agent_id, task_context, payload):
+                # Request was already approved!
+                requires_approval_flag = False
+                policy_action = "allow"
+                if bypass_reason is None:
+                    reason = "previously_approved"
+                    raw_passed = True
+
+            # If still requires approval, we fail closed with a reason of "approval_required"
             # and insert into the approval queue.
             # In a real async flow, this would pause execution. Here, we fail-closed.
             if bypass_reason is None:

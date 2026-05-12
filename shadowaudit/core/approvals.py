@@ -199,3 +199,28 @@ class ApprovalManager:
                 resolved_at=row[9],
                 resolved_by=row[10],
             )
+
+    def has_approved_request(self, agent_id: str, tool_name: str, payload: dict[str, Any]) -> bool:
+        """Check if there is an approved request for this exact payload."""
+        import json
+        from shadowaudit.core.hash import compute_payload_hash
+        
+        target_payload_str = json.dumps(payload, sort_keys=True)
+        
+        conn = self._connection()
+        with self._lock:
+            cur = conn.execute(
+                "SELECT payload FROM approvals WHERE agent_id = ? AND tool_name = ? AND status = 'approved'",
+                (agent_id, tool_name)
+            )
+            rows = cur.fetchall()
+            
+        for row in rows:
+            try:
+                db_payload = json.loads(row[0])
+                if json.dumps(db_payload, sort_keys=True) == target_payload_str:
+                    return True
+            except json.JSONDecodeError:
+                continue
+                
+        return False

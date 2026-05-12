@@ -563,19 +563,31 @@ def reject(request_id: str, db_path: Path, user: str) -> None:
     click.echo(f"Request {request_id} rejected.")
 
 @main.command(name="logs")
-@click.option("--audit-log", "-a", type=click.Path(exists=True, path_type=Path), default="audit.db",
+@click.option("--audit-log", "-a", type=click.Path(path_type=Path), default="audit.db",
               help="Path to SQLite audit log database")
 @click.option("--agent", type=str, default=None, help="Filter by agent ID")
 @click.option("--limit", type=int, default=50, help="Number of logs to show")
-def logs(audit_log: Path, agent: str | None, limit: int) -> None:
+@click.option("--json", "output_json", is_flag=True, help="Output logs in JSON format")
+def logs(audit_log: Path, agent: str | None, limit: int, output_json: bool) -> None:
     """View structured audit logs."""
+    if not audit_log.exists():
+        if not output_json:
+            click.echo(f"Audit log not found at {audit_log}")
+        return
+
     audit = AuditLogger(db_path=audit_log)
     events = audit.get_events(agent_id=agent, limit=limit)
     
     if not events:
-        click.echo("No audit events found.")
+        if not output_json:
+            click.echo("No audit events found.")
         return
         
+    if output_json:
+        import json
+        click.echo(json.dumps(events, indent=2))
+        return
+
     for ev in events:
         decision_color = "green" if ev["decision"] == "pass" else "red"
         click.echo(f"[{ev['timestamp']}] ", nl=False)
@@ -584,9 +596,13 @@ def logs(audit_log: Path, agent: str | None, limit: int) -> None:
 
 @main.command(name="trace")
 @click.argument("trace_id", type=str)
-@click.option("--audit-log", "-a", type=click.Path(exists=True, path_type=Path), default="audit.db")
+@click.option("--audit-log", "-a", type=click.Path(path_type=Path), default="audit.db")
 def trace(trace_id: str, audit_log: Path) -> None:
     """View a detailed execution trace."""
+    if not audit_log.exists():
+        click.echo(f"Audit log not found at {audit_log}")
+        return
+        
     # Assuming trace_id can be mapped to an agent_id or event hash for now.
     # We will search by payload_hash or agent_id for demo.
     audit = AuditLogger(db_path=audit_log)
