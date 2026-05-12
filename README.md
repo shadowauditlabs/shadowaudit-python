@@ -32,7 +32,7 @@ Clone, `pip install -e ".[dev]"`, run `showcase`, and watch ShadowAudit gate a r
 
 ShadowAudit is open-source and free today, with a deterministic local gate, hash-chained audit log, and full taxonomy and reporting stack.
 
-A managed cloud tier (hosted dashboard, fleet telemetry, one-click compliance exports) and an air-gapped enterprise deployment (designed for sovereign banking and regulated workloads with cryptographic evidence kernels) are in development. If you have a specific need, [reach out](mailto:hello@shadowaudit.dev) — early-access conversations are open.
+A managed cloud tier (hosted dashboard, fleet telemetry, one-click compliance exports) and an air-gapped enterprise deployment (designed for sovereign banking and regulated workloads with cryptographic evidence kernels) are in development. If you have a specific need, [reach out](mailto:anshuman1405@outlook.com) — early-access conversations are open.
 
 ## Why ShadowAudit?
 
