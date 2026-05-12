@@ -1,3 +1,5 @@
+> **This is an internal sales asset.** Share with specific prospects who ask "why not Microsoft AGT?" or similar. Not linked from the public README intentionally — naming competitors in public materials is a defensive posture that ages badly. Update this doc as the competitive landscape changes.
+
 # ShadowAudit vs. Microsoft Agent Governance Toolkit (AGT)
 
 This document is an honest, technical comparison for architects and security teams evaluating runtime governance tools for AI agents.
@@ -34,7 +36,7 @@ Choose ShadowAudit if:
 - You need **auditor-defensible evidence**. A hash-chained, Ed25519-signed audit log with payload hashing is not "nice to have" — it is the difference between a conformity assessor accepting your evidence pack and rejecting it. ShadowAudit generates this by default.
 - You operate in **financial services** and need taxonomy depth for Stripe, Plaid, ACH, wire transfers, and account modifications. Generic "payment" categories are insufficient for PCI-DSS scope reduction.
 - You deploy in **air-gapped or regulated environments** where external API calls are prohibited. ShadowAudit is pure Python + SQLite. No cloud. No LLM calls. No API keys.
-- You need **EU AI Act Annex IV compliance** out of the box. The evidence pack generator produces structured JSON and HTML for regulatory submission.
+- You need **regulatory evidence packs** out of the box — EU AI Act Annex IV, NIST AI RMF, or internal governance reviews. The evidence pack generator produces structured JSON and HTML for regulatory submission.
 - You are a **solo founder or SMB** who needs to buy governance tooling without an enterprise sales process.
 
 ShadowAudit is the right tool for depth — specifically, the audit-defensibility and financial-vertical depth that regulated workloads require.

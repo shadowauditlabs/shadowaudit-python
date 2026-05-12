@@ -1,7 +1,7 @@
 # ShadowAudit
 
 <p align="center">
-  <strong>Runtime governance for AI agents — deterministic fail-closed enforcement with auditor-defensible cryptographic audit logs.</strong>
+  <strong>Runtime safety for AI agents — fail-closed gating on every tool call, before execution.</strong>
 </p>
 
 <p align="center">
@@ -13,52 +13,47 @@
 
 ---
 
-ShadowAudit sits between your agent and its tools. It evaluates every call **before execution** and blocks anything that exceeds your risk threshold. Three things differentiate it from horizontal governance toolkits like Microsoft AGT: **(1) auditor-defensible cryptographic audit logs** — every decision is hash-chained and optionally Ed25519-signed, producing evidence conformity assessors accept; **(2) financial-vertical taxonomy depth** — built-in Stripe, Plaid, and fintech-specific risk categories out of the box; **(3) air-gap-first deployment** — single `pip install`, zero external calls, works inside isolated VPCs and on-prem.
+Your AI agent has tools that can do real damage — shell commands, payment APIs, database writes, MCP servers. ShadowAudit sits between the agent and its tools, scores every call against your risk taxonomy, and fail-closed blocks anything dangerous before execution. Deterministic. No LLM in the gate path. Works air-gapped. Hash-chained audit logs for when compliance or regulators ask.
 
 ```
 Agent → ShadowAudit Gate → Tool (allowed)
                          → Blocked (AgentActionBlocked raised)
 ```
 
+## Live integration example
 
-## Deployment Architecture & Roadmap
+For a full production-shaped fintech agent integration — sync + async + multi-agent FlowTracer + LangChain + LangGraph + all 6 taxonomies + OWASP + EU AI Act Annex IV — see:
 
-ShadowAudit is designed to scale from local prototyping to sovereign banking infrastructure. 
+→ [**shadowaudit-showcase**](https://github.com/AnshumanKumar14/shadowaudit-showcase)
 
-* **🟢 ShadowAudit OSS (Available Now):** Local, offline-first deterministic fail-closed execution. Static taxonomy gating and local hash-chaining.
-* **🟡 ShadowAudit Cloud (Private Beta - Join Waitlist):** Upgrades the local sensor with our Cloud Oracle API. Unlocks real-time dynamic drift scoring, fleet-wide telemetry dashboards, and one-click compliance exports. [Sign up for the early access waitlist here](https://forms.gle/jN46ek8iL5EpUjDL8).
-* **⏳ ShadowAudit Enterprise (Planned Q3/Q4):** Built for air-gapped sovereign environments. Features Hardware Security Module (HSM) integrations and Cryptographic Fiduciary Bonding (HMAC-SHA256) to cryptographically guarantee intent before a transaction hits your settlement layer.
+Clone, `pip install -e ".[dev]"`, run `showcase`, and watch ShadowAudit gate a realistic payment agent in under a minute.
+
+## Beyond the OSS
+
+ShadowAudit is open-source and free today, with a deterministic local gate, hash-chained audit log, and full taxonomy and reporting stack.
+
+A managed cloud tier (hosted dashboard, fleet telemetry, one-click compliance exports) and an air-gapped enterprise deployment (designed for sovereign banking and regulated workloads with cryptographic evidence kernels) are in development. If you have a specific need, [reach out](mailto:hello@shadowaudit.dev) — early-access conversations are open.
 
 ## Why ShadowAudit?
 
 | Problem | ShadowAudit's Answer |
 |---|---|
-| Agents execute arbitrary shell commands | Keyword + regex + AST risk scoring with configurable thresholds |
-| No audit trail for agent decisions | **Hash-chained, tamper-evident** SQLite audit log with SHA-256 linkage and optional Ed25519 signing |
-| Can't prove compliance to auditors | Professional HTML reports with SOX/PCI-DSS mappings + **EU AI Act Annex IV evidence pack generator** |
+| Agents execute arbitrary shell commands, payment APIs, and database writes | Keyword + regex + AST risk scoring with configurable thresholds |
 | Agent behavior drifts over time | Adaptive scoring with behavioral state tracking (K/V metrics) |
 | CI/CD deploys unsafe agents | `--fail-on-ungated` flag blocks deployments |
 | Legal team blocks cloud-dependent tools | Works fully offline — zero external calls |
+| No audit trail for agent decisions | **Hash-chained, tamper-evident** SQLite audit log with SHA-256 linkage and optional Ed25519 signing |
+| Can't prove compliance to auditors | Professional HTML reports with SOX/PCI-DSS mappings + **EU AI Act Annex IV evidence pack generator** |
 | EU AI Act Annex IV evidence required | Built-in evidence pack generator (JSON + HTML) |
 
-### vs Microsoft Agent Governance Toolkit (AGT)
+### For AI engineers and SREs
 
-> "AGT is the right horizontal governance toolkit. ShadowAudit is the auditor-defensible, financial-vertical, air-gap-ready layer for regulated workloads. Run both — AGT for breadth, ShadowAudit for the audit evidence your conformity assessor will actually accept."
->
-> See [docs/POSITIONING.md](docs/POSITIONING.md) for a detailed, honest comparison.
+You have agents in production with tools that can do real damage. ShadowAudit gives you a single pip install that adds fail-closed safety to LangChain, CrewAI, LangGraph, OpenAI Agents, and MCP tool calls. Zero LLM calls in the gate path. Sub-millisecond. Works offline.
 
-| Dimension | Microsoft AGT | ShadowAudit |
-|---|---|---|
-| License | MIT | MIT (OSS SDK) |
-| Coverage | All 10 OWASP Agentic risks | 3–5 of 10, focused on **tool-call execution** |
-| Vendor | Microsoft | **Independent** |
-| **Audit log** | Standard logging | **Hash-chained, Ed25519-signed, tamper-evident** |
-| **Vertical taxonomies** | Generic | **Financial / fintech depth** (Stripe, Plaid) |
-| **Air-gap deployment** | Possible but assembly required | **First-class — single pip install** |
-| **EU AI Act evidence pack** | Compliance module exists | **Annex IV evidence-pack generator built-in** |
-| **Solo-buyable for SMBs** | No | **Yes** |
+### For compliance and security leads
 
-*Hosted dashboard and managed cloud tier in development — contact for early access.*
+When regulators or auditors ask how your AI agents make decisions, ShadowAudit's hash-chained, optionally signed audit log produces evidence that survives forensic review. OWASP Agentic Top 10 coverage built in. EU AI Act Annex IV evidence pack generator available.
+
 
 ## Quick Start
 
@@ -66,7 +61,7 @@ ShadowAudit is designed to scale from local prototyping to sovereign banking inf
 pip install shadowaudit
 ```
 
-### CLI — 3 commands to get started
+### CLI — first commands to try
 
 ```bash
 # 1. Scan your codebase for ungated AI agent tools
@@ -235,7 +230,7 @@ Run all examples at once:
 python examples/run_all_examples.py
 ```
 
-For the full example index (14 scripts covering every v0.4.0 feature), see [`docs/FEATURES.md`](docs/FEATURES.md).
+> The 7 examples above are the recommended starting points. The `examples/` directory contains 15 scripts total covering every v0.4.0 feature; see [`docs/FEATURES.md`](docs/FEATURES.md) for the full index.
 
 ## Testing
 
@@ -249,7 +244,7 @@ For the full testing guide, see [`docs/TESTING_GUIDE.md`](docs/TESTING_GUIDE.md)
 
 ## Project Status
 
-ShadowAudit is **v0.4.0 — production-ready for audit-time scanning and assessment workflows; runtime gating is in early-adopter use.** APIs may evolve before v1.0.0; breaking changes require a major version bump and migration guide.
+ShadowAudit is **v0.4.0 — production-ready for runtime gating and audit-time scanning workflows.** APIs may evolve before v1.0.0; breaking changes require a major version bump and a migration guide.
 
 - ✅ Core gate + 5 framework adapters (LangChain, CrewAI, LangGraph, OpenAI Agents, MCP)
 - ✅ Hash-chained, Ed25519-signed audit log with integrity verification
