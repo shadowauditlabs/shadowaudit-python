@@ -4,7 +4,7 @@ Runs 100% offline. Rule-based gating with SQLite state tracking.
 Useful for CI/CD checks, local development, and offline environments.
 """
 
-from shadowaudit import Gate, TaxonomyLoader
+from shadowaudit import Gate
 
 
 def main():

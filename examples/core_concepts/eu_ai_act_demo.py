@@ -36,7 +36,7 @@ def main():
 
     # Print cybersecurity section
     cs = pack.cybersecurity
-    print(f"\nCybersecurity:")
+    print("\nCybersecurity:")
     print(f"  OWASP coverage: {cs.get('owasp_agentic_coverage', 'N/A')}")
     print(f"  Covered risks:  {cs.get('covered_risks', 0)}")
     print(f"  Full coverage:  {cs.get('full_coverage', 0)}")
@@ -44,9 +44,9 @@ def main():
     # Write outputs
     pack.write_json(Path("eu-ai-act-evidence.json"))
     pack.write_html(Path("eu-ai-act-evidence.html"))
-    print(f"\nEvidence pack written to:")
-    print(f"  JSON: eu-ai-act-evidence.json")
-    print(f"  HTML: eu-ai-act-evidence.html")
+    print("\nEvidence pack written to:")
+    print("  JSON: eu-ai-act-evidence.json")
+    print("  HTML: eu-ai-act-evidence.html")
 
 
 if __name__ == "__main__":

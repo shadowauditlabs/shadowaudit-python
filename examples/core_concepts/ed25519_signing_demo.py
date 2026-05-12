@@ -11,7 +11,7 @@ from shadowaudit.core.keys import generate_keypair, load_keypair, verify_entry
 def main():
     # Generate a new keypair (stored in ~/.shadowaudit/keys/)
     pub_b64, priv_b64 = generate_keypair()
-    print(f"Generated Ed25519 keypair")
+    print("Generated Ed25519 keypair")
     print(f"  Public key:  {pub_b64[:20]}...")
     print(f"  Private key: {priv_b64[:20]}...")
 
@@ -32,7 +32,7 @@ def main():
     rows = audit.get_events_chronological(limit=1)
     if rows:
         entry = rows[0]
-        print(f"\nAudit entry:")
+        print("\nAudit entry:")
         print(f"  ID:        {entry['id']}")
         print(f"  Decision:  {entry['decision']}")
         print(f"  Signature: {entry['signature'][:40]}..." if entry.get('signature') else "  Signature: None")

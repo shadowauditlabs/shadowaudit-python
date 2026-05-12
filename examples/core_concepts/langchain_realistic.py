@@ -87,11 +87,11 @@ safe_delete = ShadowAuditTool(
 
 def main():
     print("Realistic LangChain agent with 5 tools:")
-    print(f"  - ShellTool (gated)")
-    print(f"  - PaymentTool (UNGATED)")
-    print(f"  - ReadBalanceTool (gated)")
-    print(f"  - DeleteAccountTool (gated)")
-    print(f"  - SendEmailTool (UNGATED)")
+    print("  - ShellTool (gated)")
+    print("  - PaymentTool (UNGATED)")
+    print("  - ReadBalanceTool (gated)")
+    print("  - DeleteAccountTool (gated)")
+    print("  - SendEmailTool (UNGATED)")
 
 
 if __name__ == "__main__":
