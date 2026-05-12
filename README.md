@@ -42,7 +42,35 @@ Agent → ShadowAudit Gate → Tool Execution
 
 ---
 
-# Dangerous Tool Execution Blocked
+# Quickstart
+
+```bash
+pip install shadowaudit
+```
+
+```python
+from shadowaudit import ShadowAuditTool
+from langchain.tools import ShellTool
+
+safe_tool = ShadowAuditTool(
+    tool=ShellTool(),
+    agent_id="ops-agent",
+    capability="shell.execute",
+    policy_path="policies/production_shell_policy.yaml"
+)
+```
+
+Supported integrations:
+- LangChain
+- LangGraph
+- CrewAI
+- OpenAI Agents SDK
+- MCP
+- Direct Python APIs
+
+---
+
+# Under the Hood (Direct API)
 
 ```python
 from shadowaudit.core.gate import Gate
@@ -77,33 +105,6 @@ Reason: destructive_command_detected
 
 ---
 
-# Quickstart
-
-```bash
-pip install shadowaudit
-```
-
-```python
-from shadowaudit import ShadowAuditTool
-from langchain.tools import ShellTool
-
-safe_tool = ShadowAuditTool(
-    tool=ShellTool(),
-    agent_id="ops-agent",
-    capability="shell.execute"
-)
-```
-
-Supported integrations:
-- LangChain
-- LangGraph
-- CrewAI
-- OpenAI Agents SDK
-- MCP
-- Direct Python APIs
-
----
-
 # Policy-as-Code
 
 ```yaml
@@ -125,6 +126,8 @@ Policies support:
 - escalation workflows
 - environment-specific rules
 - replay + simulation testing
+
+> **Note:** ShadowAudit automatically extracts numeric fields (like `amount`, `total`, `value`) from unstructured tool arguments to evaluate dynamic conditions like `amount_gt`.
 
 ---
 
@@ -270,6 +273,8 @@ This enables governance across:
 - MCP ecosystems
 - chained execution graphs
 
+*Note: FlowTracer is an observability primitive designed to integrate with upcoming dynamic risk threshold plugins.*
+
 ---
 
 # MCP Governance
@@ -299,7 +304,7 @@ shadowaudit check ./src --fail-on-ungated
 ```
 
 ```bash
-shadowaudit simulate session.json   --policy alternative.yaml   --compare
+shadowaudit simulate session.json --policy alternative.yaml --compare
 ```
 
 This enables:
