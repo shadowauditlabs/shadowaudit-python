@@ -40,29 +40,7 @@ Agent → ShadowAudit Gate → Tool Execution
 - MCP governance support
 - Tamper-evident SHA-256 + Ed25519 audit chain
 
----
 
-# Why ShadowAudit Exists
-
-Agents now execute real-world tools:
-- shell commands
-- payment APIs
-- SQL queries
-- infrastructure workflows
-- MCP-connected services
-
-Prompt guardrails alone are insufficient because LLM behavior is fundamentally probabilistic under:
-- prompt injection
-- context overflow
-- tool confusion
-- long reasoning chains
-- multi-agent interactions
-
-Production agents require deterministic execution boundaries.
-
-ShadowAudit provides runtime authorization and governance infrastructure for AI agents the same way IAM systems provide authorization for APIs and cloud infrastructure.
-
----
 
 # Dangerous Tool Execution Blocked
 
@@ -74,6 +52,7 @@ gate = Gate(policy_path="policies/production_shell_policy.yaml")
 result = gate.evaluate(
     agent_id="ops-agent-1",
     task_context="shell",
+    risk_category="shell_execution",
     capability="shell.execute",
     payload={
         "command": "rm -rf /var/lib/postgresql"
@@ -388,7 +367,7 @@ See `examples/` for runnable demos including:
 - replay + simulation workflows
 
 ```bash
-python examples/run_all_examples.py
+python examples/core_concepts/run_all_examples.py
 ```
 
 ---

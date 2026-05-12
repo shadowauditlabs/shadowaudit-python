@@ -3,7 +3,7 @@
 MIT licensed. Works offline. Rule-based gating with pluggable scoring.
 """
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 from shadowaudit.core.gate import Gate
 from shadowaudit.types import GateResult
@@ -31,6 +31,7 @@ from shadowaudit.assessment.simulator import TraceSimulator
 from shadowaudit.assessment.builder import TaxonomyBuilder
 from shadowaudit.assessment.owasp import get_coverage_matrix, get_coverage_summary, generate_owasp_context
 from shadowaudit.assessment.eu_ai_act import generate_evidence_pack, EvidencePack
+from shadowaudit.framework.langchain import ShadowAuditTool
 from shadowaudit.framework.crewai import ShadowAuditCrewAITool
 from shadowaudit.framework.langgraph import ShadowAuditToolNode
 from shadowaudit.framework.openai_agents import ShadowAuditOpenAITool
@@ -85,6 +86,7 @@ __all__ = [
     "generate_owasp_context",
     "generate_evidence_pack",
     "EvidencePack",
+    "ShadowAuditTool",
     "ShadowAuditCrewAITool",
     "ShadowAuditToolNode",
     "ShadowAuditOpenAITool",
