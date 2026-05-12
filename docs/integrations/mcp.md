@@ -1,0 +1,85 @@
+# MCP Integration
+
+ShadowAudit provides a transparent stdio-proxying gateway for any MCP server. It evaluates every `tools/call` request against your policy before forwarding it to the upstream server.
+
+## How it works
+
+The gateway intercepts JSON-RPC messages on stdin, extracts `params.arguments` from `tools/call` requests, evaluates them against the gate, and either forwards the message or returns a standardized `−32000` error to the client. The upstream MCP server never receives blocked calls.
+
+## Setup
+
+```python
+from shadowaudit.mcp.gateway import MCPGatewayServer
+from shadowaudit.core.gate import Gate
+
+gateway = MCPGatewayServer(
+    upstream_command=["python", "-m", "mcp_server_filesystem", "/data"],
+    gate=Gate(),
+    policy_path="policies/mcp.yaml",
+    agent_id="mcp-agent"
+)
+
+gateway.run()
+```
+
+## Client configuration
+
+Run the gateway as the process your MCP client connects to. If you need a CLI wrapper for a specific desktop client, create a small Python entrypoint that constructs `MCPGatewayServer` with your upstream command and policy path.
+
+```python
+from shadowaudit.mcp.gateway import MCPGatewayServer
+
+MCPGatewayServer(
+    upstream_command=["python", "-m", "mcp_server_filesystem", "/data"],
+    policy_path="policies/mcp.yaml",
+    agent_id="desktop-agent",
+).run()
+```
+
+## Policy for MCP
+
+```yaml
+# policies/mcp.yaml
+
+deny:
+  - capability: filesystem.delete
+  - capability: shell.execute
+
+require_approval:
+  - capability: filesystem.write
+    path_prefix: "/data/prod"
+
+allow:
+  - capability: filesystem.read
+  - capability: filesystem.list
+  - capability: filesystem.write
+    path_prefix: "/data/staging"
+```
+
+## Blocked call response
+
+When a call is blocked, the client receives a JSON-RPC error:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32000,
+    "message": "AgentActionBlocked: capability=filesystem.delete decision=denied reason=destructive_operation"
+  }
+}
+```
+
+## Audit trail
+
+All MCP tool calls are logged with the full JSON-RPC payload hash:
+
+```bash
+shadowaudit logs --agent mcp-agent
+```
+
+## Related guides
+
+- [Secure MCP servers](../guides/secure-mcp-servers.md)
+- [MCP governance example](../examples/mcp-governance.md)

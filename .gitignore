@@ -7,6 +7,9 @@
 !CODE_OF_CONDUCT.md
 !SECURITY.md
 !docs/*.md
+!docs/**/*.md
+!docs-dev/*.md
+!docs-dev/**/*.md
 
 # Internal review artifacts (do not commit)
 docs/CODE_REVIEW_*.md
