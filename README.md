@@ -23,6 +23,10 @@ Agent -> ShadowAudit -> Tool
           +-- require approval
 ```
 
+<p align="center">
+  <img src="docs/assets/demo.gif" alt="ShadowAudit terminal demo" width="720">
+</p>
+
 ## Why This Exists
 
 Agents increasingly call tools that can move money, edit databases, run shell commands, read files, modify permissions, and operate SaaS admin APIs.
