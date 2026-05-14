@@ -26,6 +26,8 @@ nav:
   - Examples:
     - Approval workflows: examples/approval-workflows.md
     - Database write gating: examples/database-write-gating.md
+    - Demo cast: examples/demo-cast.md
+    - Demo walkthrough: examples/demo-walkthrough.md
     - Fintech agent: examples/fintech-agent.md
     - MCP governance: examples/mcp-governance.md
     - Replay demo: examples/replay-demo.md
@@ -38,12 +40,23 @@ nav:
     - Require human approval: guides/require-human-approval.md
     - Replay an incident: guides/replay-an-incident.md
     - Secure MCP servers: guides/secure-mcp-servers.md
+  - Recipes:
+    - Overview: recipes/index.md
+    - Protect shell tools: recipes/shell-tools.md
+    - Protect production DB writes: recipes/production-db-writes.md
+    - Protect payments with thresholds: recipes/payments-thresholds.md
+    - Secure MCP filesystem access: recipes/mcp-filesystem-allowlist.md
+    - Require SaaS admin approval: recipes/saas-admin-approval.md
   - Integrations:
+    - Compatibility matrix: integrations/compatibility.md
+    - AutoGen: integrations/autogen.md
     - Crewai: integrations/crewai.md
     - Langchain: integrations/langchain.md
     - LangGraph: integrations/langgraph.md
+    - LlamaIndex: integrations/llamaindex.md
     - MCP: integrations/mcp.md
     - OpenAI Agents SDK: integrations/openai-agents-sdk.md
+    - PydanticAI: integrations/pydanticai.md
     - Custom frameworks: integrations/custom-frameworks.md
   - Reference:
     - CLI: reference/cli.md

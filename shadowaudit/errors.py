@@ -36,6 +36,10 @@ class ConfigurationError(ShadowAuditError, ValueError):
     """
 
 
+class PolicyLoadError(ConfigurationError):
+    """Raised when a policy file cannot be loaded or validated."""
+
+
 class AgentActionBlocked(ShadowAuditError):
     """Raised when the gate blocks an agent tool call.
 

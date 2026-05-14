@@ -113,3 +113,21 @@ class TestGateEvaluate:
         valid, errors = audit.verify()
         assert valid is True
         assert errors == []
+
+    def test_audit_failure_fails_closed(self):
+        """Audit write failures block otherwise allowed enforce-mode decisions."""
+        class BrokenAuditLogger:
+            def record(self, *args, **kwargs):
+                raise RuntimeError("disk full")
+
+        gate = Gate(audit_logger=BrokenAuditLogger())
+        result = gate.evaluate(
+            agent_id="audit-fail",
+            task_context="read",
+            risk_category="read_only",
+            payload={"action": "view"},
+        )
+
+        assert result.passed is False
+        assert result.reason == "audit_failure_RuntimeError"
+        assert result.metadata["audit_error"] == "RuntimeError"

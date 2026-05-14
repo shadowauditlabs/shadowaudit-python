@@ -6,7 +6,7 @@
 
 | Tier | Response Time | Channel | Hours |
 |---|---|---|---|
-| **OSS (Free)** | Best-effort | [GitHub Issues](https://github.com/AnshumanKumar14/shadowaudit-python/issues) | When available |
+| **OSS (Free)** | Best-effort | [GitHub Issues](https://github.com/shadowauditlabs/shadowaudit-python/issues) | When available |
 | **Cloud Starter ($99/mo)** | 2 business days | Email | Monday–Friday, 9am–6pm IST |
 | **Cloud Team (Future)** | 1 business day | Email + Intercom | Monday–Friday, 9am–6pm IST |
 | **Enterprise ($25K/yr)** | 4 business hours | Email + dedicated Slack channel | Monday–Friday, 9am–6pm IST. 24h response on weekends/holidays. |
@@ -39,7 +39,7 @@
 
 ## Contact
 
-- **OSS:** Open an issue on [GitHub](https://github.com/AnshumanKumar14/shadowaudit-python/issues)
+- **OSS:** Open an issue on [GitHub](https://github.com/shadowauditlabs/shadowaudit-python/issues)
 - **Cloud/Enterprise:** Email support@shadowaudit.dev
 
 ---

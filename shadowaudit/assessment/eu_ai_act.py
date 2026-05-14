@@ -132,7 +132,7 @@ def generate_evidence_pack(
                 "FailClosedFSM (deterministic state machine)",
             ],
             "version": system_version,
-            "source": "https://github.com/AnshumanKumar14/shadowaudit-python",
+            "source": "https://github.com/shadowauditlabs/shadowaudit-python",
         },
         record_keeping={
             "description": "Automatic recording of events for traceability.",

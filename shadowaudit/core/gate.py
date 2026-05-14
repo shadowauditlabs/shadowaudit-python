@@ -189,9 +189,11 @@ class Gate:
         # Policy & Approval Evaluation
         # --------------------------------------------------
         policy_action = None
+        policy_loaded = False
         if policy_path:
             try:
                 policy = self._policy_loader.load(policy_path)
+                policy_loaded = True
                 p_context = policy_context or {}
                 if capability:
                     policy_action = policy.evaluate(capability, p_context, payload)
@@ -208,8 +210,13 @@ class Gate:
                     else:
                         rl = "low"
                     policy_action = policy.evaluate_risk_level(rl)
+                if policy_action is None:
+                    raw_passed = False
+                    reason = "policy_default_deny"
             except Exception as e:
                 logger.warning("Policy evaluation failed: %s", e)
+                raw_passed = False
+                reason = "policy_error_" + type(e).__name__
 
         requires_approval_flag = require_human_approval or policy_action == "require_approval"
 
@@ -238,6 +245,11 @@ class Gate:
                 bypass_reason = None
                 reason = f"approval_required: {req.id}"
 
+        if policy_loaded and policy_action is None:
+            raw_passed = False
+            if bypass_reason is None:
+                reason = "policy_default_deny"
+
         if policy_action == "deny" or policy_action == "block":
             raw_passed = False
             if bypass_reason is None:
@@ -258,7 +270,14 @@ class Gate:
                 reason = "observed"
         else:
             passed = raw_passed
-            if "reason" not in locals() or (reason != "policy_allow" and reason != "policy_deny" and not reason.startswith("approval_required")):
+            if (
+                "reason" not in locals()
+                or (
+                    reason not in ("policy_allow", "policy_deny", "policy_default_deny")
+                    and not reason.startswith("approval_required")
+                    and not reason.startswith("policy_error_")
+                )
+            ):
                 reason = "pass" if passed else "drift_detected"
 
         payload_hash = compute_payload_hash(payload)
@@ -307,12 +326,13 @@ class Gate:
             # Audit failure is a tamper signal — do not silently swallow
             logger.warning("Audit log failure for agent_id=%s: %s", agent_id, type(e).__name__)
             # Decision already recorded to state store (step 6); escalate through FSM
+            audit_failure_blocks = self._mode == GATE_MODE_ENFORCE
             result = GateResult(
-                passed=result.passed,
+                passed=False if audit_failure_blocks else result.passed,
                 risk_score=result.risk_score,
                 threshold=result.threshold,
                 risk_category=result.risk_category,
-                reason="audit_failure_" + type(e).__name__ if result.passed else result.reason,
+                reason="audit_failure_" + type(e).__name__ if audit_failure_blocks or result.passed else result.reason,
                 latency_ms=result.latency_ms,
                 metadata={**result.metadata, "audit_error": type(e).__name__},
             )

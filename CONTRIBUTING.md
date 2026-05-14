@@ -14,7 +14,7 @@ This document outlines the engineering standards and workflows for contributing 
 ## Development Setup
 
 ```bash
-git clone https://github.com/AnshumanKumar14/shadowaudit-python.git
+git clone https://github.com/shadowauditlabs/shadowaudit-python.git
 cd shadowaudit-python
 pip install -e ".[dev,langchain]"
 ```

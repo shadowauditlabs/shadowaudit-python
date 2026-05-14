@@ -38,9 +38,10 @@ from shadowaudit.assessment.owasp import generate_owasp_context
 from shadowaudit.assessment.eu_ai_act import generate_evidence_pack
 from shadowaudit.core.audit import AuditLogger
 from shadowaudit.core.approvals import ApprovalManager
+from shadowaudit.core.policy import PolicyLoader
 
 
-__version__ = "0.6.0"
+__version__ = "0.6.2"
 
 
 @click.group()
@@ -325,6 +326,22 @@ def build_taxonomy(output: Path | None) -> None:
     path = output or Path(f"custom_taxonomy_{taxonomy['domain']}.json")
     builder.save(taxonomy, path)
     click.echo(f"\nTaxonomy saved to: {path}")
+
+
+@main.command(name="check-policy")
+@click.argument("policy_file", type=click.Path(exists=True, path_type=Path))
+def check_policy(policy_file: Path) -> None:
+    """Validate a ShadowAudit YAML policy file."""
+    try:
+        policy = PolicyLoader().load(policy_file)
+    except Exception as exc:
+        click.echo(f"[POLICY] INVALID: {policy_file}", err=True)
+        click.echo(f"  {type(exc).__name__}: {exc}", err=True)
+        sys.exit(2)
+
+    click.echo(f"[POLICY] VALID: {policy_file}")
+    click.echo(f"  Rules: {len(policy.rules)}")
+    click.echo(f"  Risk levels: {len(policy.risk_levels)}")
 
 
 @main.command(name="verify")
@@ -636,5 +653,3 @@ def replay(trace_file: Path) -> None:
 
 if __name__ == "__main__":
     main()
-
-

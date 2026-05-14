@@ -3,7 +3,7 @@
 MIT licensed. Works offline. Rule-based gating with pluggable scoring.
 """
 
-__version__ = "0.6.0"
+__version__ = "0.6.2"
 
 from shadowaudit.core.gate import Gate
 from shadowaudit.types import GateResult
@@ -11,6 +11,7 @@ from shadowaudit.errors import (
     ShadowAuditError,
     AgentActionBlocked,
     ConfigurationError,
+    PolicyLoadError,
     AuditError,
     TaxonomyError,
     GatewayError,
@@ -35,6 +36,9 @@ from shadowaudit.framework.langchain import ShadowAuditTool
 from shadowaudit.framework.crewai import ShadowAuditCrewAITool
 from shadowaudit.framework.langgraph import ShadowAuditToolNode
 from shadowaudit.framework.openai_agents import ShadowAuditOpenAITool
+from shadowaudit.framework.pydanticai import ShadowAuditPydanticTool
+from shadowaudit.framework.llamaindex import ShadowAuditLlamaIndexTool
+from shadowaudit.framework.autogen import ShadowAuditAutoGenTool
 from shadowaudit.mcp.gateway import MCPGatewayServer
 from shadowaudit.mcp.adapter import ShadowAuditMCPSession
 from shadowaudit.telemetry.client import TelemetryClient
@@ -48,6 +52,7 @@ __all__ = [
     "ShadowAuditError",
     "AgentActionBlocked",
     "ConfigurationError",
+    "PolicyLoadError",
     "AuditError",
     "TaxonomyError",
     "GatewayError",
@@ -90,6 +95,9 @@ __all__ = [
     "ShadowAuditCrewAITool",
     "ShadowAuditToolNode",
     "ShadowAuditOpenAITool",
+    "ShadowAuditPydanticTool",
+    "ShadowAuditLlamaIndexTool",
+    "ShadowAuditAutoGenTool",
     "MCPGatewayServer",
     "ShadowAuditMCPSession",
     "TelemetryClient",
@@ -99,4 +107,3 @@ __all__ = [
     "GATE_MODE_ENFORCE",
     "GATE_MODE_OBSERVE",
 ]
-

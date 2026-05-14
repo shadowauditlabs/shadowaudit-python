@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-05-15
+
+### Added
+- `shadowaudit check-policy` command for validating YAML policy files.
+- Policy support for `contains`, `amount_gte`, `amount_lt`, `amount_lte`, `path_prefix`, caller-depth comparisons, and legacy `rules` starter-policy schemas.
+- Demo walkthrough, demo cast, and demo script covering scan, assess, gate enforcement, simulate, and verify workflows.
+- Recipes section with copy-paste policy patterns and integrations for PydanticAI, LlamaIndex, and AutoGen.
+- Compatibility matrix for supported framework adapters.
+
+### Changed
+- README and docs homepage now position ShadowAudit around deterministic runtime authorization, rollout, limitations, and proof-oriented workflows.
+- Repository URLs now point to the `shadowauditlabs/shadowaudit-python` namespace.
+- Local package metadata now matches the PyPI `0.6.2` release line.
+
+### Fixed
+- Policy load and validation failures now fail closed during gate evaluation.
+- Audit write failures now fail closed in enforce mode.
+- Policy schema documentation now matches implemented behavior.
+
 ## [0.5.0] - 2026-05-11
 
 ### Added
@@ -132,9 +151,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Three starter taxonomies: general, financial, legal.
 - Cloud client hook (legacy, not used in OSS path).
 
-[Unreleased]: https://github.com/AnshumanKumar14/shadowaudit-python/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/AnshumanKumar14/shadowaudit-python/compare/v0.3.3...v0.4.0
-[0.3.3]: https://github.com/AnshumanKumar14/shadowaudit-python/compare/v0.3.2...v0.3.3
-[0.3.2]: https://github.com/AnshumanKumar14/shadowaudit-python/compare/v0.3.1...v0.3.2
-[0.3.1]: https://github.com/AnshumanKumar14/shadowaudit-python/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/AnshumanKumar14/shadowaudit-python/releases/tag/v0.3.0
+[Unreleased]: https://github.com/shadowauditlabs/shadowaudit-python/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/shadowauditlabs/shadowaudit-python/compare/v0.5.0...v0.6.2
+[0.4.0]: https://github.com/shadowauditlabs/shadowaudit-python/compare/v0.3.3...v0.4.0
+[0.3.3]: https://github.com/shadowauditlabs/shadowaudit-python/compare/v0.3.2...v0.3.3
+[0.3.2]: https://github.com/shadowauditlabs/shadowaudit-python/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/shadowauditlabs/shadowaudit-python/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/shadowauditlabs/shadowaudit-python/releases/tag/v0.3.0

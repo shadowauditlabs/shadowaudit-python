@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "shadowaudit"
-version = "0.6.0"
+version = "0.6.2"
 description = "Runtime governance for AI agents — deterministic fail-closed enforcement. Wraps any agent tool and blocks dangerous calls before execution. Zero LLM calls, zero cloud dependencies, works offline."
 readme = "README.md"
 license = { text = "MIT" }
@@ -63,9 +63,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/AnshumanKumar14/shadowaudit-python"
-Repository = "https://github.com/AnshumanKumar14/shadowaudit-python"
-Issues = "https://github.com/AnshumanKumar14/shadowaudit-python/issues"
+Homepage = "https://shadowaudit.dev/"
+Repository = "https://github.com/shadowauditlabs/shadowaudit-python"
+Issues = "https://github.com/shadowauditlabs/shadowaudit-python/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

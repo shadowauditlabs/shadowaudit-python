@@ -80,3 +80,5 @@ archive/
 .DS_Store
 Thumbs.db
 site/
+shadowaudit-demo/shadowaudit-assessment-report.html
+shadowaudit-demo/audit.db
