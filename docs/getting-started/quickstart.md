@@ -1,11 +1,11 @@
 # Quickstart
 
-ShadowAudit sits between your AI agent and its tools. It evaluates every tool call against a policy before execution happens.
+CapFence sits between your AI agent and its tools. It evaluates every tool call against a policy before execution happens.
 
 ## 1. Install
 
 ```bash
-pip install shadowaudit
+pip install capfence
 ```
 
 ## 2. Write a policy
@@ -31,10 +31,10 @@ allow:
 ### LangChain
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from langchain.tools import ShellTool
 
-safe_shell = ShadowAuditTool(
+safe_shell = CapFenceTool(
     tool=ShellTool(),
     agent_id="my-agent",
     capability="shell.execute",
@@ -45,7 +45,7 @@ safe_shell = ShadowAuditTool(
 ### Direct Gate API
 
 ```python
-from shadowaudit.core.gate import Gate
+from capfence.core.gate import Gate
 
 gate = Gate()
 
@@ -67,7 +67,7 @@ else:
 
 ## 4. Run your agent
 
-Your agent runs normally. ShadowAudit intercepts each tool call:
+Your agent runs normally. CapFence intercepts each tool call:
 
 - **Allowed** calls pass through to the tool.
 - **Denied** calls raise `AgentActionBlocked` before the tool runs.
@@ -78,13 +78,13 @@ Every decision is recorded in the local audit log at `./audit.db`.
 ## 5. Check the audit log
 
 ```bash
-shadowaudit logs
+capfence logs
 ```
 
 ## 6. Verify log integrity
 
 ```bash
-shadowaudit verify --audit-log ./audit.db
+capfence verify --audit-log ./audit.db
 ```
 
 ## Next steps

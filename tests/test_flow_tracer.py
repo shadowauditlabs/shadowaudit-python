@@ -1,5 +1,5 @@
 """Tests for multi-agent FlowTracer and trust propagation."""
-from shadowaudit.flow.tracer import FlowTracer, TrustLevel
+from capfence.flow.tracer import FlowTracer, TrustLevel
 
 
 def test_trust_levels_ordered():

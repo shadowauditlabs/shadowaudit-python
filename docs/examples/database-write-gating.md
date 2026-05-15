@@ -26,16 +26,16 @@ allow:
 ## Wrapped tools
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 
-safe_query = ShadowAuditTool(
+safe_query = CapFenceTool(
     tool=ReadOnlyQueryTool(),
     agent_id="analytics-agent",
     capability="database.read",
     policy_path="policies/database_agent.yaml",
 )
 
-safe_write = ShadowAuditTool(
+safe_write = CapFenceTool(
     tool=DatabaseWriteTool(),
     agent_id="analytics-agent",
     capability="database.write",
@@ -58,5 +58,5 @@ DROP TABLE invoices
 
 ## Why this matters
 
-Database tools are often exposed to agents as general-purpose query interfaces. ShadowAudit makes the execution boundary explicit: reads can be allowed, writes can require approval, and destructive actions can be denied deterministically.
+Database tools are often exposed to agents as general-purpose query interfaces. CapFence makes the execution boundary explicit: reads can be allowed, writes can require approval, and destructive actions can be denied deterministically.
 

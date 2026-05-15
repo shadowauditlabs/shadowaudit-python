@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from shadowaudit.core.gate import Gate
-from shadowaudit.core.fsm import FailClosedFSM
-from shadowaudit.types import GateResult
-from shadowaudit.mcp.gateway import MCPGatewayServer
-from shadowaudit.mcp.adapter import ShadowAuditMCPSession, AgentActionBlocked
+from capfence.core.gate import Gate
+from capfence.core.fsm import FailClosedFSM
+from capfence.types import GateResult
+from capfence.mcp.gateway import MCPGatewayServer
+from capfence.mcp.adapter import CapFenceMCPSession, AgentActionBlocked
 
 
 class TestMCPGatewayServer:
@@ -76,7 +76,7 @@ class TestMCPGatewayServer:
         assert response["jsonrpc"] == "2.0"
         assert response["id"] == 1
         assert response["error"]["code"] == -32000
-        assert "ShadowAudit" in response["error"]["message"]
+        assert "CapFence" in response["error"]["message"]
         assert response["error"]["data"]["risk_score"] == 0.8
 
     def test_guess_category_shell(self):
@@ -111,11 +111,11 @@ class TestMCPGatewayServer:
         assert MCPGatewayServer._guess_category("xyz") is None
 
 
-class TestShadowAuditMCPSession:
-    """Tests for ShadowAuditMCPSession."""
+class TestCapFenceMCPSession:
+    """Tests for CapFenceMCPSession."""
 
     def test_init_defaults(self):
-        session = ShadowAuditMCPSession(underlying_session=None)
+        session = CapFenceMCPSession(underlying_session=None)
         assert session._agent_id == "mcp-agent"
         assert session._default_risk_category is None
         assert isinstance(session._gate, Gate)
@@ -123,7 +123,7 @@ class TestShadowAuditMCPSession:
 
     def test_init_custom(self):
         gate = Gate()
-        session = ShadowAuditMCPSession(
+        session = CapFenceMCPSession(
             underlying_session=None,
             gate=gate,
             agent_id="custom-agent",
@@ -134,27 +134,27 @@ class TestShadowAuditMCPSession:
         assert session._gate is gate
 
     def test_guess_category_shell(self):
-        assert ShadowAuditMCPSession._guess_category("shell") == "command_execution"
-        assert ShadowAuditMCPSession._guess_category("exec_tool") == "command_execution"
+        assert CapFenceMCPSession._guess_category("shell") == "command_execution"
+        assert CapFenceMCPSession._guess_category("exec_tool") == "command_execution"
 
     def test_guess_category_payment(self):
-        assert ShadowAuditMCPSession._guess_category("pay") == "payment_initiation"
-        assert ShadowAuditMCPSession._guess_category("transfer_funds") == "payment_initiation"
+        assert CapFenceMCPSession._guess_category("pay") == "payment_initiation"
+        assert CapFenceMCPSession._guess_category("transfer_funds") == "payment_initiation"
 
     def test_guess_category_delete(self):
-        assert ShadowAuditMCPSession._guess_category("delete") == "delete"
-        assert ShadowAuditMCPSession._guess_category("remove") == "delete"
+        assert CapFenceMCPSession._guess_category("delete") == "delete"
+        assert CapFenceMCPSession._guess_category("remove") == "delete"
 
     def test_guess_category_write(self):
-        assert ShadowAuditMCPSession._guess_category("write") == "write"
-        assert ShadowAuditMCPSession._guess_category("update") == "write"
+        assert CapFenceMCPSession._guess_category("write") == "write"
+        assert CapFenceMCPSession._guess_category("update") == "write"
 
     def test_guess_category_read(self):
-        assert ShadowAuditMCPSession._guess_category("read") == "read_only"
-        assert ShadowAuditMCPSession._guess_category("get") == "read_only"
+        assert CapFenceMCPSession._guess_category("read") == "read_only"
+        assert CapFenceMCPSession._guess_category("get") == "read_only"
 
     def test_guess_category_unknown(self):
-        assert ShadowAuditMCPSession._guess_category("unknown") is None
+        assert CapFenceMCPSession._guess_category("unknown") is None
 
     def test_agent_action_blocked_exception(self):
         result = GateResult(passed=False, reason="test")

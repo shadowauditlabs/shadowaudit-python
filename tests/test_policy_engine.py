@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from click.testing import CliRunner
 
-from shadowaudit.cli import main
-from shadowaudit.core.gate import Gate
-from shadowaudit.core.policy import PolicyLoader
+from capfence.cli import main
+from capfence.core.gate import Gate
+from capfence.core.policy import PolicyLoader
 
 
 def test_policy_conditions_contains_amount_lte_and_path_prefix(tmp_path):

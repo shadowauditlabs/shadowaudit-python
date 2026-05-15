@@ -1,6 +1,6 @@
 # Human Approval Workflows
 
-ShadowAudit supports approval-based runtime governance. You can define policies that require a human-in-the-loop for high-risk actions.
+CapFence supports approval-based runtime governance. You can define policies that require a human-in-the-loop for high-risk actions.
 
 ## Features
 - **Approval Queues**: Pending actions wait for authorization.
@@ -27,11 +27,11 @@ require_approval:
 
 ```bash
 # View pending approvals
-shadowaudit pending-approvals
+capfence pending-approvals
 
 # Approve a request
-shadowaudit approve <request_id>
+capfence approve <request_id>
 
 # Reject a request
-shadowaudit reject <request_id>
+capfence reject <request_id>
 ```

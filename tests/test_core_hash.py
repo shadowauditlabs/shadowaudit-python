@@ -1,6 +1,6 @@
 """Tests for deterministic payload hashing."""
 
-from shadowaudit.core.hash import compute_payload_hash
+from capfence.core.hash import compute_payload_hash
 
 
 class TestPayloadHash:

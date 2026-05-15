@@ -3,9 +3,9 @@
 Demonstrates tamper-evident audit logging with SHA-256 chain linkage.
 """
 
-from shadowaudit.core.gate import Gate
-from shadowaudit.core.audit import AuditLogger
-from shadowaudit.core.chain import verify_chain_from_rows
+from capfence.core.gate import Gate
+from capfence.core.audit import AuditLogger
+from capfence.core.chain import verify_chain_from_rows
 
 
 def main():

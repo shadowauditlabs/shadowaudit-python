@@ -1,22 +1,22 @@
 # PydanticAI Integration
 
-ShadowAudit wraps PydanticAI tools or callables with a deterministic gate check before execution.
+CapFence wraps PydanticAI tools or callables with a deterministic gate check before execution.
 
 ## Installation
 
 ```bash
-pip install shadowaudit
+pip install capfence
 ```
 
 ## Wrapping a tool
 
 ```python
-from shadowaudit.framework.pydanticai import ShadowAuditPydanticTool
+from capfence.framework.pydanticai import CapFencePydanticTool
 
 async def fetch_account(account_id: str) -> dict:
     return {"account_id": account_id, "status": "active"}
 
-safe_fetch = ShadowAuditPydanticTool(
+safe_fetch = CapFencePydanticTool(
     tool=fetch_account,
     agent_id="pydantic-agent",
     capability="account.read",

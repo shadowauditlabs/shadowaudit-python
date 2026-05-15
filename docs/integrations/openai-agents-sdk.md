@@ -1,17 +1,17 @@
 # OpenAI Agents SDK Integration
 
-ShadowAudit gates function tools defined with the OpenAI Agents SDK by wrapping them before they are registered with an agent.
+CapFence gates function tools defined with the OpenAI Agents SDK by wrapping them before they are registered with an agent.
 
 ## Installation
 
 ```bash
-pip install "shadowaudit[openai-agents]"
+pip install "capfence[openai-agents]"
 ```
 
 ## Wrapping a function tool
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from agents import function_tool
 
 @function_tool
@@ -20,7 +20,7 @@ def run_shell(command: str) -> str:
     import subprocess
     return subprocess.check_output(command, shell=True, text=True)
 
-safe_shell = ShadowAuditTool(
+safe_shell = CapFenceTool(
     tool=run_shell,
     agent_id="ops-agent",
     capability="shell.execute",
@@ -45,22 +45,22 @@ result = Runner.run_sync(agent, "List files in /tmp")
 ## Wrapping multiple tools
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 
 tools = [
-    ShadowAuditTool(
+    CapFenceTool(
         tool=read_file,
         agent_id="ops-agent",
         capability="filesystem.read",
         policy_path="policies/ops.yaml"
     ),
-    ShadowAuditTool(
+    CapFenceTool(
         tool=write_file,
         agent_id="ops-agent",
         capability="filesystem.write",
         policy_path="policies/ops.yaml"
     ),
-    ShadowAuditTool(
+    CapFenceTool(
         tool=run_shell,
         agent_id="ops-agent",
         capability="shell.execute",
@@ -72,7 +72,7 @@ tools = [
 ## Scanning for ungated tools
 
 ```bash
-shadowaudit check ./src --framework openai_agents
+capfence check ./src --framework openai_agents
 ```
 
 ## Related integrations

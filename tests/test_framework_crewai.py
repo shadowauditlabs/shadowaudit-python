@@ -2,8 +2,8 @@
 
 import pytest
 
-from shadowaudit.framework.crewai import AgentActionBlocked, ShadowAuditCrewAITool
-from shadowaudit.core.gate import Gate
+from capfence.framework.crewai import AgentActionBlocked, CapFenceCrewAITool
+from capfence.core.gate import Gate
 
 
 class MockCrewAITool:
@@ -14,9 +14,9 @@ class MockCrewAITool:
         return f"executed: {tool_input}"
 
 
-class TestShadowAuditCrewAITool:
+class TestCapFenceCrewAITool:
     def test_passes_low_risk(self):
-        tool = ShadowAuditCrewAITool(
+        tool = CapFenceCrewAITool(
             tool=MockCrewAITool(),
             agent_id="crew-test",
             risk_category="read_only",
@@ -26,7 +26,7 @@ class TestShadowAuditCrewAITool:
         assert result == "executed: list files"
 
     def test_blocks_high_risk(self):
-        tool = ShadowAuditCrewAITool(
+        tool = CapFenceCrewAITool(
             tool=MockCrewAITool(),
             agent_id="crew-test",
             risk_category="delete",
@@ -36,7 +36,7 @@ class TestShadowAuditCrewAITool:
             tool.run("delete drop remove all records")
 
     def test_tool_attributes_mirrored(self):
-        tool = ShadowAuditCrewAITool(
+        tool = CapFenceCrewAITool(
             tool=MockCrewAITool(),
             agent_id="crew-test",
             risk_category="read_only",
@@ -45,7 +45,7 @@ class TestShadowAuditCrewAITool:
         assert tool.description == "A mock tool for testing"
 
     def test_dict_input(self):
-        tool = ShadowAuditCrewAITool(
+        tool = CapFenceCrewAITool(
             tool=MockCrewAITool(),
             agent_id="crew-test",
             risk_category="read_only",
@@ -55,7 +55,7 @@ class TestShadowAuditCrewAITool:
         assert "executed" in result
 
     def test_error_detail_contains_reason(self):
-        tool = ShadowAuditCrewAITool(
+        tool = CapFenceCrewAITool(
             tool=MockCrewAITool(),
             agent_id="crew-test",
             risk_category="delete",

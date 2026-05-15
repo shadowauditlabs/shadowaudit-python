@@ -1,4 +1,4 @@
-"""Evaluate ShadowAudit gate against the public test corpus.
+"""Evaluate CapFence gate against the public test corpus.
 
 Runs all three corpus files through Gate.evaluate() and reports
 accuracy, false positive rate, and any mismatches vs expected labels.
@@ -18,7 +18,7 @@ from pathlib import Path
 # Allow running from repo root without install
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from shadowaudit import Gate
+from capfence import Gate
 
 
 CORPUS_DIR = Path(__file__).parent
@@ -91,14 +91,14 @@ def evaluate_file(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Evaluate ShadowAudit test corpus")
+    parser = argparse.ArgumentParser(description="Evaluate CapFence test corpus")
     parser.add_argument("--verbose", "-v", action="store_true",
                         help="Show all traces, not just mismatches")
     parser.add_argument("--file", "-f", type=str, default=None,
                         help="Evaluate only this corpus file")
     args = parser.parse_args()
 
-    print("ShadowAudit Corpus Evaluation")
+    print("CapFence Corpus Evaluation")
     print("=" * 60)
 
     total_correct = 0

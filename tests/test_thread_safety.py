@@ -1,8 +1,8 @@
 """Concurrency smoke tests for Gate.bypass and FlowTracer."""
 import threading
 
-from shadowaudit.core.gate import Gate
-from shadowaudit.flow.tracer import FlowTracer, TrustLevel
+from capfence.core.gate import Gate
+from capfence.flow.tracer import FlowTracer, TrustLevel
 
 
 RISKY_PAYLOAD = {

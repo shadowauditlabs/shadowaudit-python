@@ -1,17 +1,17 @@
 # LlamaIndex Integration
 
-ShadowAudit wraps LlamaIndex tools with deterministic gate enforcement.
+CapFence wraps LlamaIndex tools with deterministic gate enforcement.
 
 ## Installation
 
 ```bash
-pip install shadowaudit
+pip install capfence
 ```
 
 ## Wrapping a tool
 
 ```python
-from shadowaudit.framework.llamaindex import ShadowAuditLlamaIndexTool
+from capfence.framework.llamaindex import CapFenceLlamaIndexTool
 
 class QueryTool:
     name = "query_db"
@@ -20,7 +20,7 @@ class QueryTool:
     def call(self, query: str) -> dict:
         return {"rows": []}
 
-safe_query = ShadowAuditLlamaIndexTool(
+safe_query = CapFenceLlamaIndexTool(
     tool=QueryTool(),
     agent_id="llama-agent",
     capability="database.read",

@@ -1,6 +1,6 @@
 # Audit Log Format
 
-ShadowAudit stores runtime decisions in a local SQLite database. The current table is `audit_events`.
+CapFence stores runtime decisions in a local SQLite database. The current table is `audit_events`.
 
 ## Schema
 
@@ -65,8 +65,8 @@ rows = conn.execute("""
 ## CLI access
 
 ```bash
-shadowaudit logs --audit-log audit.db --json
-shadowaudit verify --audit-log audit.db
+capfence logs --audit-log audit.db --json
+capfence verify --audit-log audit.db
 ```
 
 ## Related concepts

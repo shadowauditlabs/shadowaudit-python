@@ -1,11 +1,11 @@
 # MCP Governance Example
 
-This example puts ShadowAudit between an agent and an MCP server so MCP tool calls are authorized before they reach the upstream server.
+This example puts CapFence between an agent and an MCP server so MCP tool calls are authorized before they reach the upstream server.
 
 ## Gateway
 
 ```python
-from shadowaudit.mcp.gateway import MCPGatewayServer
+from capfence.mcp.gateway import MCPGatewayServer
 
 gateway = MCPGatewayServer(
     upstream_command=[
@@ -42,7 +42,7 @@ allow:
 ## Decision flow
 
 ```text
-Agent → ShadowAudit MCP Gateway → MCP Server
+Agent → CapFence MCP Gateway → MCP Server
           │
           ├─ allow read/list tools
           ├─ require approval for sensitive writes

@@ -1,6 +1,6 @@
 """Tests for OWASP Agentic Top 10 coverage matrix."""
 
-from shadowaudit.assessment.owasp import (
+from capfence.assessment.owasp import (
     get_coverage_matrix,
     get_coverage_summary,
     generate_owasp_context,
@@ -18,7 +18,7 @@ class TestOWASPCoverage:
             assert item.risk_name
             assert item.description
             assert item.coverage_level in ("full", "partial", "planned", "not_applicable")
-            assert item.shadowaudit_feature
+            assert item.capfence_feature
 
     def test_summary_totals(self):
         summary = get_coverage_summary()

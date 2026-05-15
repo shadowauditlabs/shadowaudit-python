@@ -1,15 +1,15 @@
 # Replay an Incident
 
-When something goes wrong — an agent made a call it shouldn't have, or was blocked unexpectedly — ShadowAudit lets you replay the exact decision to understand what happened and why.
+When something goes wrong — an agent made a call it shouldn't have, or was blocked unexpectedly — CapFence lets you replay the exact decision to understand what happened and why.
 
 ## Finding the relevant entry
 
 ```bash
 # Search by agent ID
-shadowaudit logs --agent finance-agent --json
+capfence logs --agent finance-agent --json
 
 # Review recent events
-shadowaudit logs --audit-log audit.db --limit 100
+capfence logs --audit-log audit.db --limit 100
 ```
 
 Note the `entry_hash` or `payload_hash` from the JSON output.
@@ -17,7 +17,7 @@ Note the `entry_hash` or `payload_hash` from the JSON output.
 ## Viewing a trace
 
 ```bash
-shadowaudit trace a1b2c3d4
+capfence trace a1b2c3d4
 ```
 
 Output:
@@ -49,7 +49,7 @@ If you've updated your policy and want to see how the incident would have been h
 
 ```bash
 # Replay the captured trace
-shadowaudit replay incident.jsonl
+capfence replay incident.jsonl
 ```
 
 This replays the captured payloads and prints deterministic replay output.
@@ -59,7 +59,7 @@ This replays the captured payloads and prints deterministic replay output.
 Replay an entire time window against a policy:
 
 ```bash
-shadowaudit simulate --trace-file daily.jsonl --taxonomy policies/new_policy.yaml --compare
+capfence simulate --trace-file daily.jsonl --taxonomy policies/new_policy.yaml --compare
 ```
 
 This is useful for validating a policy change before deploying it.
@@ -69,7 +69,7 @@ This is useful for validating a policy change before deploying it.
 Always verify the audit chain before relying on replay results:
 
 ```bash
-shadowaudit verify --audit-log ./audit.db
+capfence verify --audit-log ./audit.db
 ✓ Audit chain intact. 1,284 entries verified.
 ```
 

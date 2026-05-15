@@ -1,6 +1,6 @@
 # Protect Shell Tools
 
-Shell access is one of the highest-risk capabilities an agent can have. A single `rm -rf`, `curl | bash`, or `chmod 777` can cause irreversible damage. This guide shows how to gate shell tools with ShadowAudit.
+Shell access is one of the highest-risk capabilities an agent can have. A single `rm -rf`, `curl | bash`, or `chmod 777` can cause irreversible damage. This guide shows how to gate shell tools with CapFence.
 
 ## Basic shell policy
 
@@ -40,10 +40,10 @@ allow:
 ## LangChain integration
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from langchain.tools import ShellTool
 
-safe_shell = ShadowAuditTool(
+safe_shell = CapFenceTool(
     tool=ShellTool(),
     agent_id="ops-agent",
     capability="shell.execute",
@@ -58,7 +58,7 @@ tools = [safe_shell]
 
 ```python
 import subprocess
-from shadowaudit.core.gate import Gate
+from capfence.core.gate import Gate
 
 gate = Gate()
 
@@ -81,20 +81,20 @@ def safe_run(command: str, agent_id: str) -> str:
 After running your agent, review decisions:
 
 ```bash
-shadowaudit logs --audit-log audit.db --json
+capfence logs --audit-log audit.db --json
 ```
 
 Use these findings to refine your policy: add explicit `deny` rules for patterns you see, and tighten `require_approval` thresholds.
 
 ## Scanning existing codebases
 
-Before adding ShadowAudit, identify which shell tools are currently ungated:
+Before adding CapFence, identify which shell tools are currently ungated:
 
 ```bash
-shadowaudit check ./src --framework langchain
+capfence check ./src --framework langchain
 ```
 
-This reports tools that are exposed to an agent without a ShadowAudit wrapper.
+This reports tools that are exposed to an agent without a CapFence wrapper.
 
 ## Related guides
 

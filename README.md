@@ -1,22 +1,22 @@
-# ShadowAudit
+# CapFence
 
 <p align="center">
   <strong>Deterministic runtime authorization for AI agent tool calls.</strong>
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/shadowaudit/"><img src="https://img.shields.io/pypi/v/shadowaudit?color=blue" alt="PyPI version"></a>
-  <a href="https://pypi.org/project/shadowaudit/"><img src="https://img.shields.io/pypi/pyversions/shadowaudit" alt="Python versions"></a>
+  <a href="https://pypi.org/project/capfence/"><img src="https://img.shields.io/pypi/v/capfence?color=blue" alt="PyPI version"></a>
+  <a href="https://pypi.org/project/capfence/"><img src="https://img.shields.io/pypi/pyversions/capfence" alt="Python versions"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/tests-passing-brightgreen" alt="Tests: passing">
 </p>
 
-ShadowAudit sits between AI agents and their tools. It evaluates every tool call against deterministic policy before execution, then allows it, blocks it, or requires approval.
+CapFence sits between AI agents and their tools. It evaluates every tool call against deterministic policy before execution, then allows it, blocks it, or requires approval.
 
 It is closer to IAM, Open Policy Agent, API gateways, and admission controllers than prompt guardrails or moderation.
 
 ```text
-Agent -> ShadowAudit -> Tool
+Agent -> CapFence -> Tool
           |
           +-- allow
           +-- deny
@@ -24,14 +24,14 @@ Agent -> ShadowAudit -> Tool
 ```
 
 <p align="center">
-  <img src="docs/assets/demo.gif" alt="ShadowAudit terminal demo" width="720">
+  <img src="docs/assets/demo.gif" alt="CapFence terminal demo" width="720">
 </p>
 
 ## Why This Exists
 
 Agents increasingly call tools that can move money, edit databases, run shell commands, read files, modify permissions, and operate SaaS admin APIs.
 
-Prompt instructions are not an execution boundary. ShadowAudit gives those tool calls an explicit runtime authorization layer:
+Prompt instructions are not an execution boundary. CapFence gives those tool calls an explicit runtime authorization layer:
 
 - No LLM call in the gate path.
 - Policy-as-code decisions.
@@ -43,7 +43,7 @@ Prompt instructions are not an execution boundary. ShadowAudit gives those tool 
 ## Install
 
 ```bash
-pip install shadowaudit
+pip install capfence
 ```
 
 ## 60-Second Example
@@ -68,7 +68,7 @@ allow:
 Evaluate a tool call before execution:
 
 ```python
-from shadowaudit.core.gate import Gate
+from capfence.core.gate import Gate
 
 gate = Gate()
 
@@ -89,7 +89,7 @@ The dangerous command never reaches the tool.
 
 ## Framework Integrations
 
-ShadowAudit can wrap tools in:
+CapFence can wrap tools in:
 
 - LangChain
 - LangGraph
@@ -104,10 +104,10 @@ ShadowAudit can wrap tools in:
 LangChain example:
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from langchain.tools import ShellTool
 
-safe_shell = ShadowAuditTool(
+safe_shell = CapFenceTool(
     tool=ShellTool(),
     agent_id="ops-agent",
     capability="shell.execute",
@@ -120,25 +120,25 @@ safe_shell = ShadowAuditTool(
 Scan for ungated tools:
 
 ```bash
-shadowaudit check ./src --fail-on-ungated
+capfence check ./src --fail-on-ungated
 ```
 
 Validate a policy:
 
 ```bash
-shadowaudit check-policy policies/shell_agent.yaml
+capfence check-policy policies/shell_agent.yaml
 ```
 
 Replay a trace through policy:
 
 ```bash
-shadowaudit simulate --trace-file traces/agent_trace.jsonl --compare
+capfence simulate --trace-file traces/agent_trace.jsonl --compare
 ```
 
 Verify audit-log integrity:
 
 ```bash
-shadowaudit verify --audit-log audit.db
+capfence verify --audit-log audit.db
 ```
 
 ## Rollout Path
@@ -149,9 +149,9 @@ shadowaudit verify --audit-log audit.db
 4. Add CI checks so new ungated tools cannot quietly ship.
 5. Replay incidents and policy changes against saved traces.
 
-## What ShadowAudit Is Not
+## What CapFence Is Not
 
-ShadowAudit is a runtime authorization and audit layer. It does not replace:
+CapFence is a runtime authorization and audit layer. It does not replace:
 
 - sandboxing for shell/code execution
 - least-privilege credentials
@@ -163,19 +163,19 @@ Use it as the deterministic control point before tool execution.
 
 ## Why Not Prompt Guardrails?
 
-Prompt guardrails are useful, but they do not enforce execution. A prompt can be bypassed, misinterpreted, or ignored under pressure. ShadowAudit adds a deterministic enforcement boundary that blocks tool calls before they execute and records a tamper-evident audit trail.
+Prompt guardrails are useful, but they do not enforce execution. A prompt can be bypassed, misinterpreted, or ignored under pressure. CapFence adds a deterministic enforcement boundary that blocks tool calls before they execute and records a tamper-evident audit trail.
 
 ## Where It Sits In Your Stack
 
 ```
-Agent framework -> ShadowAudit gate -> Tool/API/DB/Shell
+Agent framework -> CapFence gate -> Tool/API/DB/Shell
 ```
 
-ShadowAudit does not replace sandboxing, network egress controls, or least-privilege credentials. It complements them by enforcing runtime policy at the tool boundary.
+CapFence does not replace sandboxing, network egress controls, or least-privilege credentials. It complements them by enforcing runtime policy at the tool boundary.
 
 ## Project Status
 
-ShadowAudit is beta infrastructure for agent tool governance. The repo includes:
+CapFence is beta infrastructure for agent tool governance. The repo includes:
 
 - deterministic gate and policy engine
 - local audit log with hash-chain verification
@@ -191,9 +191,9 @@ Current local verification: run `pytest -q`.
 
 ## Documentation
 
-- Docs: https://shadowaudit.dev/
-- PyPI: https://pypi.org/project/shadowaudit/
-- Repository: https://github.com/shadowauditlabs/shadowaudit-python
+- Docs: https://capfence.dev/
+- PyPI: https://pypi.org/project/capfence/
+- Repository: https://github.com/capfencelabs/capfence
 
 Useful starting points:
 
@@ -211,8 +211,8 @@ Useful starting points:
 ## Contributing
 
 ```bash
-git clone https://github.com/shadowauditlabs/shadowaudit-python.git
-cd shadowaudit-python
+git clone https://github.com/capfencelabs/capfence.git
+cd capfence
 pip install -e ".[dev]"
 pytest tests/ -q
 ```
@@ -224,5 +224,5 @@ Policy recipes, framework adapters, taxonomies, docs, and focused bug reports ar
 MIT License
 
 <p align="center">
-  <sub>Built by <a href="https://github.com/shadowauditlabs">ShadowAudit Labs</a></sub>
+  <sub>Built by <a href="https://github.com/capfencelabs">CapFence Labs</a></sub>
 </p>

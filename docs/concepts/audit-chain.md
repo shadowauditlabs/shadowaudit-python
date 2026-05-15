@@ -1,6 +1,6 @@
 # Audit Chain
 
-ShadowAudit records every enforcement decision in a tamper-evident audit log. The log is stored locally in SQLite and protected by a SHA-256 hash chain.
+CapFence records every enforcement decision in a tamper-evident audit log. The log is stored locally in SQLite and protected by a SHA-256 hash chain.
 
 ## What is a hash chain?
 
@@ -29,7 +29,7 @@ You cannot silently alter the history.
 ## Verifying the chain
 
 ```bash
-shadowaudit verify --audit-log ./audit.db
+capfence verify --audit-log ./audit.db
 ✓ Audit chain intact. 1,284 entries verified.
 ```
 
@@ -67,7 +67,7 @@ Every call to `gate.evaluate()` produces an audit entry regardless of the decisi
 
 ## Limitations
 
-The hash chain proves **integrity** (entries have not been altered), not **authenticity** (entries were created by ShadowAudit). An attacker with file access can delete the entire database.
+The hash chain proves **integrity** (entries have not been altered), not **authenticity** (entries were created by CapFence). An attacker with file access can delete the entire database.
 
 For authenticity guarantees, combine the audit log with:
 - Ed25519 signing of each entry

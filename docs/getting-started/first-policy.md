@@ -1,6 +1,6 @@
 # Your First Policy
 
-A ShadowAudit policy is a YAML file that defines what an agent can do, what it cannot do, and what requires human sign-off.
+A CapFence policy is a YAML file that defines what an agent can do, what it cannot do, and what requires human sign-off.
 
 ## Policy structure
 

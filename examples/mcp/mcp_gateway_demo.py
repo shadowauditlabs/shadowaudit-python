@@ -1,6 +1,6 @@
 """Minimal MCP Gateway Demo."""
-from shadowaudit.mcp.gateway import MCPGatewayServer
-from shadowaudit.core.gate import Gate
+from capfence.mcp.gateway import MCPGatewayServer
+from capfence.core.gate import Gate
 
 if __name__ == "__main__":
     print("Initializing MCP Gateway...")

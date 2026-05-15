@@ -1,4 +1,4 @@
-# ShadowAudit Support SLA
+# CapFence Support SLA
 
 **Effective:** May 2026
 
@@ -6,7 +6,7 @@
 
 | Tier | Response Time | Channel | Hours |
 |---|---|---|---|
-| **OSS (Free)** | Best-effort | [GitHub Issues](https://github.com/shadowauditlabs/shadowaudit-python/issues) | When available |
+| **OSS (Free)** | Best-effort | [GitHub Issues](https://github.com/capfencelabs/capfence/issues) | When available |
 | **Cloud Starter ($99/mo)** | 2 business days | Email | Monday–Friday, 9am–6pm IST |
 | **Cloud Team (Future)** | 1 business day | Email + Intercom | Monday–Friday, 9am–6pm IST |
 | **Enterprise ($25K/yr)** | 4 business hours | Email + dedicated Slack channel | Monday–Friday, 9am–6pm IST. 24h response on weekends/holidays. |
@@ -23,7 +23,7 @@
 
 ## What's Covered
 
-- ShadowAudit SDK installation and configuration
+- CapFence SDK installation and configuration
 - Gate evaluation and taxonomy questions
 - Audit log verification and integrity checks
 - Framework adapter integration (LangChain, CrewAI, LangGraph, OpenAI Agents)
@@ -39,8 +39,8 @@
 
 ## Contact
 
-- **OSS:** Open an issue on [GitHub](https://github.com/shadowauditlabs/shadowaudit-python/issues)
-- **Cloud/Enterprise:** Email support@shadowaudit.dev
+- **OSS:** Open an issue on [GitHub](https://github.com/capfencelabs/capfence/issues)
+- **Cloud/Enterprise:** Email support@capfence.dev
 
 ---
 

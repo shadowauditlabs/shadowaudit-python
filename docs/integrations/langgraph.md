@@ -1,21 +1,21 @@
 # LangGraph Integration
 
-ShadowAudit integrates with LangGraph by wrapping tools before they are passed to graph nodes. Enforcement applies at every tool invocation, including within loops and conditional branches.
+CapFence integrates with LangGraph by wrapping tools before they are passed to graph nodes. Enforcement applies at every tool invocation, including within loops and conditional branches.
 
 ## Installation
 
 ```bash
-pip install "shadowaudit[langchain]"
+pip install "capfence[langchain]"
 ```
 
 ## Wrapping tools for a graph
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from langchain.tools import ShellTool
 from langgraph.prebuilt import create_react_agent
 
-safe_shell = ShadowAuditTool(
+safe_shell = CapFenceTool(
     tool=ShellTool(),
     agent_id="graph-agent",
     capability="shell.execute",
@@ -31,7 +31,7 @@ graph = create_react_agent(model, tools=[safe_shell])
 When defining graph nodes manually, gate tool calls within the node function:
 
 ```python
-from shadowaudit.core.gate import Gate
+from capfence.core.gate import Gate
 from langgraph.graph import StateGraph
 
 gate = Gate()

@@ -1,11 +1,11 @@
-"""Example: Protected LangChain agent with ShadowAudit.
+"""Example: Protected LangChain agent with CapFence.
 
 Wraps tools so that risky actions are blocked before execution.
-Requires: pip install shadowaudit[langchain] langchain
+Requires: pip install capfence[langchain] langchain
 """
 
-from shadowaudit import Gate
-from shadowaudit.framework.langchain import ShadowAuditTool, AgentActionBlocked
+from capfence import Gate
+from capfence.framework.langchain import CapFenceTool, AgentActionBlocked
 
 
 def mock_shell_tool(tool_input: str, **kwargs) -> str:
@@ -24,8 +24,8 @@ def main():
     # Gate with financial taxonomy for money movement
     finance_gate = Gate(taxonomy_path="financial")
 
-    # Wrap tools with ShadowAudit enforcement
-    safe_shell = ShadowAuditTool(
+    # Wrap tools with CapFence enforcement
+    safe_shell = CapFenceTool(
         tool=type("ShellTool", (), {
             "name": "shell",
             "description": "Run shell commands",
@@ -36,7 +36,7 @@ def main():
         gate=general_gate,
     )
 
-    safe_transfer = ShadowAuditTool(
+    safe_transfer = CapFenceTool(
         tool=type("TransferTool", (), {
             "name": "transfer",
             "description": "Transfer funds between accounts",
@@ -47,7 +47,7 @@ def main():
         gate=finance_gate,
     )
 
-    safe_delete = ShadowAuditTool(
+    safe_delete = CapFenceTool(
         tool=type("DeleteTool", (), {
             "name": "delete_file",
             "description": "Delete files from filesystem",

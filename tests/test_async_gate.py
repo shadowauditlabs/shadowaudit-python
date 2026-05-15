@@ -3,7 +3,7 @@ import asyncio
 
 import pytest
 
-from shadowaudit.core.gate import Gate
+from capfence.core.gate import Gate
 
 
 RISKY_PAYLOAD = {

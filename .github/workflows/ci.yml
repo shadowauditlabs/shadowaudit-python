@@ -25,11 +25,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev,langchain]"
       - name: Lint with ruff
-        run: ruff check shadowaudit tests
+        run: ruff check capfence tests
       - name: Type check with mypy
-        run: mypy shadowaudit
+        run: mypy capfence
       - name: Test with pytest
-        run: pytest --cov=shadowaudit --cov-report=term
+        run: pytest --cov=capfence --cov-report=term
 
   build:
     runs-on: ubuntu-latest

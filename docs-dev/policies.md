@@ -1,6 +1,6 @@
 # Policy-as-Code Engine
 
-ShadowAudit uses a deterministic YAML-based policy engine to enforce execution boundaries at runtime. Policies allow you to define `allow`, `deny`, and `require_approval` rules based on capabilities, contextual data, and evaluated risk levels.
+CapFence uses a deterministic YAML-based policy engine to enforce execution boundaries at runtime. Policies allow you to define `allow`, `deny`, and `require_approval` rules based on capabilities, contextual data, and evaluated risk levels.
 
 ## Features
 

@@ -1,16 +1,16 @@
-"""Example: Realistic LangChain agent with BaseTool subclasses and ShadowAudit wrappers.
+"""Example: Realistic LangChain agent with BaseTool subclasses and CapFence wrappers.
 
 This file uses actual BaseTool inheritance patterns (not mocks) so the
-AST scanner can detect them via `shadowaudit check`.
+AST scanner can detect them via `capfence check`.
 
 Usage:
-    shadowaudit check ./examples/langchain_realistic.py
-    shadowaudit check ./examples/langchain_realistic.py --output report.html
+    capfence check ./examples/langchain_realistic.py
+    capfence check ./examples/langchain_realistic.py --output report.html
 """
 
 from langchain.tools import BaseTool
 
-from shadowaudit.framework.langchain import ShadowAuditTool
+from capfence.framework.langchain import CapFenceTool
 
 
 class ShellTool(BaseTool):
@@ -58,8 +58,8 @@ class SendEmailTool(BaseTool):
         return f"Sent email to {to_address}"
 
 
-# These tools ARE wrapped with ShadowAuditTool — the scanner should detect this
-safe_shell = ShadowAuditTool(
+# These tools ARE wrapped with CapFenceTool — the scanner should detect this
+safe_shell = CapFenceTool(
     tool=ShellTool(),
     agent_id="ops-agent-1",
     risk_category="execute",
@@ -69,14 +69,14 @@ safe_shell = ShadowAuditTool(
 # (the scanner should flag this as a high-risk ungated finding)
 
 # Read-only tool wrapped for auditing
-safe_balance = ShadowAuditTool(
+safe_balance = CapFenceTool(
     tool=ReadBalanceTool(),
     agent_id="finance-agent-1",
     risk_category="read_only",
 )
 
 # Delete tool wrapped
-safe_delete = ShadowAuditTool(
+safe_delete = CapFenceTool(
     tool=DeleteAccountTool(),
     agent_id="ops-agent-1",
     risk_category="delete",

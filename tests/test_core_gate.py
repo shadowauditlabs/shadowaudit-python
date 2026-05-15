@@ -2,8 +2,8 @@
 
 import pytest
 
-from shadowaudit import Gate
-from shadowaudit.core.gate import score_payload, compute_threshold
+from capfence import Gate
+from capfence.core.gate import score_payload, compute_threshold
 
 
 class TestScorePayload:
@@ -83,7 +83,7 @@ class TestGateEvaluate:
 
     def test_audit_logger_records(self):
         """Gate evaluation writes to audit log."""
-        from shadowaudit.core.audit import AuditLogger
+        from capfence.core.audit import AuditLogger
         audit = AuditLogger()
         gate = Gate(audit_logger=audit)
         gate.evaluate(
@@ -100,7 +100,7 @@ class TestGateEvaluate:
 
     def test_audit_chain_verification(self):
         """Audit log chain verifies after multiple decisions."""
-        from shadowaudit.core.audit import AuditLogger
+        from capfence.core.audit import AuditLogger
         audit = AuditLogger()
         gate = Gate(audit_logger=audit)
         for i in range(3):

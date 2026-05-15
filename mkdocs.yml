@@ -1,5 +1,5 @@
-site_name: ShadowAudit Docs
-site_description: Documentation for the ShadowAudit project
+site_name: CapFence Docs
+site_description: Documentation for the CapFence project
 nav:
   - Home: index.md
   - Getting Started:

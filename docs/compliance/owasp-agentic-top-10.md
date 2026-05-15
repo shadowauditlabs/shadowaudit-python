@@ -1,14 +1,14 @@
 # OWASP Agentic Top 10
 
-ShadowAudit includes reporting helpers for mapping runtime enforcement controls to the OWASP Agentic AI Top 10.
+CapFence includes reporting helpers for mapping runtime enforcement controls to the OWASP Agentic AI Top 10.
 
 ```bash
-shadowaudit owasp
+capfence owasp
 ```
 
 ## Control themes
 
-ShadowAudit helps address agentic risks through:
+CapFence helps address agentic risks through:
 
 - deterministic authorization before tool execution
 - fail-closed blocking for unsafe actions

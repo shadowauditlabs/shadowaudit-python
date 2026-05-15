@@ -2,7 +2,7 @@
 
 import pytest
 
-from shadowaudit.core.state import AgentStateStore
+from capfence.core.state import AgentStateStore
 
 
 class TestKComputation:

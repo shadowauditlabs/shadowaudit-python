@@ -1,6 +1,6 @@
 # Protect Payment Agents
 
-Payment operations carry direct financial risk. This guide shows how to apply ShadowAudit to payment agents: blocking large transfers, requiring approval for mid-range amounts, and providing a full audit trail for compliance.
+Payment operations carry direct financial risk. This guide shows how to apply CapFence to payment agents: blocking large transfers, requiring approval for mid-range amounts, and providing a full audit trail for compliance.
 
 ## Payment policy
 
@@ -32,10 +32,10 @@ allow:
 ## Wrapping a payment tool
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from myapp.tools import PaymentsTool
 
-safe_payments = ShadowAuditTool(
+safe_payments = CapFenceTool(
     tool=PaymentsTool(),
     agent_id="finance-agent",
     capability="payments.transfer",
@@ -43,7 +43,7 @@ safe_payments = ShadowAuditTool(
 )
 ```
 
-For transfers with amounts, ShadowAudit automatically extracts numeric fields (`amount`, `total`, `value`) from the payload to evaluate threshold conditions.
+For transfers with amounts, CapFence automatically extracts numeric fields (`amount`, `total`, `value`) from the payload to evaluate threshold conditions.
 
 ## Passing runtime context
 
@@ -66,21 +66,21 @@ When a transfer triggers `require_approval`, the action pauses. The agent receiv
 
 ```bash
 # See pending approvals
-shadowaudit pending-approvals
+capfence pending-approvals
 
 # Approve
-shadowaudit approve <request_id>
+capfence approve <request_id>
 
 # Reject
-shadowaudit reject <request_id>
+capfence reject <request_id>
 ```
 
 Or via the Python API:
 
 ```python
-from shadowaudit.core.approvals import ApprovalManager
+from capfence.core.approvals import ApprovalManager
 
-manager = ApprovalManager(db_path="shadowaudit_approvals.db")
+manager = ApprovalManager(db_path="capfence_approvals.db")
 pending = manager.get_pending()
 manager.approve(pending[0].id, resolved_by="alice@company.com")
 ```
@@ -90,7 +90,7 @@ manager.approve(pending[0].id, resolved_by="alice@company.com")
 Every payment decision is recorded:
 
 ```bash
-shadowaudit logs --audit-log audit.db --json
+capfence logs --audit-log audit.db --json
 ```
 
 The hash-chained log provides tamper-evident evidence for SOX 404, PCI-DSS audit trails, and internal controls reviews.

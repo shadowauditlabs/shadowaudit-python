@@ -14,10 +14,10 @@ This threat model focuses on agent tool execution: the point where model output 
 ## Trust boundaries
 
 ```text
-LLM / Agent Planner → ShadowAudit Gate → Tool / API / Infrastructure
+LLM / Agent Planner → CapFence Gate → Tool / API / Infrastructure
 ```
 
-The agent planner is not treated as an authorization authority. ShadowAudit is the runtime authorization boundary.
+The agent planner is not treated as an authorization authority. CapFence is the runtime authorization boundary.
 
 ## Threats
 
@@ -32,5 +32,5 @@ The agent planner is not treated as an authorization authority. ShadowAudit is t
 
 ## Residual risks
 
-ShadowAudit does not replace operating system sandboxing, secrets management, network segmentation, or least-privilege credentials. Use it as the runtime authorization layer for agent tools, alongside normal infrastructure controls.
+CapFence does not replace operating system sandboxing, secrets management, network segmentation, or least-privilege credentials. Use it as the runtime authorization layer for agent tools, alongside normal infrastructure controls.
 

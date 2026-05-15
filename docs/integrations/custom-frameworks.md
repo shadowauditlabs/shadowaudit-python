@@ -5,7 +5,7 @@ If you are using a framework without a built-in adapter, call the Gate API direc
 ## Direct gate usage
 
 ```python
-from shadowaudit.core.gate import Gate
+from capfence.core.gate import Gate
 
 gate = Gate()
 
@@ -31,8 +31,8 @@ else:
 ```python
 from typing import Any
 
-from shadowaudit.core.gate import Gate
-from shadowaudit.errors import AgentActionBlocked
+from capfence.core.gate import Gate
+from capfence.errors import AgentActionBlocked
 
 class GatedTool:
     def __init__(self, tool: Any, agent_id: str, capability: str, policy_path: str):

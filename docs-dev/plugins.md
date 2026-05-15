@@ -1,6 +1,6 @@
 # Plugin Architecture
 
-ShadowAudit supports extensibility through a robust plugin system. You can extend core functionality with specialized modules.
+CapFence supports extensibility through a robust plugin system. You can extend core functionality with specialized modules.
 
 ## Supported Extension Points
 - **Risk Evaluators**: Custom heuristics or ML models to score tool payloads.
@@ -24,7 +24,7 @@ plugins/
 Use the explicit registry to load plugins:
 
 ```python
-from shadowaudit.core.plugins import default_registry
+from capfence.core.plugins import default_registry
 
 default_registry.register_risk_evaluator("pii_detector", PIIDetectorPlugin)
 default_registry.register_audit_sink("splunk", SplunkSinkPlugin)

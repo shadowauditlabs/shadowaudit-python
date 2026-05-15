@@ -1,6 +1,6 @@
 # Capability Taxonomy
 
-ShadowAudit uses a **Capability Taxonomy** to govern what AI agents are permitted to do, independent of the underlying tool implementation.
+CapFence uses a **Capability Taxonomy** to govern what AI agents are permitted to do, independent of the underlying tool implementation.
 
 ## Core Principles
 1. **Reusability**: `filesystem.read` means the same thing whether an agent uses Python's `os` module, a Bash command, or an MCP server.

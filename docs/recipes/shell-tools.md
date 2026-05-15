@@ -14,10 +14,10 @@ allow:
 ## Integration
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from langchain.tools import ShellTool
 
-safe_shell = ShadowAuditTool(
+safe_shell = CapFenceTool(
     tool=ShellTool(),
     agent_id="ops-agent",
     capability="shell.execute",

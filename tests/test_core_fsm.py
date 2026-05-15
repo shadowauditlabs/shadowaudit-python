@@ -1,8 +1,8 @@
 """Tests for fail-closed FSM."""
 
 
-from shadowaudit.core.fsm import FailClosedFSM
-from shadowaudit.types import GateResult
+from capfence.core.fsm import FailClosedFSM
+from capfence.types import GateResult
 
 
 class TestFSMTransition:

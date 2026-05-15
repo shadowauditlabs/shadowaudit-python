@@ -3,12 +3,12 @@
 from pathlib import Path
 
 
-from shadowaudit.assessment.scanner import (
+from capfence.assessment.scanner import (
     ToolAssessment,
     AssessmentData,
     scan_assessment,
 )
-from shadowaudit.assessment.reporter import generate_html_report
+from capfence.assessment.reporter import generate_html_report
 
 
 class TestToolAssessment:
@@ -192,14 +192,14 @@ class TestGenerateHtmlReport:
         generate_html_report(data, output_path=output)
         assert output.exists()
         content = output.read_text()
-        assert "ShadowAudit" in content
+        assert "CapFence" in content
     
     def test_report_includes_remediation(self):
         tools = [
             ToolAssessment("Shell", Path("/tmp"), 1, "langchain", "execute",
-                          False, 0.1, remediation="Wrap with ShadowAuditTool"),
+                          False, 0.1, remediation="Wrap with CapFenceTool"),
         ]
         data = AssessmentData(path=Path("/tmp"), taxonomy_name=None, tools=tools)
         html = generate_html_report(data)
         assert "Remediation" in html
-        assert "ShadowAuditTool" in html
+        assert "CapFenceTool" in html

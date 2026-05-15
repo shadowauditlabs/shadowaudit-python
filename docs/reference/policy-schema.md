@@ -1,6 +1,6 @@
 # Policy Schema Reference
 
-ShadowAudit policies are YAML files. This page documents every supported field.
+CapFence policies are YAML files. This page documents every supported field.
 
 ## Top-level structure
 
@@ -72,7 +72,7 @@ Legacy `rules` entries support `id`, `description`, `capability`, `match_keyword
 
 ## Numeric field extraction
 
-Numeric comparisons evaluate against fields automatically extracted from the payload. ShadowAudit looks for keys named: `amount`, `total`, `value`, `price`, `cost`, `sum`, and `quantity`. The first found numeric value is used.
+Numeric comparisons evaluate against fields automatically extracted from the payload. CapFence looks for keys named: `amount`, `total`, `value`, `price`, `cost`, `sum`, and `quantity`. The first found numeric value is used.
 
 ## Risk level mapping
 
@@ -125,9 +125,9 @@ approval_timeout_seconds: 1800
 
 ## Validation
 
-ShadowAudit validates the policy file when it is loaded. A malformed policy raises `PolicyLoadError`. During gate evaluation, policy load or validation failures fail closed with a `policy_error_PolicyLoadError` decision.
+CapFence validates the policy file when it is loaded. A malformed policy raises `PolicyLoadError`. During gate evaluation, policy load or validation failures fail closed with a `policy_error_PolicyLoadError` decision.
 
 ```bash
 # Validate a policy file
-shadowaudit check-policy policies/my_policy.yaml
+capfence check-policy policies/my_policy.yaml
 ```

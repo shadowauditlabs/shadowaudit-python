@@ -1,20 +1,20 @@
 # LangChain Integration
 
-ShadowAudit wraps any LangChain tool with a runtime gate. The wrapped tool is a drop-in replacement — it has the same interface and can be used anywhere the original tool is used.
+CapFence wraps any LangChain tool with a runtime gate. The wrapped tool is a drop-in replacement — it has the same interface and can be used anywhere the original tool is used.
 
 ## Installation
 
 ```bash
-pip install "shadowaudit[langchain]"
+pip install "capfence[langchain]"
 ```
 
 ## Wrapping a tool
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from langchain.tools import ShellTool
 
-safe_shell = ShadowAuditTool(
+safe_shell = CapFenceTool(
     tool=ShellTool(),
     agent_id="my-agent",
     capability="shell.execute",
@@ -39,10 +39,10 @@ executor.invoke({"input": "List the files in /tmp"})
 ## Wrapping multiple tools
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from langchain.tools import ShellTool, FileManagementToolkit
 
-shell = ShadowAuditTool(
+shell = CapFenceTool(
     tool=ShellTool(),
     agent_id="ops-agent",
     capability="shell.execute",
@@ -50,7 +50,7 @@ shell = ShadowAuditTool(
 )
 
 file_tools = [
-    ShadowAuditTool(
+    CapFenceTool(
         tool=t,
         agent_id="ops-agent",
         capability=f"filesystem.{t.name}",
@@ -80,7 +80,7 @@ safe_shell.run(
 Blocked calls raise `AgentActionBlocked`. LangChain's `AgentExecutor` catches tool exceptions and reports them to the agent:
 
 ```python
-from shadowaudit.exceptions import AgentActionBlocked
+from capfence.exceptions import AgentActionBlocked
 
 try:
     result = safe_shell.run("rm -rf /var/lib/postgresql")
@@ -91,10 +91,10 @@ except AgentActionBlocked as e:
 ## Scanning for ungated tools
 
 ```bash
-shadowaudit check ./src --framework langchain
+capfence check ./src --framework langchain
 ```
 
-This identifies LangChain tools in your codebase that are not wrapped with ShadowAudit.
+This identifies LangChain tools in your codebase that are not wrapped with CapFence.
 
 ## Related integrations
 

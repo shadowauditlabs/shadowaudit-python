@@ -1,12 +1,12 @@
 # CI/CD Enforcement
 
-ShadowAudit's static scanner can block CI/CD pipelines when ungated AI agent tools are detected. This prevents unenforced tools from reaching production.
+CapFence's static scanner can block CI/CD pipelines when ungated AI agent tools are detected. This prevents unenforced tools from reaching production.
 
 ## What the scanner checks
 
-`shadowaudit check` parses Python files with the AST module and identifies:
+`capfence check` parses Python files with the AST module and identifies:
 
-- LangChain `BaseTool` subclasses not wrapped with `ShadowAuditTool`
+- LangChain `BaseTool` subclasses not wrapped with `CapFenceTool`
 - CrewAI `BaseTool` subclasses not wrapped
 - OpenAI Agents SDK function tools not gated
 - MCP tool definitions without a gateway
@@ -16,8 +16,8 @@ Cross-file detection is supported: a tool defined in `tools.py` and wrapped in `
 ## GitHub Actions
 
 ```yaml
-# .github/workflows/shadowaudit.yml
-name: ShadowAudit Gate Check
+# .github/workflows/capfence.yml
+name: CapFence Gate Check
 
 on: [push, pull_request]
 
@@ -27,21 +27,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install ShadowAudit
-        run: pip install shadowaudit
+      - name: Install CapFence
+        run: pip install capfence
 
       - name: Check for ungated tools
-        run: shadowaudit check ./src --fail-on-ungated
+        run: capfence check ./src --fail-on-ungated
 
       - name: Generate HTML report (on failure)
         if: failure()
-        run: shadowaudit check ./src -o report.html
+        run: capfence check ./src -o report.html
 
       - name: Upload report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: shadowaudit-report
+          name: capfence-report
           path: report.html
 ```
 
@@ -57,13 +57,13 @@ jobs:
 
 ```bash
 # Check only LangChain tools
-shadowaudit check ./src --framework langchain
+capfence check ./src --framework langchain
 
 # Check only CrewAI tools
-shadowaudit check ./src --framework crewai
+capfence check ./src --framework crewai
 
 # Check only OpenAI Agents SDK tools
-shadowaudit check ./src --framework openai_agents
+capfence check ./src --framework openai_agents
 ```
 
 ## Full risk assessment report
@@ -71,7 +71,7 @@ shadowaudit check ./src --framework openai_agents
 For a richer report with compliance mapping and remediation guidance:
 
 ```bash
-shadowaudit assess ./src -o report.html
+capfence assess ./src -o report.html
 ```
 
 The assessment report includes:
@@ -89,9 +89,9 @@ Add a pre-commit check so developers catch issues before pushing:
 repos:
   - repo: local
     hooks:
-      - id: shadowaudit-check
-        name: ShadowAudit gate check
-        entry: shadowaudit check --fail-on-ungated
+      - id: capfence-check
+        name: CapFence gate check
+        entry: capfence check --fail-on-ungated
         language: system
         types: [python]
 ```

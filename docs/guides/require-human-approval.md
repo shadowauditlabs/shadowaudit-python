@@ -1,6 +1,6 @@
 # Require Human Approval
 
-Some actions are too consequential to allow or deny automatically. ShadowAudit's approval workflow pauses agent execution and routes the request to a human reviewer.
+Some actions are too consequential to allow or deny automatically. CapFence's approval workflow pauses agent execution and routes the request to a human reviewer.
 
 ## How approval works
 
@@ -42,7 +42,7 @@ result = gate.evaluate(
 ## Viewing pending approvals
 
 ```bash
-shadowaudit pending-approvals
+capfence pending-approvals
 ```
 
 ```
@@ -54,16 +54,16 @@ e5f6g7h8    database.write        db-agent         2024-01-15 10:31   —
 ## Approving and rejecting
 
 ```bash
-shadowaudit approve a1b2c3d4
-shadowaudit reject e5f6g7h8
+capfence approve a1b2c3d4
+capfence reject e5f6g7h8
 ```
 
 ## Python API
 
 ```python
-from shadowaudit.core.approvals import ApprovalManager
+from capfence.core.approvals import ApprovalManager
 
-manager = ApprovalManager(db_path="shadowaudit_approvals.db")
+manager = ApprovalManager(db_path="capfence_approvals.db")
 
 # List pending
 pending = manager.get_pending()
@@ -93,7 +93,7 @@ After expiration, the agent's pending call fails with `approval_expired`.
 All approval actions are recorded:
 
 ```bash
-shadowaudit logs --audit-log audit.db --json
+capfence logs --audit-log audit.db --json
 ```
 
 The log includes who approved or rejected, when, and the original request context. This is tamper-evident via the hash chain.

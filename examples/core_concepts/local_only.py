@@ -1,10 +1,10 @@
-"""Example: ShadowAudit gate without any external dependencies.
+"""Example: CapFence gate without any external dependencies.
 
 Runs 100% offline. Rule-based gating with SQLite state tracking.
 Useful for CI/CD checks, local development, and offline environments.
 """
 
-from shadowaudit import Gate
+from capfence import Gate
 
 
 def main():

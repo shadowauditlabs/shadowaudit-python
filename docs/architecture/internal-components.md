@@ -1,6 +1,6 @@
 # Internal Components
 
-ShadowAudit is organized around a small runtime gate and supporting infrastructure for audit, replay, integrations, and reporting.
+CapFence is organized around a small runtime gate and supporting infrastructure for audit, replay, integrations, and reporting.
 
 ```text
 Agent Framework Adapter
@@ -29,7 +29,7 @@ The audit logger records decisions in SQLite with hash chaining and optional Ed2
 
 ## Adapters
 
-Adapters let ShadowAudit sit in front of common agent tool systems:
+Adapters let CapFence sit in front of common agent tool systems:
 
 - LangChain
 - LangGraph

@@ -1,6 +1,6 @@
 # MCP Integration
 
-ShadowAudit provides a transparent stdio-proxying gateway for any MCP server. It evaluates every `tools/call` request against your policy before forwarding it to the upstream server.
+CapFence provides a transparent stdio-proxying gateway for any MCP server. It evaluates every `tools/call` request against your policy before forwarding it to the upstream server.
 
 ## How it works
 
@@ -9,8 +9,8 @@ The gateway intercepts JSON-RPC messages on stdin, extracts `params.arguments` f
 ## Setup
 
 ```python
-from shadowaudit.mcp.gateway import MCPGatewayServer
-from shadowaudit.core.gate import Gate
+from capfence.mcp.gateway import MCPGatewayServer
+from capfence.core.gate import Gate
 
 gateway = MCPGatewayServer(
     upstream_command=["python", "-m", "mcp_server_filesystem", "/data"],
@@ -27,7 +27,7 @@ gateway.run()
 Run the gateway as the process your MCP client connects to. If you need a CLI wrapper for a specific desktop client, create a small Python entrypoint that constructs `MCPGatewayServer` with your upstream command and policy path.
 
 ```python
-from shadowaudit.mcp.gateway import MCPGatewayServer
+from capfence.mcp.gateway import MCPGatewayServer
 
 MCPGatewayServer(
     upstream_command=["python", "-m", "mcp_server_filesystem", "/data"],
@@ -76,7 +76,7 @@ When a call is blocked, the client receives a JSON-RPC error:
 All MCP tool calls are logged with the full JSON-RPC payload hash:
 
 ```bash
-shadowaudit logs --agent mcp-agent
+capfence logs --agent mcp-agent
 ```
 
 ## Related guides

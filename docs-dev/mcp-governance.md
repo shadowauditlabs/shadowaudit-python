@@ -1,8 +1,8 @@
-# MCP Governance with ShadowAudit
+# MCP Governance with CapFence
 
 The Model Context Protocol (MCP) standardizes how AI agents connect to data sources and tools. While MCP provides a clean integration layer, it inherently expands the attack surface by exposing local filesystems, databases, and enterprise APIs to autonomous agents.
 
-ShadowAudit acts as the **runtime governance layer for MCP**.
+CapFence acts as the **runtime governance layer for MCP**.
 
 ## The Authorization Gap in MCP
 
@@ -14,13 +14,13 @@ flowchart LR
     Server -->|Direct Execution!| FileSystem[Filesystem / DB]
 ```
 
-## The ShadowAudit MCP Gateway
+## The CapFence MCP Gateway
 
-ShadowAudit provides a transparent, stdio-proxying gateway. It wraps any standard MCP server. 
+CapFence provides a transparent, stdio-proxying gateway. It wraps any standard MCP server. 
 
 ```mermaid
 flowchart LR
-    Client[MCP Client / Agent] -->|tools/call| Gateway[ShadowAudit Gateway]
+    Client[MCP Client / Agent] -->|tools/call| Gateway[CapFence Gateway]
     
     subgraph Governance
         Gateway --> Gate[Runtime Evaluation]
@@ -39,11 +39,11 @@ flowchart LR
 
 ## Example Usage
 
-Run the ShadowAudit gateway as a wrapper around an existing MCP server (like the filesystem server):
+Run the CapFence gateway as a wrapper around an existing MCP server (like the filesystem server):
 
 ```python
-from shadowaudit.mcp.gateway import MCPGatewayServer
-from shadowaudit.core.gate import Gate
+from capfence.mcp.gateway import MCPGatewayServer
+from capfence.core.gate import Gate
 
 gateway = MCPGatewayServer(
     # The actual MCP server command
@@ -56,4 +56,4 @@ gateway = MCPGatewayServer(
 gateway.run() 
 ```
 
-Whenever the MCP Client attempts to call a tool, ShadowAudit intercepts the message, extracts the arguments, scores them against the configured risk taxonomy, and either forwards the JSON-RPC message to the upstream server or blocks it immediately.
+Whenever the MCP Client attempts to call a tool, CapFence intercepts the message, extracts the arguments, scores them against the configured risk taxonomy, and either forwards the JSON-RPC message to the upstream server or blocks it immediately.

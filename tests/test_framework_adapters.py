@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import pytest
 
-from shadowaudit.errors import AgentActionBlocked
-from shadowaudit.framework.autogen import ShadowAuditAutoGenTool
-from shadowaudit.framework.llamaindex import ShadowAuditLlamaIndexTool
-from shadowaudit.framework.pydanticai import ShadowAuditPydanticTool
+from capfence.errors import AgentActionBlocked
+from capfence.framework.autogen import CapFenceAutoGenTool
+from capfence.framework.llamaindex import CapFenceLlamaIndexTool
+from capfence.framework.pydanticai import CapFencePydanticTool
 
 
 def _write_policy(tmp_path, content: str) -> str:
@@ -26,7 +26,7 @@ allow:
     def tool_fn(value: str) -> str:
         return f"ok:{value}"
 
-    safe_tool = ShadowAuditPydanticTool(
+    safe_tool = CapFencePydanticTool(
         tool=tool_fn,
         agent_id="test-agent",
         capability="tool.execute",
@@ -48,7 +48,7 @@ deny:
     def tool_fn(value: str) -> str:
         return f"ok:{value}"
 
-    safe_tool = ShadowAuditPydanticTool(
+    safe_tool = CapFencePydanticTool(
         tool=tool_fn,
         agent_id="test-agent",
         capability="tool.execute",
@@ -74,7 +74,7 @@ allow:
         def call(self, payload):
             return {"ok": payload}
 
-    safe_tool = ShadowAuditLlamaIndexTool(
+    safe_tool = CapFenceLlamaIndexTool(
         tool=DummyTool(),
         agent_id="test-agent",
         capability="tool.execute",
@@ -99,7 +99,7 @@ deny:
         def call(self, payload):
             return {"ok": payload}
 
-    safe_tool = ShadowAuditLlamaIndexTool(
+    safe_tool = CapFenceLlamaIndexTool(
         tool=DummyTool(),
         agent_id="test-agent",
         capability="tool.execute",
@@ -122,7 +122,7 @@ allow:
     def tool_fn(payload):
         return f"ok:{payload['value']}"
 
-    safe_tool = ShadowAuditAutoGenTool(
+    safe_tool = CapFenceAutoGenTool(
         tool=tool_fn,
         agent_id="test-agent",
         capability="tool.execute",
@@ -144,7 +144,7 @@ deny:
     def tool_fn(payload):
         return f"ok:{payload['value']}"
 
-    safe_tool = ShadowAuditAutoGenTool(
+    safe_tool = CapFenceAutoGenTool(
         tool=tool_fn,
         agent_id="test-agent",
         capability="tool.execute",

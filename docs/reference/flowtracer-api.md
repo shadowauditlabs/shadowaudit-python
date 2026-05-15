@@ -3,7 +3,7 @@
 `FlowTracer` tracks data movement between agents and propagates trust levels through multi-agent workflows.
 
 ```python
-from shadowaudit import FlowTracer, TrustLevel
+from capfence import FlowTracer, TrustLevel
 
 tracer = FlowTracer()
 ```

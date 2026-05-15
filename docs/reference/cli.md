@@ -1,20 +1,20 @@
 # CLI Reference
 
-All commands are available through the `shadowaudit` entry point after installation.
+All commands are available through the `capfence` entry point after installation.
 
 ```bash
-pip install shadowaudit
-shadowaudit --version
+pip install capfence
+capfence --version
 ```
 
 ---
 
-## `shadowaudit check`
+## `capfence check`
 
 Scan Python files for ungated AI agent tools.
 
 ```bash
-shadowaudit check [OPTIONS] PATH
+capfence check [OPTIONS] PATH
 ```
 
 Options:
@@ -31,19 +31,19 @@ Options:
 Examples:
 
 ```bash
-shadowaudit check ./src
-shadowaudit check ./src --fail-on-ungated
-shadowaudit check ./src --framework langchain --output report.html
+capfence check ./src
+capfence check ./src --fail-on-ungated
+capfence check ./src --framework langchain --output report.html
 ```
 
 ---
 
-## `shadowaudit assess`
+## `capfence assess`
 
 Generate a detailed HTML assessment report with taxonomy enrichment.
 
 ```bash
-shadowaudit assess [OPTIONS] PATH
+capfence assess [OPTIONS] PATH
 ```
 
 Options:
@@ -57,12 +57,12 @@ Options:
 
 ---
 
-## `shadowaudit verify`
+## `capfence verify`
 
 Verify the integrity of a hash-chained audit log.
 
 ```bash
-shadowaudit verify --audit-log audit.db
+capfence verify --audit-log audit.db
 ```
 
 Options:
@@ -80,12 +80,12 @@ Exit codes:
 
 ---
 
-## `shadowaudit logs`
+## `capfence logs`
 
 View structured audit events.
 
 ```bash
-shadowaudit logs [OPTIONS]
+capfence logs [OPTIONS]
 ```
 
 Options:
@@ -100,18 +100,18 @@ Options:
 Examples:
 
 ```bash
-shadowaudit logs --audit-log audit.db
-shadowaudit logs --agent finance-agent --json
+capfence logs --audit-log audit.db
+capfence logs --agent finance-agent --json
 ```
 
 ---
 
-## `shadowaudit trace`
+## `capfence trace`
 
 Show a detailed execution trace for an audit entry hash or payload hash.
 
 ```bash
-shadowaudit trace TRACE_ID --audit-log audit.db
+capfence trace TRACE_ID --audit-log audit.db
 ```
 
 Options:
@@ -123,24 +123,24 @@ Options:
 
 ---
 
-## `shadowaudit replay`
+## `capfence replay`
 
 Replay a JSONL trace file for deterministic output.
 
 ```bash
-shadowaudit replay trace.jsonl
+capfence replay trace.jsonl
 ```
 
 Use `simulate` when you need taxonomy selection, comparison, or JSON output.
 
 ---
 
-## `shadowaudit simulate`
+## `capfence simulate`
 
-Replay agent execution traces through the ShadowAudit simulator.
+Replay agent execution traces through the CapFence simulator.
 
 ```bash
-shadowaudit simulate --trace-file trace.jsonl --taxonomy financial --compare
+capfence simulate --trace-file trace.jsonl --taxonomy financial --compare
 ```
 
 Options:
@@ -155,28 +155,28 @@ Options:
 
 ---
 
-## `shadowaudit pending-approvals`
+## `capfence pending-approvals`
 
 List pending approval requests.
 
 ```bash
-shadowaudit pending-approvals --db-path shadowaudit_approvals.db
+capfence pending-approvals --db-path capfence_approvals.db
 ```
 
 Options:
 
 | Flag | Description |
 |---|---|
-| `-d, --db-path PATH` | Approval database. Defaults to `shadowaudit_approvals.db`. |
+| `-d, --db-path PATH` | Approval database. Defaults to `capfence_approvals.db`. |
 
 ---
 
-## `shadowaudit approve`
+## `capfence approve`
 
 Approve a pending tool execution.
 
 ```bash
-shadowaudit approve REQUEST_ID --user alice@example.com
+capfence approve REQUEST_ID --user alice@example.com
 ```
 
 Options:
@@ -184,39 +184,39 @@ Options:
 | Flag | Description |
 |---|---|
 | `REQUEST_ID` | Approval request ID. |
-| `-d, --db-path PATH` | Approval database. Defaults to `shadowaudit_approvals.db`. |
+| `-d, --db-path PATH` | Approval database. Defaults to `capfence_approvals.db`. |
 | `-u, --user TEXT` | User approving the request. Defaults to `cli_user`. |
 
 ---
 
-## `shadowaudit reject`
+## `capfence reject`
 
 Reject a pending tool execution.
 
 ```bash
-shadowaudit reject REQUEST_ID --user alice@example.com
+capfence reject REQUEST_ID --user alice@example.com
 ```
 
 Options are the same as `approve`.
 
 ---
 
-## `shadowaudit owasp`
+## `capfence owasp`
 
 Generate an OWASP Agentic Top 10 coverage matrix.
 
 ```bash
-shadowaudit owasp --output owasp.html
+capfence owasp --output owasp.html
 ```
 
 ---
 
-## `shadowaudit eu-ai-act`
+## `capfence eu-ai-act`
 
 Generate an EU AI Act Annex IV evidence pack from a codebase assessment.
 
 ```bash
-shadowaudit eu-ai-act ./src --output eu-ai-act.html --json-output eu-ai-act.json
+capfence eu-ai-act ./src --output eu-ai-act.html --json-output eu-ai-act.json
 ```
 
 Options:
@@ -231,12 +231,12 @@ Options:
 
 ---
 
-## `shadowaudit tune`
+## `capfence tune`
 
 Analyze recent audit decisions and suggest threshold adjustments.
 
 ```bash
-shadowaudit tune --audit-log audit.db --window 200
+capfence tune --audit-log audit.db --window 200
 ```
 
 Options:

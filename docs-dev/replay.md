@@ -1,6 +1,6 @@
 # Replay + Trace Engine
 
-ShadowAudit includes a deterministic Replay and Trace engine to ensure **explainability** and **auditability**.
+CapFence includes a deterministic Replay and Trace engine to ensure **explainability** and **auditability**.
 
 ## Features
 - **Deterministic Replay**: Re-evaluate past execution traces to understand enforcement paths.
@@ -11,7 +11,7 @@ ShadowAudit includes a deterministic Replay and Trace engine to ensure **explain
 
 ### View a Trace
 ```bash
-shadowaudit trace <trace_id>
+capfence trace <trace_id>
 ```
 Output clearly shows:
 - Tool invocation
@@ -22,6 +22,6 @@ Output clearly shows:
 
 ### Replay a Trace
 ```bash
-shadowaudit replay trace.jsonl
+capfence replay trace.jsonl
 ```
 This is useful for debugging policy changes or reproducing an incident.

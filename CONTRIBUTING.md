@@ -1,6 +1,6 @@
-# Contributing to ShadowAudit
+# Contributing to CapFence
 
-Thank you for your interest in contributing to ShadowAudit. As a foundational runtime authorization layer for AI agents, we prioritize deterministic behavior, security, and enterprise reliability above all else. 
+Thank you for your interest in contributing to CapFence. As a foundational runtime authorization layer for AI agents, we prioritize deterministic behavior, security, and enterprise reliability above all else. 
 
 This document outlines the engineering standards and workflows for contributing to the core engine, framework adapters, and policy modules.
 
@@ -14,8 +14,8 @@ This document outlines the engineering standards and workflows for contributing 
 ## Development Setup
 
 ```bash
-git clone https://github.com/shadowauditlabs/shadowaudit-python.git
-cd shadowaudit-python
+git clone https://github.com/capfencelabs/capfence.git
+cd capfence
 pip install -e ".[dev,langchain]"
 ```
 
@@ -27,14 +27,14 @@ We maintain a strict CI/CD pipeline for all enterprise-grade merges:
 2. **Test Coverage**: Every logic branch must be tested. We require edge-case testing, especially for bypass logic and failure modes.
 3. **Local Validation**:
    - `pytest tests/ -q`
-   - `mypy --strict shadowaudit/`
-   - `ruff check shadowaudit/ tests/`
+   - `mypy --strict capfence/`
+   - `ruff check capfence/ tests/`
 4. **Documentation**: Updates to APIs must be reflected in `docs/architecture.md` and `README.md`.
 5. **Review**: A core maintainer will review the PR for security implications, fail-closed enforcement, and performance regressions.
 
 ## Adding Policies
 
-If you are contributing to the standard policy taxonomy (under `policies/` or `shadowaudit/taxonomies/`):
+If you are contributing to the standard policy taxonomy (under `policies/` or `capfence/taxonomies/`):
 - Ensure keywords or regexes use whole-word boundaries where applicable to minimize false positives.
 - Clearly document the threat vector the policy addresses.
 - Provide a unit test demonstrating both the allowed execution and the blocked execution.
@@ -42,7 +42,7 @@ If you are contributing to the standard policy taxonomy (under `policies/` or `s
 ## Adding Framework Adapters
 
 When integrating a new agent framework (e.g., LlamaIndex):
-1. Create `shadowaudit/framework/<framework>.py`.
+1. Create `capfence/framework/<framework>.py`.
 2. Implement a transparent proxy that extracts the tool invocation payload.
 3. Ensure the `Gate.evaluate()` result directly controls the upstream execution.
 4. Add a minimal, runnable example to `examples/<framework>/`.

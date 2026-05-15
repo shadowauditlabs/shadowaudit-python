@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from shadowaudit.assessment.eu_ai_act import generate_evidence_pack
-from shadowaudit.assessment.scanner import AssessmentData, ToolAssessment
+from capfence.assessment.eu_ai_act import generate_evidence_pack
+from capfence.assessment.scanner import AssessmentData, ToolAssessment
 
 
 class TestEvidencePack:

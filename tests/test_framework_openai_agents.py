@@ -8,10 +8,10 @@ import pytest
 
 pytest.importorskip("pytest_asyncio", reason="pytest-asyncio not installed")
 
-from shadowaudit.core.gate import Gate
-from shadowaudit.core.fsm import FailClosedFSM
-from shadowaudit.types import GateResult
-from shadowaudit.framework.openai_agents import ShadowAuditOpenAITool, AgentActionBlocked
+from capfence.core.gate import Gate
+from capfence.core.fsm import FailClosedFSM
+from capfence.types import GateResult
+from capfence.framework.openai_agents import CapFenceOpenAITool, AgentActionBlocked
 
 
 class MockOpenAITool:
@@ -29,12 +29,12 @@ class MockOpenAITool:
         return f"invoked {self.name} with {arguments}"
 
 
-class TestShadowAuditOpenAITool:
-    """Tests for ShadowAuditOpenAITool."""
+class TestCapFenceOpenAITool:
+    """Tests for CapFenceOpenAITool."""
 
     def test_init_defaults(self):
         tool = MockOpenAITool("read_tool")
-        wrapped = ShadowAuditOpenAITool(tool=tool, agent_id="agent-1")
+        wrapped = CapFenceOpenAITool(tool=tool, agent_id="agent-1")
         assert wrapped.name == "read_tool"
         assert wrapped._agent_id == "agent-1"
         assert wrapped._risk_category is None
@@ -44,7 +44,7 @@ class TestShadowAuditOpenAITool:
     def test_init_custom(self):
         gate = Gate()
         tool = MockOpenAITool("shell")
-        wrapped = ShadowAuditOpenAITool(
+        wrapped = CapFenceOpenAITool(
             tool=tool,
             agent_id="agent-1",
             risk_category="execute",
@@ -56,7 +56,7 @@ class TestShadowAuditOpenAITool:
     def test_init_mirrors_metadata(self):
         tool = MockOpenAITool("payment", "Process payments")
         tool.params_json_schema = {"type": "object"}
-        wrapped = ShadowAuditOpenAITool(tool=tool, agent_id="agent-1")
+        wrapped = CapFenceOpenAITool(tool=tool, agent_id="agent-1")
         assert wrapped.name == "payment"
         assert wrapped.description == "Process payments"
         assert wrapped.params_json_schema == {"type": "object"}
@@ -67,7 +67,7 @@ class TestShadowAuditOpenAITool:
         class BareTool:
             pass
 
-        wrapped = ShadowAuditOpenAITool(tool=BareTool(), agent_id="agent-1")
+        wrapped = CapFenceOpenAITool(tool=BareTool(), agent_id="agent-1")
         assert wrapped.name == "unknown_tool"
         assert wrapped.description == ""
         assert wrapped.params_json_schema == {}
@@ -75,14 +75,14 @@ class TestShadowAuditOpenAITool:
     @pytest.mark.asyncio
     async def test_on_invoke_tool_passes_safe(self):
         tool = MockOpenAITool("read_tool")
-        wrapped = ShadowAuditOpenAITool(tool=tool, agent_id="agent-1")
+        wrapped = CapFenceOpenAITool(tool=tool, agent_id="agent-1")
         result = await wrapped.on_invoke_tool(None, json.dumps({"query": "test"}))
         assert "read_tool" in result
 
     @pytest.mark.asyncio
     async def test_on_invoke_tool_blocks_high_risk(self):
         tool = MockOpenAITool("shell")
-        wrapped = ShadowAuditOpenAITool(
+        wrapped = CapFenceOpenAITool(
             tool=tool,
             agent_id="agent-1",
             risk_category="execute",
@@ -93,7 +93,7 @@ class TestShadowAuditOpenAITool:
     @pytest.mark.asyncio
     async def test_on_invoke_tool_invalid_json(self):
         tool = MockOpenAITool("read_tool")
-        wrapped = ShadowAuditOpenAITool(tool=tool, agent_id="agent-1")
+        wrapped = CapFenceOpenAITool(tool=tool, agent_id="agent-1")
         result = await wrapped.on_invoke_tool(None, "not json")
         assert "read_tool" in result
 
@@ -109,7 +109,7 @@ class TestShadowAuditOpenAITool:
             def invoke(self, arguments: dict) -> str:
                 return f"invoked with {arguments}"
 
-        wrapped = ShadowAuditOpenAITool(tool=InvokeOnlyTool(), agent_id="agent-1")
+        wrapped = CapFenceOpenAITool(tool=InvokeOnlyTool(), agent_id="agent-1")
         result = await wrapped.on_invoke_tool(None, json.dumps({"key": "val"}))
         assert "invoked" in result
 
@@ -122,13 +122,13 @@ class TestShadowAuditOpenAITool:
             description = ""
             params_json_schema = {}
 
-        wrapped = ShadowAuditOpenAITool(tool=NoMethodTool(), agent_id="agent-1")
+        wrapped = CapFenceOpenAITool(tool=NoMethodTool(), agent_id="agent-1")
         with pytest.raises(AgentActionBlocked):
             await wrapped.on_invoke_tool(None, json.dumps({}))
 
     def test_getattr_passthrough(self):
         tool = MockOpenAITool("read_tool")
-        wrapped = ShadowAuditOpenAITool(tool=tool, agent_id="agent-1")
+        wrapped = CapFenceOpenAITool(tool=tool, agent_id="agent-1")
         assert wrapped.name == "read_tool"
         assert wrapped.description == ""
 

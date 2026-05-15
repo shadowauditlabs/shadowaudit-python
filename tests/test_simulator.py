@@ -3,7 +3,7 @@
 import json
 
 
-from shadowaudit.assessment.simulator import TraceSimulator
+from capfence.assessment.simulator import TraceSimulator
 
 
 class TestTraceSimulator:

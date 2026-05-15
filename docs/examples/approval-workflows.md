@@ -24,22 +24,22 @@ allow:
 ## Review queue
 
 ```bash
-shadowaudit pending-approvals
+capfence pending-approvals
 ```
 
 Approve or reject:
 
 ```bash
-shadowaudit approve <request_id> --user alice@example.com
-shadowaudit reject <request_id> --user alice@example.com
+capfence approve <request_id> --user alice@example.com
+capfence reject <request_id> --user alice@example.com
 ```
 
 ## Python API
 
 ```python
-from shadowaudit.core.approvals import ApprovalManager
+from capfence.core.approvals import ApprovalManager
 
-manager = ApprovalManager(db_path="shadowaudit_approvals.db")
+manager = ApprovalManager(db_path="capfence_approvals.db")
 
 request = manager.request_approval(
     agent_id="finance-agent",

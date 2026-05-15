@@ -1,20 +1,20 @@
 # CrewAI Integration
 
-ShadowAudit wraps CrewAI tools with a runtime gate. The wrapped tool is used in place of the original wherever it would appear in a crew or task definition.
+CapFence wraps CrewAI tools with a runtime gate. The wrapped tool is used in place of the original wherever it would appear in a crew or task definition.
 
 ## Installation
 
 ```bash
-pip install "shadowaudit[crewai]"
+pip install "capfence[crewai]"
 ```
 
 ## Wrapping a CrewAI tool
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from crewai_tools import FileReadTool
 
-safe_file = ShadowAuditTool(
+safe_file = CapFenceTool(
     tool=FileReadTool(),
     agent_id="research-agent",
     capability="filesystem.read",
@@ -46,7 +46,7 @@ crew.kickoff()
 
 ```python
 from crewai.tools import BaseTool
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 
 class MyDatabaseTool(BaseTool):
     name: str = "database_query"
@@ -56,7 +56,7 @@ class MyDatabaseTool(BaseTool):
         # database logic
         ...
 
-safe_db = ShadowAuditTool(
+safe_db = CapFenceTool(
     tool=MyDatabaseTool(),
     agent_id="db-agent",
     capability="database.read",
@@ -81,7 +81,7 @@ allow:
 ## Scanning for ungated tools
 
 ```bash
-shadowaudit check ./src --framework crewai
+capfence check ./src --framework crewai
 ```
 
 ## Related integrations

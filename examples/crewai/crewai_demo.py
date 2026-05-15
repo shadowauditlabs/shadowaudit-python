@@ -1,6 +1,6 @@
 """Minimal CrewAI Integration Demo."""
-from shadowaudit.framework.crewai import ShadowAuditCrewAITool
-from shadowaudit.errors import AgentActionBlocked
+from capfence.framework.crewai import CapFenceCrewAITool
+from capfence.errors import AgentActionBlocked
 
 class MockCrewAITool:
     name = "shell"
@@ -9,7 +9,7 @@ class MockCrewAITool:
     def run(self, command: str) -> str:
         return "Executed"
 
-safe_shell = ShadowAuditCrewAITool(
+safe_shell = CapFenceCrewAITool(
     tool=MockCrewAITool(),
     agent_id="crewai-agent",
     risk_category="execute"

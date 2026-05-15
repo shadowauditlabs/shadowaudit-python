@@ -3,7 +3,7 @@
 import os
 import tempfile
 
-from shadowaudit.core.keys import (
+from capfence.core.keys import (
     generate_keypair,
     load_keypair,
     ensure_keypair,

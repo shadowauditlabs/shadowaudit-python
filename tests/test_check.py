@@ -3,13 +3,13 @@
 import ast
 from pathlib import Path
 
-from shadowaudit.check import (
+from capfence.check import (
     ToolFinding,
     _guess_category,
     _is_tool_classdef,
     _is_tool_functiondef,
     _find_tool_classes,
-    _find_shadowaudit_wrappers,
+    _find_capfence_wrappers,
     scan_file,
     scan_directory,
     compute_aggregate_score,
@@ -85,20 +85,20 @@ class PaymentTool(BaseTool):
         assert "PaymentTool" in names
 
 
-class TestFindShadowAuditWrappers:
+class TestFindCapFenceWrappers:
     def test_detects_wrapper(self):
         code = """
-from shadowaudit.framework.langchain import ShadowAuditTool
-safe_shell = ShadowAuditTool(tool=ShellTool(), agent_id="test")
+from capfence.framework.langchain import CapFenceTool
+safe_shell = CapFenceTool(tool=ShellTool(), agent_id="test")
 """
         tree = ast.parse(code)
-        wrapped = _find_shadowaudit_wrappers(tree)
+        wrapped = _find_capfence_wrappers(tree)
         assert "ShellTool" in wrapped
 
     def test_no_wrapper(self):
         code = "shell = ShellTool()"
         tree = ast.parse(code)
-        wrapped = _find_shadowaudit_wrappers(tree)
+        wrapped = _find_capfence_wrappers(tree)
         assert len(wrapped) == 0
 
 
@@ -122,8 +122,8 @@ class PaymentTool(BaseTool):
         return f"Paid: {amount}"
 
 # This one is wrapped
-from shadowaudit.framework.langchain import ShadowAuditTool
-safe_shell = ShadowAuditTool(tool=ShellTool(), agent_id="ops-1", risk_category="execute")
+from capfence.framework.langchain import CapFenceTool
+safe_shell = CapFenceTool(tool=ShellTool(), agent_id="ops-1", risk_category="execute")
 """
         f = tmp_path / "test_tools.py"
         f.write_text(code)
@@ -134,7 +134,7 @@ safe_shell = ShadowAuditTool(tool=ShellTool(), agent_id="ops-1", risk_category="
         
         shell = next(f for f in findings if f.name == "ShellTool")
         assert shell.category == "execute"
-        assert shell.is_wrapped is True  # ShadowAuditTool detected
+        assert shell.is_wrapped is True  # CapFenceTool detected
         
         payment = next(f for f in findings if f.name == "PaymentTool")
         assert payment.category == "payment_initiation"

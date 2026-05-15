@@ -1,12 +1,12 @@
 # Configuration Reference
 
-ShadowAudit is configured through constructor parameters and policy files. There is no required global configuration file.
+CapFence is configured through constructor parameters and policy files. There is no required global configuration file.
 
 ## Gate configuration
 
 ```python
-from shadowaudit.core.audit import AuditLogger
-from shadowaudit.core.gate import Gate
+from capfence.core.audit import AuditLogger
+from capfence.core.gate import Gate
 
 gate = Gate(
     taxonomy_path="financial",
@@ -26,13 +26,13 @@ gate = Gate(
 ## Adapter configuration
 
 ```python
-from shadowaudit import ShadowAuditTool
-from shadowaudit.core.audit import AuditLogger
-from shadowaudit.core.gate import Gate
+from capfence import CapFenceTool
+from capfence.core.audit import AuditLogger
+from capfence.core.gate import Gate
 
 gate = Gate(audit_logger=AuditLogger(db_path="audit.db"))
 
-safe_tool = ShadowAuditTool(
+safe_tool = CapFenceTool(
     tool=my_tool,
     agent_id="my-agent",
     capability="shell.execute",
@@ -61,11 +61,11 @@ policies/
 By default, `AuditLogger()` uses an in-memory database. Configure a path for persistent audit logs:
 
 ```python
-from shadowaudit.core.audit import AuditLogger
-from shadowaudit.core.gate import Gate
+from capfence.core.audit import AuditLogger
+from capfence.core.gate import Gate
 
 gate = Gate(
-    audit_logger=AuditLogger(db_path="/var/log/myapp/shadowaudit.db")
+    audit_logger=AuditLogger(db_path="/var/log/myapp/capfence.db")
 )
 ```
 
@@ -79,11 +79,11 @@ approval_timeout_seconds: 3600
 
 ## Logging
 
-ShadowAudit uses the standard Python `logging` module under the `shadowaudit` logger name.
+CapFence uses the standard Python `logging` module under the `capfence` logger name.
 
 ```python
 import logging
 
-logging.getLogger("shadowaudit").setLevel(logging.WARNING)
+logging.getLogger("capfence").setLevel(logging.WARNING)
 ```
 

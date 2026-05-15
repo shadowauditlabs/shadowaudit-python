@@ -1,4 +1,4 @@
-# ShadowAudit Public Roadmap
+# CapFence Public Roadmap
 
 Updated monthly. No dates on unshipped items — we ship when ready.
 
@@ -9,8 +9,8 @@ Updated monthly. No dates on unshipped items — we ship when ready.
 - v0.4.0 — Hardened Regex+AST scorer
 - v0.4.0 — OWASP Agentic Top 10 coverage matrix
 - v0.4.0 — MCP gateway (stdio proxy + in-process adapter)
-- v0.4.0 — LangGraph adapter (`ShadowAuditToolNode`)
-- v0.4.0 — OpenAI Agents SDK adapter (`ShadowAuditOpenAITool`)
+- v0.4.0 — LangGraph adapter (`CapFenceToolNode`)
+- v0.4.0 — OpenAI Agents SDK adapter (`CapFenceOpenAITool`)
 - v0.4.0 — EU AI Act Annex IV evidence pack generator
 
 ## Working on now

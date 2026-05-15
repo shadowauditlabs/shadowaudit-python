@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "shadowaudit"
-version = "0.6.2"
+name = "capfence"
+version = "0.7.0"
 description = "Runtime governance for AI agents — deterministic fail-closed enforcement. Wraps any agent tool and blocks dangerous calls before execution. Zero LLM calls, zero cloud dependencies, works offline."
 readme = "README.md"
 license = { text = "MIT" }
@@ -50,7 +50,7 @@ dependencies = [
 ]
 
 [project.scripts]
-shadowaudit = "shadowaudit.cli:main"
+capfence = "capfence.cli:main"
 
 [project.optional-dependencies]
 langchain = ["langchain-core>=0.1"]
@@ -63,9 +63,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://shadowaudit.dev/"
-Repository = "https://github.com/shadowauditlabs/shadowaudit-python"
-Issues = "https://github.com/shadowauditlabs/shadowaudit-python/issues"
+Homepage = "https://capfence.dev/"
+Repository = "https://github.com/capfencelabs/capfence"
+Issues = "https://github.com/capfencelabs/capfence/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -78,7 +78,7 @@ module = "cryptography.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "shadowaudit._native"
+module = "capfence._native"
 ignore_missing_imports = true
 
 [tool.ruff]
@@ -86,14 +86,14 @@ line-length = 100
 target-version = "py310"
 
 [tool.hatch.build.targets.wheel]
-packages = ["shadowaudit"]
+packages = ["capfence"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"shadowaudit/py.typed" = "shadowaudit/py.typed"
+"capfence/py.typed" = "capfence/py.typed"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "shadowaudit",
+    "capfence",
     "tests",
     "examples",
     "docs",

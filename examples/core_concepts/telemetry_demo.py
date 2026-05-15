@@ -5,7 +5,7 @@ Demonstrates the async telemetry exporter for hashed decision metadata.
 
 import asyncio
 import os
-from shadowaudit.telemetry.client import TelemetryClient
+from capfence.telemetry.client import TelemetryClient
 
 
 def main():
@@ -17,9 +17,9 @@ def main():
     print(f"Default state: enabled={client_disabled.enabled}")
 
     # Enable via environment variable
-    os.environ["SHADOWAUDIT_TELEMETRY"] = "1"
+    os.environ["CAPFENCE_TELEMETRY"] = "1"
     client_enabled = TelemetryClient(api_key="test-key")
-    print(f"With SHADOWAUDIT_TELEMETRY=1: enabled={client_enabled.enabled}")
+    print(f"With CAPFENCE_TELEMETRY=1: enabled={client_enabled.enabled}")
 
     # Simulate sending a decision
     if client_enabled.enabled:
@@ -36,9 +36,9 @@ def main():
         print("Decision queued for telemetry export")
 
     # Cleanup
-    del os.environ["SHADOWAUDIT_TELEMETRY"]
+    del os.environ["CAPFENCE_TELEMETRY"]
 
-    print("\nNote: Telemetry is opt-in. Set SHADOWAUDIT_TELEMETRY=1 to enable.")
+    print("\nNote: Telemetry is opt-in. Set CAPFENCE_TELEMETRY=1 to enable.")
     print("Only hashed metadata is sent — no raw payloads leave your system.")
 
 

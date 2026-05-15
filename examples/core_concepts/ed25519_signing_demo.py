@@ -3,13 +3,13 @@
 Demonstrates cryptographic signing of audit log entries for authenticity.
 """
 
-from shadowaudit.core.gate import Gate
-from shadowaudit.core.audit import AuditLogger
-from shadowaudit.core.keys import generate_keypair, load_keypair, verify_entry
+from capfence.core.gate import Gate
+from capfence.core.audit import AuditLogger
+from capfence.core.keys import generate_keypair, load_keypair, verify_entry
 
 
 def main():
-    # Generate a new keypair (stored in ~/.shadowaudit/keys/)
+    # Generate a new keypair (stored in ~/.capfence/keys/)
     pub_b64, priv_b64 = generate_keypair()
     print("Generated Ed25519 keypair")
     print(f"  Public key:  {pub_b64[:20]}...")

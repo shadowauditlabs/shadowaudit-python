@@ -18,7 +18,7 @@ allow:
 ## Integration
 
 ```python
-from shadowaudit.core.gate import Gate
+from capfence.core.gate import Gate
 
 gate = Gate()
 

@@ -21,7 +21,7 @@ TRADE_SECRET*.md
 CHANGES_TO_APPLY_MANUALLY.md
 
 # Private Cloud repo — decoupled from OSS
-shadowaudit-cloud/
+capfence-cloud/
 
 # Python
 __pycache__/
@@ -80,5 +80,5 @@ archive/
 .DS_Store
 Thumbs.db
 site/
-shadowaudit-demo/shadowaudit-assessment-report.html
-shadowaudit-demo/audit.db
+capfence-demo/capfence-assessment-report.html
+capfence-demo/audit.db

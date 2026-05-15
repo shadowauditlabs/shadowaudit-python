@@ -1,4 +1,4 @@
-# ShadowAudit benchmarks
+# CapFence benchmarks
 
 ## Scorer benchmark
 
@@ -32,5 +32,5 @@ results. The 30-trace edge-case corpus at `tests/corpus/edge_cases.jsonl`
 documents some of the failure modes (sparse keywords, AST obfuscation in
 string literals, borderline thresholds).
 
-For production calibration, run `shadowaudit tune --audit-log audit.db`
+For production calibration, run `capfence tune --audit-log audit.db`
 against your real audit log after a shadow-mode rollout.

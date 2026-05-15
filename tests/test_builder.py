@@ -1,6 +1,6 @@
 """Tests for TaxonomyBuilder."""
 
-from shadowaudit.assessment.builder import TaxonomyBuilder
+from capfence.assessment.builder import TaxonomyBuilder
 
 
 class TestTaxonomyBuilder:

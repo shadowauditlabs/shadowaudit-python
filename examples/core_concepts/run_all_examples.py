@@ -30,7 +30,7 @@ def run_example(name: str, filename: str) -> bool:
     print(f"File:    {filename}")
     print("=" * 60)
 
-    # Allow examples to import shadowaudit from the repo root without pip install
+    # Allow examples to import capfence from the repo root without pip install
     env = os.environ.copy()
     repo_root = str(Path(__file__).parent.parent.resolve())
     env["PYTHONPATH"] = repo_root + os.pathsep + env.get("PYTHONPATH", "")
@@ -54,7 +54,7 @@ def run_example(name: str, filename: str) -> bool:
 
 
 def main():
-    print("ShadowAudit v0.4.0 Example Test Runner")
+    print("CapFence v0.4.0 Example Test Runner")
     print(f"Python: {sys.version}")
 
     passed = 0

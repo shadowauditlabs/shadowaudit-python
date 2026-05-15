@@ -1,7 +1,7 @@
 """Tests for cloud client with graceful offline fallback."""
 
 
-from shadowaudit.cloud.client import CloudClient
+from capfence.cloud.client import CloudClient
 
 
 class TestCloudClientOfflineMode:
@@ -51,12 +51,12 @@ class TestCloudClientFromEnv:
     """API key from environment variable."""
 
     def test_api_key_from_env(self, monkeypatch):
-        monkeypatch.setenv("SHADOWAUDIT_API_KEY", "sk_env_123")
+        monkeypatch.setenv("CAPFENCE_API_KEY", "sk_env_123")
         client = CloudClient()
         assert not client.offline_mode
         assert client._api_key == "sk_env_123"
 
     def test_base_url_from_env(self, monkeypatch):
-        monkeypatch.setenv("SHADOWAUDIT_BASE_URL", "https://custom.example.com/v2")
+        monkeypatch.setenv("CAPFENCE_BASE_URL", "https://custom.example.com/v2")
         client = CloudClient()
         assert client._base_url == "https://custom.example.com/v2"

@@ -1,12 +1,12 @@
 # Gate API Reference
 
-`shadowaudit.core.gate.Gate` is the core enforcement object. Framework adapters call it internally, and custom runtimes can call it directly.
+`capfence.core.gate.Gate` is the core enforcement object. Framework adapters call it internally, and custom runtimes can call it directly.
 
 ## Constructor
 
 ```python
-from shadowaudit.core.audit import AuditLogger
-from shadowaudit.core.gate import Gate
+from capfence.core.audit import AuditLogger
+from capfence.core.gate import Gate
 
 gate = Gate(
     taxonomy_path="financial",
@@ -64,7 +64,7 @@ result = gate.evaluate(
 | `latency_ms` | `int \| None` | Evaluation latency. |
 | `metadata` | `dict` | Additional decision metadata, including policy details. |
 
-ShadowAudit’s current direct result model is pass/fail. Policy outcomes such as approval are represented through result metadata and approval queue state.
+CapFence’s current direct result model is pass/fail. Policy outcomes such as approval are represented through result metadata and approval queue state.
 
 ## `gate.evaluate_async()`
 
@@ -92,8 +92,8 @@ Observe mode records what would have happened, but returns a passing result so t
 ## Example
 
 ```python
-from shadowaudit.core.audit import AuditLogger
-from shadowaudit.core.gate import Gate
+from capfence.core.audit import AuditLogger
+from capfence.core.gate import Gate
 
 gate = Gate(audit_logger=AuditLogger(db_path="audit.db"))
 

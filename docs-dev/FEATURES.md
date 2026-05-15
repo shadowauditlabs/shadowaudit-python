@@ -1,79 +1,79 @@
-# ShadowAudit Feature Reference
+# CapFence Feature Reference
 
-This document lists every feature in ShadowAudit v0.4.0, grouped by category. For usage examples, see [`README.md`](../README.md) and [`docs/CLI.md`](CLI.md).
+This document lists every feature in CapFence v0.4.0, grouped by category. For usage examples, see [`README.md`](../README.md) and [`docs/CLI.md`](CLI.md).
 
 ---
 
 ## 1. Tamper-Evident Audit
 
 ### Hash-chained audit log
-Every gate decision is recorded in an append-only SQLite log. Each entry contains a SHA-256 hash of the previous entry's hash, creating a cryptographic chain. Modifying any row invalidates all subsequent entries. Implemented in [`shadowaudit/core/chain.py`](../shadowaudit/core/chain.py) and [`shadowaudit/core/audit.py`](../shadowaudit/core/audit.py).
+Every gate decision is recorded in an append-only SQLite log. Each entry contains a SHA-256 hash of the previous entry's hash, creating a cryptographic chain. Modifying any row invalidates all subsequent entries. Implemented in [`capfence/core/chain.py`](../capfence/core/chain.py) and [`capfence/core/audit.py`](../capfence/core/audit.py).
 
 ### Ed25519 signing
-Optional cryptographic signing of each audit entry. Generate an Ed25519 keypair via [`shadowaudit/core/keys.py`](../shadowaudit/core/keys.py), enable `sign_entries=True` in `AuditLogger`, and verify authenticity with `shadowaudit verify`. Falls back to HMAC-SHA256 when the `cryptography` package is not installed.
+Optional cryptographic signing of each audit entry. Generate an Ed25519 keypair via [`capfence/core/keys.py`](../capfence/core/keys.py), enable `sign_entries=True` in `AuditLogger`, and verify authenticity with `capfence verify`. Falls back to HMAC-SHA256 when the `cryptography` package is not installed.
 
 ### Audit log verification
-`shadowaudit verify` reads the SQLite database and checks every link in the hash chain. Reports the first broken entry, missing keys, or signature mismatches. See [`shadowaudit/cli.py`](../shadowaudit/cli.py) and [`shadowaudit/core/chain.py`](../shadowaudit/core/chain.py).
+`capfence verify` reads the SQLite database and checks every link in the hash chain. Reports the first broken entry, missing keys, or signature mismatches. See [`capfence/cli.py`](../capfence/cli.py) and [`capfence/core/chain.py`](../capfence/core/chain.py).
 
 ---
 
 ## 2. Vertical Taxonomies
 
 ### General taxonomy
-Covers shell execution, file operations, network calls, data export, authentication, and permission changes. Default taxonomy for most workloads. Defined in [`shadowaudit/taxonomies/general.json`](../shadowaudit/taxonomies/general.json).
+Covers shell execution, file operations, network calls, data export, authentication, and permission changes. Default taxonomy for most workloads. Defined in [`capfence/taxonomies/general.json`](../capfence/taxonomies/general.json).
 
 ### Financial taxonomy
-Covers balance inquiry, transaction history, payment initiation, withdrawal, account modification, high-value transfer, and Stripe operations (payment, refund, payout, subscription, issuing card, customer management, dispute). Defined in [`shadowaudit/taxonomies/financial.json`](../shadowaudit/taxonomies/financial.json).
+Covers balance inquiry, transaction history, payment initiation, withdrawal, account modification, high-value transfer, and Stripe operations (payment, refund, payout, subscription, issuing card, customer management, dispute). Defined in [`capfence/taxonomies/financial.json`](../capfence/taxonomies/financial.json).
 
 ### Plaid taxonomy
-Fintech-specific categories for Plaid API operations: auth, balance, transactions, identity, income, transfer, link token, item management, liabilities, and investments. Defined in [`shadowaudit/taxonomies/financial_plaid.json`](../shadowaudit/taxonomies/financial_plaid.json).
+Fintech-specific categories for Plaid API operations: auth, balance, transactions, identity, income, transfer, link token, item management, liabilities, and investments. Defined in [`capfence/taxonomies/financial_plaid.json`](../capfence/taxonomies/financial_plaid.json).
 
 ### Legal taxonomy
-Covers privilege waiver, regulatory filings, and client data access. Defined in [`shadowaudit/taxonomies/legal.json`](../shadowaudit/taxonomies/legal.json).
+Covers privilege waiver, regulatory filings, and client data access. Defined in [`capfence/taxonomies/legal.json`](../capfence/taxonomies/legal.json).
 
 ### Interactive taxonomy builder
-`shadowaudit build-taxonomy` prompts for industry, payment methods, and compliance frameworks, then generates a tailored JSON taxonomy. Implemented in [`shadowaudit/assessment/builder.py`](../shadowaudit/assessment/builder.py).
+`capfence build-taxonomy` prompts for industry, payment methods, and compliance frameworks, then generates a tailored JSON taxonomy. Implemented in [`capfence/assessment/builder.py`](../capfence/assessment/builder.py).
 
 ### Taxonomy loader with caching
-`TaxonomyLoader.load()` reads embedded starter packs or user-provided JSON files. Caches loaded taxonomies at the class level and returns deep copies to prevent shared mutable state. Implemented in [`shadowaudit/core/taxonomy.py`](../shadowaudit/core/taxonomy.py).
+`TaxonomyLoader.load()` reads embedded starter packs or user-provided JSON files. Caches loaded taxonomies at the class level and returns deep copies to prevent shared mutable state. Implemented in [`capfence/core/taxonomy.py`](../capfence/core/taxonomy.py).
 
 ---
 
 ## 3. Framework Coverage
 
 ### LangChain adapter
-`ShadowAuditTool` wraps any LangChain `BaseTool` with deterministic gate enforcement. Same interface, automatic blocking. Supports both class-based and function-based tools via decorator. Implemented in [`shadowaudit/framework/langchain.py`](../shadowaudit/framework/langchain.py).
+`CapFenceTool` wraps any LangChain `BaseTool` with deterministic gate enforcement. Same interface, automatic blocking. Supports both class-based and function-based tools via decorator. Implemented in [`capfence/framework/langchain.py`](../capfence/framework/langchain.py).
 
 ### CrewAI adapter
-`ShadowAuditCrewAITool` wraps CrewAI `BaseTool` subclasses. Intercepts `run()` calls, evaluates through the gate, and raises `AgentActionBlocked` on violation. Implemented in [`shadowaudit/framework/crewai.py`](../shadowaudit/framework/crewai.py).
+`CapFenceCrewAITool` wraps CrewAI `BaseTool` subclasses. Intercepts `run()` calls, evaluates through the gate, and raises `AgentActionBlocked` on violation. Implemented in [`capfence/framework/crewai.py`](../capfence/framework/crewai.py).
 
 ### LangGraph adapter
-`ShadowAuditToolNode` replaces LangGraph `ToolNode` with automatic gate enforcement on every tool invocation. Maps tool names to risk categories and handles state transitions. Implemented in [`shadowaudit/framework/langgraph.py`](../shadowaudit/framework/langgraph.py).
+`CapFenceToolNode` replaces LangGraph `ToolNode` with automatic gate enforcement on every tool invocation. Maps tool names to risk categories and handles state transitions. Implemented in [`capfence/framework/langgraph.py`](../capfence/framework/langgraph.py).
 
 ### OpenAI Agents SDK adapter
-`ShadowAuditOpenAITool` wraps OpenAI Agents SDK tools. Provides `on_invoke_tool()` for the Agents SDK runtime, with automatic gate evaluation and blocking. Implemented in [`shadowaudit/framework/openai_agents.py`](../shadowaudit/framework/openai_agents.py).
+`CapFenceOpenAITool` wraps OpenAI Agents SDK tools. Provides `on_invoke_tool()` for the Agents SDK runtime, with automatic gate evaluation and blocking. Implemented in [`capfence/framework/openai_agents.py`](../capfence/framework/openai_agents.py).
 
 ### MCP gateway server
-`MCPGatewayServer` is a stdio proxy that intercepts MCP tool calls through the ShadowAudit Gate. Parses JSON-RPC messages with Content-Length protocol, extracts tool payloads, and blocks dangerous calls before forwarding to the upstream MCP server. Implemented in [`shadowaudit/mcp/gateway.py`](../shadowaudit/mcp/gateway.py).
+`MCPGatewayServer` is a stdio proxy that intercepts MCP tool calls through the CapFence Gate. Parses JSON-RPC messages with Content-Length protocol, extracts tool payloads, and blocks dangerous calls before forwarding to the upstream MCP server. Implemented in [`capfence/mcp/gateway.py`](../capfence/mcp/gateway.py).
 
 ### MCP in-process adapter
-`ShadowAuditMCPSession` wraps an existing MCP client session with ShadowAudit gating for async tool calls. Transparent passthrough for non-tool methods. Implemented in [`shadowaudit/mcp/adapter.py`](../shadowaudit/mcp/adapter.py).
+`CapFenceMCPSession` wraps an existing MCP client session with CapFence gating for async tool calls. Transparent passthrough for non-tool methods. Implemented in [`capfence/mcp/adapter.py`](../capfence/mcp/adapter.py).
 
 ---
 
 ## 4. Compliance Reporting
 
 ### HTML assessment reports
-Jinja2-based professional reports with executive summaries, risk breakdowns, remediation plans, and tool inventories. Generated by `shadowaudit assess --output report.html`. Implemented in [`shadowaudit/assessment/reporter.py`](../shadowaudit/assessment/reporter.py).
+Jinja2-based professional reports with executive summaries, risk breakdowns, remediation plans, and tool inventories. Generated by `capfence assess --output report.html`. Implemented in [`capfence/assessment/reporter.py`](../capfence/assessment/reporter.py).
 
 ### SOX/PCI-DSS/GDPR compliance mappings
-Assessment reports include mappings between discovered tools and relevant compliance frameworks. Useful for audit questionnaires. Implemented in [`shadowaudit/assessment/scanner.py`](../shadowaudit/assessment/scanner.py).
+Assessment reports include mappings between discovered tools and relevant compliance frameworks. Useful for audit questionnaires. Implemented in [`capfence/assessment/scanner.py`](../capfence/assessment/scanner.py).
 
 ### OWASP Agentic Top 10 coverage matrix
-Static mapping of ShadowAudit controls to OWASP Agentic AI Top 10 risks. Run `shadowaudit owasp` to generate an HTML report showing full, partial, or no coverage for each risk. Implemented in [`shadowaudit/assessment/owasp.py`](../shadowaudit/assessment/owasp.py).
+Static mapping of CapFence controls to OWASP Agentic AI Top 10 risks. Run `capfence owasp` to generate an HTML report showing full, partial, or no coverage for each risk. Implemented in [`capfence/assessment/owasp.py`](../capfence/assessment/owasp.py).
 
 ### EU AI Act Annex IV evidence pack
-Generates structured JSON and HTML evidence packs for regulatory submission. Covers risk management, cybersecurity, data governance, and technical documentation sections of Annex IV. Implemented in [`shadowaudit/assessment/eu_ai_act.py`](../shadowaudit/assessment/eu_ai_act.py).
+Generates structured JSON and HTML evidence packs for regulatory submission. Covers risk management, cybersecurity, data governance, and technical documentation sections of Annex IV. Implemented in [`capfence/assessment/eu_ai_act.py`](../capfence/assessment/eu_ai_act.py).
 
 ---
 
@@ -83,30 +83,30 @@ Generates structured JSON and HTML evidence packs for regulatory submission. Cov
 The core gate, scorer, state store, and audit log require no network access. No LLM APIs, no cloud services, no telemetry unless explicitly enabled.
 
 ### Air-gap ready
-Single `pip install shadowaudit` deploys everything needed for runtime governance. SQLite is the only persistence layer. Works inside isolated VPCs and on-prem deployments.
+Single `pip install capfence` deploys everything needed for runtime governance. SQLite is the only persistence layer. Works inside isolated VPCs and on-prem deployments.
 
 ### Optional telemetry (opt-in, hashed metadata only)
-`TelemetryClient` queues decision records and exports hashed metadata asynchronously. Disabled by default; enable via `SHADOWAUDIT_TELEMETRY=1`. No raw payloads leave the system. Implemented in [`shadowaudit/telemetry/client.py`](../shadowaudit/telemetry/client.py).
+`TelemetryClient` queues decision records and exports hashed metadata asynchronously. Disabled by default; enable via `CAPFENCE_TELEMETRY=1`. No raw payloads leave the system. Implemented in [`capfence/telemetry/client.py`](../capfence/telemetry/client.py).
 
 ---
 
 ## 6. CI/CD Integration
 
 ### Static scanner
-`shadowaudit check` parses Python source with the AST module, identifies tool classes and functions, and flags ungated ones. Supports cross-file wrapper detection. See [`shadowaudit/check.py`](../shadowaudit/check.py).
+`capfence check` parses Python source with the AST module, identifies tool classes and functions, and flags ungated ones. Supports cross-file wrapper detection. See [`capfence/check.py`](../capfence/check.py).
 
 ### `--fail-on-ungated` flag
-Exits with non-zero code if high-risk tools are found without ShadowAudit wrappers. Drop into any CI pipeline to block deployments containing unsafe agents.
+Exits with non-zero code if high-risk tools are found without CapFence wrappers. Drop into any CI pipeline to block deployments containing unsafe agents.
 
 ### Trace simulator
-`shadowaudit simulate` replays JSONL agent execution traces through the gate. Compare static vs. adaptive scoring side-by-side to detect behavioral drift. Implemented in [`shadowaudit/assessment/simulator.py`](../shadowaudit/assessment/simulator.py).
+`capfence simulate` replays JSONL agent execution traces through the gate. Compare static vs. adaptive scoring side-by-side to detect behavioral drift. Implemented in [`capfence/assessment/simulator.py`](../capfence/assessment/simulator.py).
 
 ---
 
 ## 7. Core Engine
 
 ### Deterministic fail-closed gate
-`Gate.evaluate()` uses a finite state machine with one accepting state: pass. Everything else is a terminal failure. No probabilistic decisions. Implemented in [`shadowaudit/core/gate.py`](../shadowaudit/core/gate.py) and [`shadowaudit/core/fsm.py`](../shadowaudit/core/fsm.py).
+`Gate.evaluate()` uses a finite state machine with one accepting state: pass. Everything else is a terminal failure. No probabilistic decisions. Implemented in [`capfence/core/gate.py`](../capfence/core/gate.py) and [`capfence/core/fsm.py`](../capfence/core/fsm.py).
 
 ### Pluggable scoring
 Three built-in scorers:
@@ -114,29 +114,29 @@ Three built-in scorers:
 - `RegexASTScorer` — whole-word regex + Python AST dangerous construct detection
 - `AdaptiveScorer` — extends keyword scoring with behavioral state (K/V metrics)
 
-Custom scorers implement `BaseScorer`. Implemented in [`shadowaudit/core/scorer.py`](../shadowaudit/core/scorer.py).
+Custom scorers implement `BaseScorer`. Implemented in [`capfence/core/scorer.py`](../capfence/core/scorer.py).
 
 ### Behavioral state tracking
-SQLite-backed rolling history and velocity tracking. Computes K (historical accuracy) and V (request velocity) per agent. Used by `AdaptiveScorer` to adjust risk thresholds dynamically. Implemented in [`shadowaudit/core/state.py`](../shadowaudit/core/state.py).
+SQLite-backed rolling history and velocity tracking. Computes K (historical accuracy) and V (request velocity) per agent. Used by `AdaptiveScorer` to adjust risk thresholds dynamically. Implemented in [`capfence/core/state.py`](../capfence/core/state.py).
 
 ### Deterministic payload hashing
-`compute_payload_hash()` produces SHA-256 hex digests from canonical JSON serialization. Used for audit log integrity and telemetry deduplication. Implemented in [`shadowaudit/core/hash.py`](../shadowaudit/core/hash.py).
+`compute_payload_hash()` produces SHA-256 hex digests from canonical JSON serialization. Used for audit log integrity and telemetry deduplication. Implemented in [`capfence/core/hash.py`](../capfence/core/hash.py).
 
 ---
 
 ## 8. Security Hardening
 
 ### Constant-time signature verification
-Fallback signature verification uses `hmac.compare_digest()` to prevent timing attacks. Implemented in [`shadowaudit/core/keys.py`](../shadowaudit/core/keys.py).
+Fallback signature verification uses `hmac.compare_digest()` to prevent timing attacks. Implemented in [`capfence/core/keys.py`](../capfence/core/keys.py).
 
 ### Atomic key file writes
-Private keys are written with `os.open()` using `O_CREAT | O_WRONLY` and mode `0o600`, eliminating the race window between `write_text()` and `os.chmod()`. Implemented in [`shadowaudit/core/keys.py`](../shadowaudit/core/keys.py).
+Private keys are written with `os.open()` using `O_CREAT | O_WRONLY` and mode `0o600`, eliminating the race window between `write_text()` and `os.chmod()`. Implemented in [`capfence/core/keys.py`](../capfence/core/keys.py).
 
 ### Taxonomy cache poisoning protection
-`TaxonomyLoader.load()` returns `copy.deepcopy(data)` from cache, preventing callers from mutating shared state. `Gate.evaluate()` deep-copies taxonomy entries before mutation. Implemented in [`shadowaudit/core/taxonomy.py`](../shadowaudit/core/taxonomy.py) and [`shadowaudit/core/gate.py`](../shadowaudit/core/gate.py).
+`TaxonomyLoader.load()` returns `copy.deepcopy(data)` from cache, preventing callers from mutating shared state. `Gate.evaluate()` deep-copies taxonomy entries before mutation. Implemented in [`capfence/core/taxonomy.py`](../capfence/core/taxonomy.py) and [`capfence/core/gate.py`](../capfence/core/gate.py).
 
 ### MCP message size limits
-`MCPGatewayServer` enforces `MAX_MESSAGE_SIZE` (10MB) on Content-Length headers, preventing memory exhaustion from malformed or malicious messages. Implemented in [`shadowaudit/mcp/gateway.py`](../shadowaudit/mcp/gateway.py).
+`MCPGatewayServer` enforces `MAX_MESSAGE_SIZE` (10MB) on Content-Length headers, preventing memory exhaustion from malformed or malicious messages. Implemented in [`capfence/mcp/gateway.py`](../capfence/mcp/gateway.py).
 
 ### Path traversal prevention
-`EvidencePack.write_html()` and `write_json()` reject paths containing `..` components. Implemented in [`shadowaudit/assessment/eu_ai_act.py`](../shadowaudit/assessment/eu_ai_act.py).
+`EvidencePack.write_html()` and `write_json()` reject paths containing `..` components. Implemented in [`capfence/assessment/eu_ai_act.py`](../capfence/assessment/eu_ai_act.py).

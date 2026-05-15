@@ -1,9 +1,9 @@
-"""Example: LangGraph integration with ShadowAudit (Week 10).
+"""Example: LangGraph integration with CapFence (Week 10).
 
-Demonstrates ShadowAuditToolNode for LangGraph ToolNode replacement.
+Demonstrates CapFenceToolNode for LangGraph ToolNode replacement.
 """
 
-from shadowaudit.framework.langgraph import ShadowAuditToolNode
+from capfence.framework.langgraph import CapFenceToolNode
 
 
 class MockLangGraphTool:
@@ -22,8 +22,8 @@ def main():
     shell_tool = MockLangGraphTool("shell")
     pay_tool = MockLangGraphTool("pay_vendor")
 
-    # Create ShadowAudit-wrapped node
-    node = ShadowAuditToolNode(
+    # Create CapFence-wrapped node
+    node = CapFenceToolNode(
         tools=[read_tool, shell_tool, pay_tool],
         agent_id="langgraph-agent-1",
         risk_category_map={
@@ -33,7 +33,7 @@ def main():
         },
     )
 
-    print("LangGraph ShadowAuditToolNode")
+    print("LangGraph CapFenceToolNode")
     print("=" * 40)
     print(f"Agent ID: {node._agent_id}")
     print(f"Tools: {list(node._tools.keys())}")

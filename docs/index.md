@@ -1,22 +1,22 @@
-# ShadowAudit
+# CapFence
 
-ShadowAudit is a deterministic runtime authorization layer for AI agent tool calls.
+CapFence is a deterministic runtime authorization layer for AI agent tool calls.
 
 It sits between an agent and its tools, evaluates each attempted tool call against policy, and blocks unauthorized actions before execution.
 
 ```text
-Agent -> ShadowAudit -> Tool
+Agent -> CapFence -> Tool
           |
           +-- allow
           +-- deny
           +-- require approval
 ```
 
-ShadowAudit is built for teams shipping agents that can touch shells, databases, payment APIs, filesystems, MCP servers, SaaS admin APIs, or other sensitive systems.
+CapFence is built for teams shipping agents that can touch shells, databases, payment APIs, filesystems, MCP servers, SaaS admin APIs, or other sensitive systems.
 
 ## Why it exists
 
-Prompt guardrails and model instructions are useful, but they are not an execution boundary. ShadowAudit treats tool execution like infrastructure authorization: explicit policy, deterministic decisions, audit logs, replay, and fail-closed behavior.
+Prompt guardrails and model instructions are useful, but they are not an execution boundary. CapFence treats tool execution like infrastructure authorization: explicit policy, deterministic decisions, audit logs, replay, and fail-closed behavior.
 
 ## What it does
 
@@ -38,14 +38,14 @@ Prompt guardrails and model instructions are useful, but they are not an executi
 - It does not turn synthetic benchmark results into production detection guarantees.
 - It does not remove the need for least-privilege credentials and network controls.
 
-Use ShadowAudit as the runtime authorization and audit layer alongside those controls.
+Use CapFence as the runtime authorization and audit layer alongside those controls.
 
 ## Five-minute path
 
 Install:
 
 ```bash
-pip install shadowaudit
+pip install capfence
 ```
 
 Create a policy:
@@ -68,7 +68,7 @@ allow:
 Evaluate a tool call:
 
 ```python
-from shadowaudit.core.gate import Gate
+from capfence.core.gate import Gate
 
 gate = Gate()
 
@@ -102,7 +102,7 @@ if not result.passed:
 
 ## Trust model
 
-ShadowAudit is strongest when you define explicit capabilities and policies. Risk scoring can help with suspicious payloads, but the primary control should be policy-first authorization: what capability is being requested, under what context, and whether that action is allowed.
+CapFence is strongest when you define explicit capabilities and policies. Risk scoring can help with suspicious payloads, but the primary control should be policy-first authorization: what capability is being requested, under what context, and whether that action is allowed.
 
 For architecture details, see:
 

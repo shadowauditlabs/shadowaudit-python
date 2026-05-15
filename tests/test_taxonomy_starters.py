@@ -1,7 +1,7 @@
 """Tests for built-in taxonomy starter packs."""
 
 
-from shadowaudit.core.taxonomy import TaxonomyLoader
+from capfence.core.taxonomy import TaxonomyLoader
 
 
 class TestGeneralTaxonomy:

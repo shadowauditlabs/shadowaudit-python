@@ -1,4 +1,4 @@
-# ShadowAudit SDK Environment Configuration
+# CapFence SDK Environment Configuration
 
 # Observability
 LOG_LEVEL=INFO

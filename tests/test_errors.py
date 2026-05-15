@@ -1,48 +1,48 @@
 """Tests for the unified exception hierarchy."""
 import pytest
 
-import shadowaudit
-from shadowaudit.errors import (
+import capfence
+from capfence.errors import (
     AgentActionBlocked,
     ConfigurationError,
-    ShadowAuditError,
+    CapFenceError,
 )
-from shadowaudit.framework.langchain import AgentActionBlocked as LCBlocked
-from shadowaudit.framework.crewai import AgentActionBlocked as CrewBlocked
-from shadowaudit.framework.langgraph import AgentActionBlocked as LGBlocked
-from shadowaudit.framework.openai_agents import AgentActionBlocked as OAIBlocked
-from shadowaudit.mcp.adapter import AgentActionBlocked as MCPBlocked
+from capfence.framework.langchain import AgentActionBlocked as LCBlocked
+from capfence.framework.crewai import AgentActionBlocked as CrewBlocked
+from capfence.framework.langgraph import AgentActionBlocked as LGBlocked
+from capfence.framework.openai_agents import AgentActionBlocked as OAIBlocked
+from capfence.mcp.adapter import AgentActionBlocked as MCPBlocked
 
 
 def test_version_exposed():
-    assert isinstance(shadowaudit.__version__, str)
-    assert shadowaudit.__version__.count(".") >= 1
+    assert isinstance(capfence.__version__, str)
+    assert capfence.__version__.count(".") >= 1
 
 
 def test_all_framework_agent_blocked_is_same_class():
-    """A user catching shadowaudit.AgentActionBlocked must catch every adapter's block."""
+    """A user catching capfence.AgentActionBlocked must catch every adapter's block."""
     assert LCBlocked is AgentActionBlocked
     assert CrewBlocked is AgentActionBlocked
     assert LGBlocked is AgentActionBlocked
     assert OAIBlocked is AgentActionBlocked
     assert MCPBlocked is AgentActionBlocked
-    assert shadowaudit.AgentActionBlocked is AgentActionBlocked
+    assert capfence.AgentActionBlocked is AgentActionBlocked
 
 
-def test_agent_blocked_inherits_shadowaudit_error():
+def test_agent_blocked_inherits_capfence_error():
     exc = AgentActionBlocked(detail="blocked")
-    assert isinstance(exc, ShadowAuditError)
+    assert isinstance(exc, CapFenceError)
 
 
 def test_configuration_error_keeps_value_error_compat():
     """Existing code that catches ValueError on bad config must keep working."""
     err = ConfigurationError("bad mode")
     assert isinstance(err, ValueError)
-    assert isinstance(err, ShadowAuditError)
+    assert isinstance(err, CapFenceError)
 
 
 def test_bad_gate_mode_raises_configuration_error():
-    from shadowaudit.core.gate import Gate
+    from capfence.core.gate import Gate
     with pytest.raises(ConfigurationError):
         Gate(mode="stealth")
     # Backward compat: also catchable as ValueError
@@ -51,7 +51,7 @@ def test_bad_gate_mode_raises_configuration_error():
 
 
 def test_empty_bypass_reason_raises_configuration_error():
-    from shadowaudit.core.gate import Gate
+    from capfence.core.gate import Gate
     gate = Gate()
     with pytest.raises(ConfigurationError):
         with gate.bypass("a1", reason=""):

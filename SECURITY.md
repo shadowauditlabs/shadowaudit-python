@@ -1,13 +1,13 @@
-# ShadowAudit Security Policy
+# CapFence Security Policy
 
-As a runtime authorization layer for AI agents, security is our primary focus. ShadowAudit is designed to operate in highly regulated, air-gapped, and zero-trust environments.
+As a runtime authorization layer for AI agents, security is our primary focus. CapFence is designed to operate in highly regulated, air-gapped, and zero-trust environments.
 
 ## Enterprise Trust Signals & Architecture Guarantees
 
-- **Offline-First & Air-Gapped**: ShadowAudit has zero external network dependencies. It does not phone home, it does not send telemetry by default, and it does not rely on cloud-hosted LLMs for policy evaluation.
+- **Offline-First & Air-Gapped**: CapFence has zero external network dependencies. It does not phone home, it does not send telemetry by default, and it does not rely on cloud-hosted LLMs for policy evaluation.
 - **Deterministic Enforcement**: Risk scoring relies on regex boundary matching and AST parsing. Unlike LLM-based guardrails, execution decisions are reproducible and predictable.
 - **Hash-Chained Audit Logging**: Every evaluation is recorded in a local SQLite database. The cryptographic hash chain prevents tampering, ensuring forensic replayability.
-- **Fail-Closed Execution**: If a tool call cannot be evaluated or exceeds risk thresholds, ShadowAudit raises a hard exception, halting the execution path immediately.
+- **Fail-Closed Execution**: If a tool call cannot be evaluated or exceeds risk thresholds, CapFence raises a hard exception, halting the execution path immediately.
 - **Thread Safety**: Core components are designed for high-concurrency, asynchronous agent frameworks with average latency overhead under 1 millisecond.
 
 ## Supported Versions
@@ -21,7 +21,7 @@ We currently support the following versions for security updates:
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in ShadowAudit, please do NOT open a public issue.
+If you discover a security vulnerability in CapFence, please do NOT open a public issue.
 
 Instead, please send an email to **[anshuman1405@outlook.com](mailto:anshuman1405@outlook.com)**.
 

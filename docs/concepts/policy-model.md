@@ -1,6 +1,6 @@
 # Policy Model
 
-ShadowAudit policies are YAML files that define deterministic rules for what agents can and cannot do at runtime.
+CapFence policies are YAML files that define deterministic rules for what agents can and cannot do at runtime.
 
 ## Three decision types
 
@@ -32,7 +32,7 @@ allow:       # evaluated last
 The primary matching field is `capability`. This is a dot-separated string you assign when wrapping a tool:
 
 ```python
-ShadowAuditTool(
+CapFenceTool(
     tool=MyTool(),
     capability="payments.transfer",
     ...
@@ -57,7 +57,7 @@ require_approval:
     contains: "systemctl"
 ```
 
-ShadowAudit automatically extracts numeric fields (`amount`, `total`, `value`, `price`) from payloads to support threshold conditions like `amount_gt`.
+CapFence automatically extracts numeric fields (`amount`, `total`, `value`, `price`) from payloads to support threshold conditions like `amount_gt`.
 
 ## Risk-level mapping
 

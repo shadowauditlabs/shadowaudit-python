@@ -1,10 +1,10 @@
 """Example: OWASP Agentic Top 10 coverage report (Week 8).
 
-Generates an HTML report showing how ShadowAudit maps to OWASP risks.
+Generates an HTML report showing how CapFence maps to OWASP risks.
 """
 
 from pathlib import Path
-from shadowaudit.assessment.owasp import generate_owasp_context
+from capfence.assessment.owasp import generate_owasp_context
 
 
 def main():
@@ -29,7 +29,7 @@ def main():
         print(f"{item['risk_id']:<6} {item['risk_name']:<35} {level:<12} {covered}")
 
     # Generate HTML report
-    from shadowaudit.assessment.reporter import _get_template_dir, _risk_color, _risk_bg
+    from capfence.assessment.reporter import _get_template_dir, _risk_color, _risk_bg
     import jinja2
 
     tpl_dir = _get_template_dir()
@@ -43,7 +43,7 @@ def main():
     template = env.get_template("report_owasp.html")
     html = template.render(**ctx)
 
-    output = Path("shadowaudit-owasp-report.html")
+    output = Path("capfence-owasp-report.html")
     output.write_text(html, encoding="utf-8")
     print(f"\nHTML report written to: {output}")
 

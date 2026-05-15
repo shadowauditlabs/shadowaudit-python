@@ -18,7 +18,7 @@ allow:
 ## Code
 
 ```python
-from shadowaudit.core.gate import Gate
+from capfence.core.gate import Gate
 
 gate = Gate()
 
@@ -51,10 +51,10 @@ print(result.reason)   # destructive_command_detected
 With a LangChain wrapper, blocked calls raise an exception so the agent cannot proceed:
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 from langchain.tools import ShellTool
 
-safe_shell = ShadowAuditTool(
+safe_shell = CapFenceTool(
     tool=ShellTool(),
     agent_id="demo-agent",
     capability="shell.execute",
@@ -74,7 +74,7 @@ AgentActionBlocked: capability=shell.execute decision=denied reason=destructive_
 Both the allowed and denied decisions are recorded:
 
 ```bash
-shadowaudit logs
+capfence logs
 ```
 
 ```
@@ -86,7 +86,7 @@ timestamp            agent_id      capability      decision  reason
 ## Verifying log integrity
 
 ```bash
-shadowaudit verify --audit-log ./audit.db
+capfence verify --audit-log ./audit.db
 ✓ Audit chain intact. 2 entries verified.
 ```
 

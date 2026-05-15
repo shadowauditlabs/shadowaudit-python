@@ -1,6 +1,6 @@
 """Tests for Gate observe mode, bypass context manager, and confidence metadata."""
 import pytest
-from shadowaudit.core.gate import Gate, GATE_MODE_OBSERVE, GATE_MODE_ENFORCE
+from capfence.core.gate import Gate, GATE_MODE_OBSERVE, GATE_MODE_ENFORCE
 
 
 RISKY_PAYLOAD = {
@@ -87,7 +87,7 @@ def test_observe_mode_reason_string():
 
 
 def test_bypass_reason_in_audit_log():
-    from shadowaudit.core.audit import AuditLogger
+    from capfence.core.audit import AuditLogger
     audit = AuditLogger()
     gate = Gate(taxonomy_path="financial", audit_logger=audit)
     with gate.bypass("a1", reason="emergency override"):

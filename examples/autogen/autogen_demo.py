@@ -1,6 +1,6 @@
 """Minimal AutoGen Integration Demo."""
-from shadowaudit.framework.autogpt import AutoGPTAdapter
-from shadowaudit.core.gate import Gate
+from capfence.framework.autogpt import AutoGPTAdapter
+from capfence.core.gate import Gate
 
 gate = Gate()
 adapter = AutoGPTAdapter(gate)

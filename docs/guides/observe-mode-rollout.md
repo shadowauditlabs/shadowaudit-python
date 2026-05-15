@@ -1,6 +1,6 @@
 # Observe Mode Rollout
 
-Deploying ShadowAudit in enforce mode immediately can surface policy gaps that block legitimate agent behavior. Observe mode lets you run ShadowAudit in production — logging all decisions — without blocking anything. You tune your policy on real traffic, then flip to enforce.
+Deploying CapFence in enforce mode immediately can surface policy gaps that block legitimate agent behavior. Observe mode lets you run CapFence in production — logging all decisions — without blocking anything. You tune your policy on real traffic, then flip to enforce.
 
 ## The rollout pattern
 
@@ -13,10 +13,10 @@ Deploying ShadowAudit in enforce mode immediately can surface policy gaps that b
 Create the gate in observe mode and pass it to the adapter:
 
 ```python
-from shadowaudit import ShadowAuditTool
-from shadowaudit.core.gate import Gate
+from capfence import CapFenceTool
+from capfence.core.gate import Gate
 
-safe_tool = ShadowAuditTool(
+safe_tool = CapFenceTool(
     tool=my_tool,
     agent_id="prod-agent",
     capability="shell.execute",
@@ -42,7 +42,7 @@ In observe mode:
 ## Step 2: Review what would have been blocked
 
 ```bash
-shadowaudit logs --audit-log audit.db --json
+capfence logs --audit-log audit.db --json
 ```
 
 Identify patterns:
@@ -55,7 +55,7 @@ Identify patterns:
 Export observed traffic and replay it against a revised policy:
 
 ```bash
-shadowaudit simulate --trace-file audit.jsonl --taxonomy policies/shell_v2.yaml --compare
+capfence simulate --trace-file audit.jsonl --taxonomy policies/shell_v2.yaml --compare
 ```
 
 This shows you how your updated policy would have handled all real traffic from the observe period — before you deploy it.
@@ -65,7 +65,7 @@ This shows you how your updated policy would have handled all real traffic from 
 Use an enforcing gate:
 
 ```python
-safe_tool = ShadowAuditTool(
+safe_tool = CapFenceTool(
     tool=my_tool,
     agent_id="prod-agent",
     capability="shell.execute",

@@ -4,7 +4,7 @@ The audit chain makes runtime decision logs tamper-evident.
 
 ## Storage model
 
-ShadowAudit stores audit events in SQLite. Each row contains decision metadata and cryptographic linkage to the previous row.
+CapFence stores audit events in SQLite. Each row contains decision metadata and cryptographic linkage to the previous row.
 
 Core fields include:
 
@@ -38,7 +38,7 @@ When signing is enabled, entries can be signed with Ed25519. Hash chaining detec
 ## Verification
 
 ```bash
-shadowaudit verify --audit-log audit.db
+capfence verify --audit-log audit.db
 ```
 
 Verification recomputes hashes and checks the chain from the first entry to the latest entry.

@@ -1,7 +1,7 @@
 """Minimal OpenAI Agents Integration Demo."""
 import asyncio
 import json
-from shadowaudit.framework.openai_agents import ShadowAuditOpenAITool, AgentActionBlocked
+from capfence.framework.openai_agents import CapFenceOpenAITool, AgentActionBlocked
 
 class MockOpenAITool:
     name = "shell"
@@ -11,7 +11,7 @@ class MockOpenAITool:
         return "Executed"
 
 async def main():
-    safe_shell = ShadowAuditOpenAITool(
+    safe_shell = CapFenceOpenAITool(
         tool=MockOpenAITool(),
         agent_id="openai-agent",
         risk_category="execute"

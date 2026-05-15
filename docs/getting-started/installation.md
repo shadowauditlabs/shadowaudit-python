@@ -1,43 +1,43 @@
 # Installation
 
-ShadowAudit requires Python 3.9 or later.
+CapFence requires Python 3.9 or later.
 
 ## Install from PyPI
 
 ```bash
-pip install shadowaudit
+pip install capfence
 ```
 
 ## Install with optional framework extras
 
 ```bash
 # LangChain / LangGraph support
-pip install "shadowaudit[langchain]"
+pip install "capfence[langchain]"
 
 # CrewAI support
-pip install "shadowaudit[crewai]"
+pip install "capfence[crewai]"
 
 # OpenAI Agents SDK support
-pip install "shadowaudit[openai-agents]"
+pip install "capfence[openai-agents]"
 
 # All integrations
-pip install "shadowaudit[all]"
+pip install "capfence[all]"
 ```
 
 ## Verify the installation
 
 ```bash
-shadowaudit --version
+capfence --version
 ```
 
 ## What gets installed
 
 | Component | Purpose |
 |---|---|
-| `shadowaudit` CLI | Scan, assess, audit, replay, approve |
-| `shadowaudit.core.gate` | Runtime gate for direct API use |
-| `shadowaudit.adapters.*` | Framework-specific wrappers |
-| `shadowaudit.mcp.gateway` | MCP governance gateway |
+| `capfence` CLI | Scan, assess, audit, replay, approve |
+| `capfence.core.gate` | Runtime gate for direct API use |
+| `capfence.adapters.*` | Framework-specific wrappers |
+| `capfence.mcp.gateway` | MCP governance gateway |
 | Local SQLite audit database | Created on first run in `./audit.db` |
 
 ## Next steps

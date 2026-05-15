@@ -1,12 +1,12 @@
 # Fail-Closed Enforcement
 
-Fail-closed means that when ShadowAudit cannot reach a decision — due to a policy error, missing configuration, or internal fault — it blocks the action rather than allowing it through.
+Fail-closed means that when CapFence cannot reach a decision — due to a policy error, missing configuration, or internal fault — it blocks the action rather than allowing it through.
 
 ## The default position
 
 In a fail-open system, uncertainty means "allow." In a fail-closed system, uncertainty means "deny."
 
-ShadowAudit is fail-closed by default. If the gate raises an unhandled exception, the framework adapter catches it and blocks the tool call. The agent receives an error. The tool never runs.
+CapFence is fail-closed by default. If the gate raises an unhandled exception, the framework adapter catches it and blocks the tool call. The agent receives an error. The tool never runs.
 
 ```
 policy error → gate exception → AgentActionBlocked raised → tool not invoked
@@ -46,7 +46,7 @@ The tool is blocked. The error is logged. The agent is informed.
 
 ## Configuring strict mode
 
-By default, ShadowAudit blocks unmatched capabilities (no rule matches → deny). This is the strictest posture. You can explicitly add an allow-all fallback if needed, but this is not recommended for production:
+By default, CapFence blocks unmatched capabilities (no rule matches → deny). This is the strictest posture. You can explicitly add an allow-all fallback if needed, but this is not recommended for production:
 
 ```yaml
 # Not recommended in production

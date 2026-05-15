@@ -2,7 +2,7 @@
 
 import json
 
-from shadowaudit.core.taxonomy import TaxonomyLoader
+from capfence.core.taxonomy import TaxonomyLoader
 
 
 class TestTaxonomyLoader:

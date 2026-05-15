@@ -1,6 +1,6 @@
 """Tests for hash-chained audit log verifier."""
 
-from shadowaudit.core.chain import (
+from capfence.core.chain import (
     ChainEntry,
     compute_entry_hash,
     verify_chain,

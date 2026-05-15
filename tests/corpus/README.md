@@ -1,6 +1,6 @@
-# ShadowAudit Public Test Corpus
+# CapFence Public Test Corpus
 
-This corpus provides labelled agent tool-call traces for evaluating ShadowAudit gate behaviour.
+This corpus provides labelled agent tool-call traces for evaluating CapFence gate behaviour.
 
 ## Files
 
@@ -37,7 +37,7 @@ Fields:
 
 ```python
 import json
-from shadowaudit import Gate
+from capfence import Gate
 
 gate = Gate(taxonomy_path="financial")
 

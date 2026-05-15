@@ -13,7 +13,7 @@ Run:
     python benchmarks/scorer_benchmark.py
     python benchmarks/scorer_benchmark.py --n 1000 --seed 99
 
-The taxonomy used is "financial" — the highest-stakes vertical in ShadowAudit.
+The taxonomy used is "financial" — the highest-stakes vertical in CapFence.
 Scores are decision-level: a call is "blocked" if risk_score > threshold.
 
 NOTE: This benchmark uses SYNTHETIC traces. Ground-truth labels are assigned
@@ -31,8 +31,8 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-from shadowaudit.core.scorer import KeywordScorer, RegexASTScorer, AdaptiveScorer, BaseScorer
-from shadowaudit.core.taxonomy import TaxonomyLoader
+from capfence.core.scorer import KeywordScorer, RegexASTScorer, AdaptiveScorer, BaseScorer
+from capfence.core.taxonomy import TaxonomyLoader
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -236,7 +236,7 @@ def evaluate_scorer(
 
 def print_results(results: list[ScorerResult], n_traces: int) -> None:
     print(f"\n{'='*80}")
-    print(f"  ShadowAudit Scorer Benchmark  ({n_traces:,} synthetic traces, financial taxonomy)")
+    print(f"  CapFence Scorer Benchmark  ({n_traces:,} synthetic traces, financial taxonomy)")
     print(f"{'='*80}\n")
 
     header = f"{'Scorer':<22} {'TPR/Recall':<14} {'FPR':<10} {'Precision':<12} {'F1':<10} {'Accuracy':<12} {'Latency (ms)'}"
@@ -267,7 +267,7 @@ def print_results(results: list[ScorerResult], n_traces: int) -> None:
     print("  These are synthetic benchmarks with known ground-truth labels.")
     print("  They measure relative scorer performance, not real-world detection rates.")
     print("  Adversarial traces (sparse keywords, code injection) test robustness.")
-    print("  In production, calibrate thresholds with `shadowaudit tune --audit-log`.")
+    print("  In production, calibrate thresholds with `capfence tune --audit-log`.")
 
     print()
     print("Trace breakdown:")
@@ -283,7 +283,7 @@ def print_results(results: list[ScorerResult], n_traces: int) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ShadowAudit scorer benchmark")
+    parser = argparse.ArgumentParser(description="CapFence scorer benchmark")
     parser.add_argument("--n", type=int, default=10_000, help="Number of traces (default: 10000)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
     args = parser.parse_args()

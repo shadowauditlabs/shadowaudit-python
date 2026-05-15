@@ -1,8 +1,8 @@
-"""Tests for LangChain ShadowAuditTool wrapper."""
+"""Tests for LangChain CapFenceTool wrapper."""
 
 import pytest
 
-from shadowaudit.framework.langchain import ShadowAuditTool, AgentActionBlocked
+from capfence.framework.langchain import CapFenceTool, AgentActionBlocked
 
 
 class MockTool:
@@ -14,9 +14,9 @@ class MockTool:
         return f"result: {tool_input}"
 
 
-class TestShadowAuditTool:
+class TestCapFenceTool:
     def test_passes_allows_execution(self):
-        tool = ShadowAuditTool(
+        tool = CapFenceTool(
             tool=MockTool(),
             agent_id="test-agent",
             risk_category="read_only",  # low risk, should pass
@@ -25,7 +25,7 @@ class TestShadowAuditTool:
         assert "result:" in result
 
     def test_blocks_on_risk(self):
-        tool = ShadowAuditTool(
+        tool = CapFenceTool(
             tool=MockTool(),
             agent_id="test-agent",
             risk_category="delete",  # risky keywords in input
@@ -37,12 +37,12 @@ class TestShadowAuditTool:
         assert exc_info.value.gate_result is not None
 
     def test_preserves_tool_attributes(self):
-        tool = ShadowAuditTool(tool=MockTool(), agent_id="test", risk_category="read_only")
+        tool = CapFenceTool(tool=MockTool(), agent_id="test", risk_category="read_only")
         assert tool.name == "mock"
         assert tool.description == "Mock tool"
 
     def test_metadata_in_exception(self):
-        tool = ShadowAuditTool(
+        tool = CapFenceTool(
             tool=MockTool(),
             agent_id="test-agent",
             risk_category="execute",  # risky: execute, run, exec
@@ -57,9 +57,9 @@ class TestShadowAuditTool:
 
 class TestGuardDecorator:
     def test_decorator_blocks(self):
-        from shadowaudit.framework.langchain import shadowaudit_guard
+        from capfence.framework.langchain import capfence_guard
 
-        @shadowaudit_guard(agent_id="test-agent", risk_category="delete")
+        @capfence_guard(agent_id="test-agent", risk_category="delete")
         def risky_delete(id: str) -> str:
             return f"deleted {id}"
 
@@ -67,9 +67,9 @@ class TestGuardDecorator:
             risky_delete("delete drop remove all records")
 
     def test_decorator_allows(self):
-        from shadowaudit.framework.langchain import shadowaudit_guard
+        from capfence.framework.langchain import capfence_guard
 
-        @shadowaudit_guard(agent_id="test-agent", risk_category="read_only")
+        @capfence_guard(agent_id="test-agent", risk_category="read_only")
         def safe_view(id: str) -> str:
             return f"viewed {id}"
 

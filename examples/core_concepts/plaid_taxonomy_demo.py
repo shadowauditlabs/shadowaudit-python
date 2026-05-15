@@ -3,7 +3,7 @@
 Demonstrates the Plaid-specific risk taxonomy for fintech agents.
 """
 
-from shadowaudit.core.taxonomy import TaxonomyLoader
+from capfence.core.taxonomy import TaxonomyLoader
 
 
 def main():

@@ -1,6 +1,6 @@
 # Demo Walkthrough
 
-This demo highlights ShadowAudit's static scan, assessment, live gate decisions, trace simulation, and audit verification workflows using the bundled fintech demo project.
+This demo highlights CapFence's static scan, assessment, live gate decisions, trace simulation, and audit verification workflows using the bundled fintech demo project.
 
 ## Why this demo exists
 
@@ -9,10 +9,10 @@ Prompt guardrails are not enforcement. This demo shows a deterministic gate that
 ## Where it sits in your stack
 
 ```
-Agent framework -> ShadowAudit gate -> Tool/API/DB/Shell
+Agent framework -> CapFence gate -> Tool/API/DB/Shell
 ```
 
-ShadowAudit does not replace sandboxing or least-privilege credentials. It complements them by enforcing runtime policy at the tool boundary.
+CapFence does not replace sandboxing or least-privilege credentials. It complements them by enforcing runtime policy at the tool boundary.
 
 ## Rollout story (observe → enforce → audit)
 
@@ -24,7 +24,7 @@ ShadowAudit does not replace sandboxing or least-privilege credentials. It compl
 
 - Python 3.10+
 - Local repo checkout
-- Virtual environment with ShadowAudit installed (`pip install -e ".[dev]"`)
+- Virtual environment with CapFence installed (`pip install -e ".[dev]"`)
 
 ## Run the demo
 
@@ -42,14 +42,14 @@ If you share the demo cast, add a brief text overlay (or preface) that says:
 ## Expected output (example)
 
 ```text
-[DEMO] Running ShadowAudit demo from repo root
+[DEMO] Running CapFence demo from repo root
 [DEMO] Deterministic runtime authorization for agent tool calls, enforced before execution.
-[SCAN] 8 tool(s) found in shadowaudit-demo/src
+[SCAN] 8 tool(s) found in capfence-demo/src
   Gated: 6
   Ungated: 2
   High-risk ungated: 1
 
-Assessment report written to: shadowaudit-demo/shadowaudit-assessment-report.html
+Assessment report written to: capfence-demo/capfence-assessment-report.html
 [INFO] Assessment exited with status 2 (expected when critical ungated tools exist).
 [GATE] passed=False reason=policy_deny
 [GATE] passed=True reason=policy_allow
@@ -67,5 +67,5 @@ Replayed 50 tool call(s):
 
 ## Next steps
 
-- Open `shadowaudit-demo/shadowaudit-assessment-report.html` to review findings.
-- Try `shadowaudit check` on your own project.
+- Open `capfence-demo/capfence-assessment-report.html` to review findings.
+- Try `capfence check` on your own project.

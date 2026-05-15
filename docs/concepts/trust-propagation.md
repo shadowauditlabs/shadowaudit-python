@@ -14,10 +14,10 @@ If the payment payload was derived from scraped or user-controlled content, the 
 
 ## FlowTracer
 
-ShadowAudit provides `FlowTracer` for recording cross-agent data movement.
+CapFence provides `FlowTracer` for recording cross-agent data movement.
 
 ```python
-from shadowaudit import FlowTracer, TrustLevel
+from capfence import FlowTracer, TrustLevel
 
 tracer = FlowTracer()
 

@@ -1,22 +1,22 @@
 # AutoGen Integration
 
-ShadowAudit wraps AutoGen tools or callables with deterministic gate enforcement.
+CapFence wraps AutoGen tools or callables with deterministic gate enforcement.
 
 ## Installation
 
 ```bash
-pip install shadowaudit
+pip install capfence
 ```
 
 ## Wrapping a tool
 
 ```python
-from shadowaudit.framework.autogen import ShadowAuditAutoGenTool
+from capfence.framework.autogen import CapFenceAutoGenTool
 
 def run_shell(command: str) -> str:
     return "ok"
 
-safe_shell = ShadowAuditAutoGenTool(
+safe_shell = CapFenceAutoGenTool(
     tool=run_shell,
     agent_id="autogen-agent",
     capability="shell.execute",

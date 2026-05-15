@@ -8,19 +8,19 @@ AI agents make tool calls dynamically. The set of calls an agent will make canno
 
 Runtime authorization answers a different question: **should this specific tool call, with these specific arguments, be executed right now?**
 
-This is the same question that IAM, Open Policy Agent, and API gateways answer for non-AI systems. ShadowAudit brings that model to AI agent tool use.
+This is the same question that IAM, Open Policy Agent, and API gateways answer for non-AI systems. CapFence brings that model to AI agent tool use.
 
-## Where ShadowAudit enforces
+## Where CapFence enforces
 
 ```
-Agent → [ShadowAudit Gate] → Tool
+Agent → [CapFence Gate] → Tool
 ```
 
 The gate sits at the boundary between the agent and the tool. It receives the structured arguments the agent is passing to the tool — not a prompt, not a response, but the actual JSON or string payload that would cause the tool to act.
 
 Enforcement happens before `tool.run()` is called. If a call is denied, the tool function is never invoked.
 
-## What ShadowAudit evaluates
+## What CapFence evaluates
 
 The gate receives:
 
@@ -37,7 +37,7 @@ It evaluates these against a policy and returns one of three decisions: `allow`,
 |---|---|---|---|
 | System prompt instructions | Before the agent starts | No | No |
 | Output filters / moderation | After the model generates | No | No |
-| ShadowAudit gate | At tool call time | Yes | Yes |
+| CapFence gate | At tool call time | Yes | Yes |
 
 Runtime authorization does not replace prompt design or output monitoring. It is the enforcement layer that makes the others auditable: you can verify that policy was actually applied at the point where consequences occur.
 

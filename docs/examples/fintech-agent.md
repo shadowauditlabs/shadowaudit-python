@@ -1,6 +1,6 @@
 # Fintech Agent Example
 
-A complete example of a financial agent gated with ShadowAudit: the agent can read account data freely, requires approval for transfers over $1,000, and is hard-blocked from transfers over $50,000.
+A complete example of a financial agent gated with CapFence: the agent can read account data freely, requires approval for transfers over $1,000, and is hard-blocked from transfers over $50,000.
 
 ## Policy
 
@@ -35,7 +35,7 @@ approval_timeout_seconds: 1800
 ## Tools
 
 ```python
-from shadowaudit import ShadowAuditTool
+from capfence import CapFenceTool
 
 class AccountReadTool:
     name = "account_read"
@@ -47,14 +47,14 @@ class TransferTool:
     def run(self, from_account: str, to_account: str, amount: float) -> dict:
         return payments_api.transfer(from_account, to_account, amount)
 
-safe_read = ShadowAuditTool(
+safe_read = CapFenceTool(
     tool=AccountReadTool(),
     agent_id="fintech-agent",
     capability="account.read",
     policy_path="policies/fintech_agent.yaml"
 )
 
-safe_transfer = ShadowAuditTool(
+safe_transfer = CapFenceTool(
     tool=TransferTool(),
     agent_id="fintech-agent",
     capability="payments.transfer",
@@ -106,12 +106,12 @@ executor.invoke({
 ## Approve the pending transfer
 
 ```bash
-shadowaudit pending-approvals
-shadowaudit approve a1b2c3d4
+capfence pending-approvals
+capfence approve a1b2c3d4
 ```
 
 ## Audit log
 
 ```bash
-shadowaudit logs --audit-log audit.db --json
+capfence logs --audit-log audit.db --json
 ```

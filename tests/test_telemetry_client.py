@@ -2,7 +2,7 @@
 
 import asyncio
 
-from shadowaudit.telemetry.client import TelemetryClient
+from capfence.telemetry.client import TelemetryClient
 
 
 class TestTelemetryClient:
@@ -11,7 +11,7 @@ class TestTelemetryClient:
         assert client.enabled is False
 
     def test_enabled_with_env(self, monkeypatch):
-        monkeypatch.setenv("SHADOWAUDIT_TELEMETRY", "1")
+        monkeypatch.setenv("CAPFENCE_TELEMETRY", "1")
         client = TelemetryClient(api_key="test-key")
         assert client.enabled is True
 
@@ -25,7 +25,7 @@ class TestTelemetryClient:
         ))
 
     def test_queue_drops_when_full(self, monkeypatch):
-        monkeypatch.setenv("SHADOWAUDIT_TELEMETRY", "1")
+        monkeypatch.setenv("CAPFENCE_TELEMETRY", "1")
         client = TelemetryClient(api_key="test-key")
         client._queue = asyncio.Queue(maxsize=1)
         asyncio.run(client.send_decision(

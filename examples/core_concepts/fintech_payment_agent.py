@@ -1,14 +1,14 @@
-"""Realistic production-style fintech payment agent with ShadowAudit gates.
+"""Realistic production-style fintech payment agent with CapFence gates.
 
 Mirrors patterns from actual fintech production code:
   - Stripe SDK calls wrapped in retry + rate-limit logic
   - Async task queue simulation (Celery-style)
   - Idempotency keys on all mutations
   - Structured error handling with escalation
-  - ShadowAudit gates inserted at every money-movement boundary
+  - CapFence gates inserted at every money-movement boundary
 
 This file is intentionally explicit and verbose — it shows WHERE and HOW
-to integrate ShadowAudit gates in realistic agent code.
+to integrate CapFence gates in realistic agent code.
 
 Run:
     python examples/fintech_payment_agent.py
@@ -26,14 +26,14 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from shadowaudit import Gate, AuditLogger, GateResult
-from shadowaudit.core.state import AgentStateStore
+from capfence import Gate, AuditLogger, GateResult
+from capfence.core.state import AgentStateStore
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
-# ── Audit log to a persistent file so you can run `shadowaudit verify` on it ──
-AUDIT_DB = Path("/tmp/shadowaudit_fintech_demo.db")
+# ── Audit log to a persistent file so you can run `capfence verify` on it ──
+AUDIT_DB = Path("/tmp/capfence_fintech_demo.db")
 
 
 # ── Shared gate: one instance per process, injected via DI in production ──────
@@ -138,7 +138,7 @@ def _with_retry(fn: Any, max_attempts: int = 3, backoff_base: float = 0.5) -> An
 
 class PaymentStatus(str, Enum):
     PENDING = "pending"
-    GATED = "gated"          # ShadowAudit blocked execution
+    GATED = "gated"          # CapFence blocked execution
     SUCCEEDED = "succeeded"
     FAILED = "failed"
     REFUNDED = "refunded"
@@ -165,7 +165,7 @@ class PaymentRecord:
 class PaymentTools:
     """Agent-callable tools for Stripe payment operations.
 
-    ShadowAudit gate is evaluated BEFORE each Stripe call.
+    CapFence gate is evaluated BEFORE each Stripe call.
     If the gate blocks, the payment is recorded with status=GATED
     and the Stripe call is never made.
     """
@@ -447,7 +447,7 @@ class PaymentAgent:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    print("=== ShadowAudit Fintech Payment Agent Demo ===")
+    print("=== CapFence Fintech Payment Agent Demo ===")
     print(f"Audit log: {AUDIT_DB}")
     print()
 
@@ -487,14 +487,14 @@ def main() -> None:
     print()
     print("─" * 60)
     print("Audit log written. To verify chain integrity:")
-    print(f"  shadowaudit verify --audit-log {AUDIT_DB}")
+    print(f"  capfence verify --audit-log {AUDIT_DB}")
     print()
     print("To replay this trace through the gate:")
-    print("  (use shadowaudit simulate with a JSONL trace file)")
+    print("  (use capfence simulate with a JSONL trace file)")
     print()
 
     # Show final audit log summary
-    from shadowaudit.core.audit import AuditLogger
+    from capfence.core.audit import AuditLogger
     audit = AuditLogger(db_path=AUDIT_DB)
     events = audit.get_events(limit=100)
     valid, errors = audit.verify()

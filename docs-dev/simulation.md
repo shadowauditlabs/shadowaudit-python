@@ -11,10 +11,10 @@ Simulation tooling allows security engineers to safely test policy changes again
 
 ```bash
 # Simulate a specific session trace
-shadowaudit simulate trace.jsonl
+capfence simulate trace.jsonl
 
 # Compare alternative policy
-shadowaudit simulate trace.jsonl --policy alternative.yaml --compare
+capfence simulate trace.jsonl --policy alternative.yaml --compare
 ```
 
 The output will show deterministic comparisons, policy diffs, and simulation reporting.

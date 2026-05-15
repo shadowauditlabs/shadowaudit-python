@@ -1,4 +1,4 @@
-# ShadowAudit Project Review
+# CapFence Project Review
 
 Date: 2026-05-15
 
@@ -6,17 +6,17 @@ Scope: local repository scan, README/docs/package metadata review, test/lint/typ
 
 ## Fix Pass Status
 
-Repo-side remediation started immediately after this review. Website content fixes for `shadowaudit.dev` were intentionally left out of scope.
+Repo-side remediation started immediately after this review. Website content fixes for `capfence.dev` were intentionally left out of scope.
 
 Completed in this pass:
 
 - Aligned local package version metadata to `0.6.1`.
-- Updated repository URLs from the personal GitHub namespace to `shadowauditlabs`.
+- Updated repository URLs from the personal GitHub namespace to `capfencelabs`.
 - Rewrote the GitHub README around runtime authorization, proof, rollout, limitations, and CLI workflows.
 - Replaced the placeholder docs homepage with a real product/docs entrypoint.
 - Implemented documented policy conditions: `contains`, `amount_lte`, `path_prefix`, and caller-depth comparisons.
 - Added policy validation and `PolicyLoadError`.
-- Added `shadowaudit check-policy`.
+- Added `capfence check-policy`.
 - Made policy load/validation failures fail closed during gate evaluation.
 - Made audit write failures fail closed in enforce mode.
 - Added regression tests for policy conditions, legacy bundled policy schema support, default-deny, policy errors, `check-policy`, and audit failure behavior.
@@ -24,8 +24,8 @@ Completed in this pass:
 Verification after fixes:
 
 ```bash
-ruff check shadowaudit tests
-mypy shadowaudit
+ruff check capfence tests
+mypy capfence
 PYTHONPATH=. .venv/bin/pytest -q
 ```
 
@@ -33,13 +33,13 @@ Results: ruff passed, mypy passed, bundled policy validation passed, and `261` t
 
 ## Executive Read
 
-ShadowAudit is not just a small wrapper library. The real project scope is runtime authorization infrastructure for agent tool execution: policy-as-code gating, framework adapters, audit logging, replay/simulation, approval queues, MCP governance, taxonomies, compliance reports, static scanning, and trust-flow tracing.
+CapFence is not just a small wrapper library. The real project scope is runtime authorization infrastructure for agent tool execution: policy-as-code gating, framework adapters, audit logging, replay/simulation, approval queues, MCP governance, taxonomies, compliance reports, static scanning, and trust-flow tracing.
 
 The strongest idea is clear and worth building around:
 
 > Agents should not execute sensitive tool calls unless a deterministic runtime policy authorizes them.
 
-That is a much better category than "AI safety SDK" or "agent guardrails." The infrastructure analogy is correct: ShadowAudit is closer to an admission controller, API gateway, IAM policy point, or OPA-style runtime enforcement layer for agent tools.
+That is a much better category than "AI safety SDK" or "agent guardrails." The infrastructure analogy is correct: CapFence is closer to an admission controller, API gateway, IAM policy point, or OPA-style runtime enforcement layer for agent tools.
 
 Current honest verdict:
 
@@ -75,8 +75,8 @@ Major components present in the repo:
 Commands run:
 
 ```bash
-ruff check shadowaudit tests
-mypy shadowaudit
+ruff check capfence tests
+mypy capfence
 PYTHONPATH=. .venv/bin/pytest -q
 PYTHONPATH=. .venv/bin/python tests/corpus/evaluate.py
 ```
@@ -127,7 +127,7 @@ Initial finding: local version metadata lagged PyPI, some repo links still used 
 Fix:
 
 - Centralize version in one place.
-- Update package URLs to `shadowauditlabs` and preferably `shadowaudit.dev`.
+- Update package URLs to `capfencelabs` and preferably `capfence.dev`.
 - Remove hardcoded test counts unless generated automatically.
 - Make GitHub README, PyPI long description, docs homepage, and website agree.
 
@@ -138,7 +138,7 @@ Fix:
 Fix:
 
 - Make docs home the real product entrypoint:
-  - What ShadowAudit is.
+  - What CapFence is.
   - The 5-minute quickstart.
   - Supported integrations.
   - Security model.
@@ -147,13 +147,13 @@ Fix:
 
 ### P0: README undersells the product
 
-Yes, the GitHub README undersells ShadowAudit. It states the core idea, but it does not show enough proof. It mentions features, but does not make the reader feel: "I need this before shipping agents with tools."
+Yes, the GitHub README undersells CapFence. It states the core idea, but it does not show enough proof. It mentions features, but does not make the reader feel: "I need this before shipping agents with tools."
 
 What is missing:
 
 - A concrete before/after example where an agent would have executed a bad action.
 - A 60-second direct `Gate` example that runs without LangChain.
-- A CLI demo: `shadowaudit check`, `shadowaudit simulate`, `shadowaudit verify`.
+- A CLI demo: `capfence check`, `capfence simulate`, `capfence verify`.
 - A "Why not prompt guardrails?" section.
 - A "Where it sits in your stack" section.
 - A "What it protects / what it does not protect" section.
@@ -163,7 +163,7 @@ What is missing:
 
 ### P0: Some docs overclaim unsupported behavior
 
-`docs/reference/policy-schema.md` documents fields that the current policy engine does not fully implement, including `contains`, `amount_lte`, `path_prefix`, `caller_depth_gt`, policy validation at gate initialization, `PolicyLoadError`, and `shadowaudit check-policy`.
+`docs/reference/policy-schema.md` documents fields that the current policy engine does not fully implement, including `contains`, `amount_lte`, `path_prefix`, `caller_depth_gt`, policy validation at gate initialization, `PolicyLoadError`, and `capfence check-policy`.
 
 Current code supports:
 
@@ -238,14 +238,14 @@ Fix:
 
 ### P1: The demo story is underused
 
-The fintech demo is a good starting point, but it should be a flagship narrative: "See ShadowAudit stop an agent from moving money."
+The fintech demo is a good starting point, but it should be a flagship narrative: "See CapFence stop an agent from moving money."
 
 Fix:
 
 - Move a polished demo walkthrough into README and docs.
 - Record a GIF or terminal cast.
 - Add `make demo` or `just demo`.
-- Add a hosted demo page on `shadowaudit.dev`.
+- Add a hosted demo page on `capfence.dev`.
 
 ### P2: OSS growth surface is weak
 
@@ -255,7 +255,7 @@ Fix:
 
 - Add "good first issue" tickets for policy fields, recipes, integrations, docs examples.
 - Use GitHub Discussions with prompts:
-  - "What agent framework should ShadowAudit support next?"
+  - "What agent framework should CapFence support next?"
   - "Share your risky tool pattern."
   - "Policy recipes wanted."
 - Add a contributor map:
@@ -270,10 +270,10 @@ Fix:
 The README should be reorganized around urgency and proof:
 
 1. One-line category:
-   "ShadowAudit is a deterministic runtime authorization layer for AI agent tool calls."
+   "CapFence is a deterministic runtime authorization layer for AI agent tool calls."
 
 2. Immediate danger demo:
-   Agent tries `rm -rf /var/lib/postgresql`; ShadowAudit blocks before execution.
+   Agent tries `rm -rf /var/lib/postgresql`; CapFence blocks before execution.
 
 3. 60-second install and direct gate example:
    No LangChain required. This proves the primitive.
@@ -285,12 +285,12 @@ The README should be reorganized around urgency and proof:
    Show compact cards/table, not long prose.
 
 6. Audit/replay:
-   Show `shadowaudit verify`, `shadowaudit replay`, and hash-chain proof.
+   Show `capfence verify`, `capfence replay`, and hash-chain proof.
 
 7. Rollout path:
    Observe -> tune -> enforce -> audit.
 
-8. What ShadowAudit is / is not:
+8. What CapFence is / is not:
    It is runtime authorization and audit infrastructure.
    It is not prompt injection prevention, a model evaluator, or a replacement for sandboxing.
 
@@ -302,7 +302,7 @@ The README should be reorganized around urgency and proof:
 
 ## Website Recommendation
 
-`shadowaudit.dev` has a stronger landing-page shape than the GitHub README, but it has stale claims and some wording that can sound premature.
+`capfence.dev` has a stronger landing-page shape than the GitHub README, but it has stale claims and some wording that can sound premature.
 
 Change:
 
@@ -310,7 +310,7 @@ Change:
 - Update stale website test-count/coverage language to a generated/current metric or remove it.
 - Align supported Python/framework claims with package metadata.
 - Replace "Every tool call is scored" with "Every tool call is evaluated against policy, with optional risk scoring."
-- Add a real demo artifact and docs link to `shadowaudit.dev`, not only GitHub Pages.
+- Add a real demo artifact and docs link to `capfence.dev`, not only GitHub Pages.
 
 ## Product Focus To Become Infrastructure Necessity
 
@@ -381,7 +381,7 @@ Stars come from developers seeing themselves in the project:
 - Fix version/URL/test-count/doc inconsistencies.
 - Rewrite `docs/index.md`.
 - Rewrite README around proof, demo, and rollout.
-- Add "What ShadowAudit does not do."
+- Add "What CapFence does not do."
 - Add 5 production recipes.
 - Open 10 high-quality good-first issues.
 - Pin a GitHub Discussion asking for risky tool patterns.
@@ -389,7 +389,7 @@ Stars come from developers seeing themselves in the project:
 ### First 30 days
 
 - Implement or correct the policy schema docs.
-- Add `shadowaudit check-policy`.
+- Add `capfence check-policy`.
 - Add strict fail-closed policy/audit tests.
 - Add PydanticAI or LlamaIndex adapter.
 - Publish a polished fintech demo.
@@ -413,7 +413,7 @@ Suggested GitHub issues:
 2. Replace docs homepage placeholder with real landing documentation.
 3. Sync README, PyPI long description, website, and docs.
 4. Implement or remove unsupported policy schema fields.
-5. Add `shadowaudit check-policy`.
+5. Add `capfence check-policy`.
 6. Fail closed on policy load error in enforce mode.
 7. Define and test audit-write failure behavior.
 8. Add default-deny unknown capability mode.
@@ -432,7 +432,7 @@ Suggested GitHub issues:
 
 ## Bottom Line
 
-ShadowAudit has the bones of a serious infrastructure project. The name, concept, and current codebase are pointing in the right direction.
+CapFence has the bones of a serious infrastructure project. The name, concept, and current codebase are pointing in the right direction.
 
 The main problem is not lack of scope. The main problem is trust compression: the project needs to make its strongest claims faster, prove them with runnable demos, and remove every inconsistency that makes a security-minded user pause.
 

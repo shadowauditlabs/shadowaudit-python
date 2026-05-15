@@ -2,13 +2,13 @@
 
 import pytest
 
-from shadowaudit.core.scorer import (
+from capfence.core.scorer import (
     BaseScorer,
     KeywordScorer,
     AdaptiveScorer,
     load_scorer,
 )
-from shadowaudit.core.state import AgentStateStore
+from capfence.core.state import AgentStateStore
 
 
 class TestKeywordScorer:
@@ -63,7 +63,7 @@ class TestAdaptiveScorer:
 class TestLoadScorer:
     def test_loads_hardened_by_default(self):
         s = load_scorer(prefer_native=False)
-        from shadowaudit.core.scorer import RegexASTScorer
+        from capfence.core.scorer import RegexASTScorer
         assert isinstance(s, RegexASTScorer)
 
     def test_loads_keyword_when_hardened_disabled(self):
@@ -81,5 +81,5 @@ class TestLoadScorer:
 
     def test_enterprise_binary_not_present(self):
         s = load_scorer(prefer_native=True, state_store=None)
-        from shadowaudit.core.scorer import RegexASTScorer
+        from capfence.core.scorer import RegexASTScorer
         assert isinstance(s, RegexASTScorer)

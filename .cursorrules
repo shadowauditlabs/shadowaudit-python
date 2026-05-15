@@ -1,6 +1,6 @@
-# ShadowAudit Core Positioning and Philosophy
+# CapFence Core Positioning and Philosophy
 
-ShadowAudit is a deterministic runtime authorization platform for AI agents and MCP ecosystems.
+CapFence is a deterministic runtime authorization platform for AI agents and MCP ecosystems.
 
 Its core philosophy is:
 "Unsafe behavior is inevitable. Execution boundaries must be enforced deterministically."

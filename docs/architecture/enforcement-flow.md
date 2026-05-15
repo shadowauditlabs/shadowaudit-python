@@ -1,11 +1,11 @@
 # Enforcement Flow
 
-ShadowAudit enforces policy at the final boundary before a tool executes.
+CapFence enforces policy at the final boundary before a tool executes.
 
 ```mermaid
 graph LR
     A[Agent] --> B[Tool Request]
-    B --> C[ShadowAudit Gate]
+    B --> C[CapFence Gate]
     C --> D[Capability Mapping]
     D --> E[Policy Evaluation]
     E --> F{Decision}
@@ -18,7 +18,7 @@ graph LR
 ## Steps
 
 1. The agent attempts to call a tool.
-2. ShadowAudit maps the request to a capability.
+2. CapFence maps the request to a capability.
 3. The gate evaluates policy-as-code.
 4. The decision is returned before execution.
 5. The decision is recorded for audit and replay.

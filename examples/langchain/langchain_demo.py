@@ -1,7 +1,7 @@
 """Minimal LangChain Integration Demo."""
 
-from shadowaudit.framework.langchain import ShadowAuditTool
-from shadowaudit.errors import AgentActionBlocked
+from capfence.framework.langchain import CapFenceTool
+from capfence.errors import AgentActionBlocked
 from langchain.tools import tool
 
 @tool
@@ -9,7 +9,7 @@ def shell_tool(command: str) -> str:
     """Execute a shell command."""
     return "Executed"
 
-safe_shell = ShadowAuditTool(
+safe_shell = CapFenceTool(
     tool=shell_tool,
     agent_id="langchain-agent",
     risk_category="execute"

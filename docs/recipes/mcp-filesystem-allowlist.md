@@ -20,8 +20,8 @@ allow:
 ## Integration
 
 ```python
-from shadowaudit.mcp.gateway import MCPGatewayServer
-from shadowaudit.core.gate import Gate
+from capfence.mcp.gateway import MCPGatewayServer
+from capfence.core.gate import Gate
 
 MCPGatewayServer(
     upstream_command=["python", "-m", "mcp_server_filesystem", "/data"],

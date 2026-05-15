@@ -4,8 +4,8 @@ Generates a compliance evidence pack for AI system conformity assessment.
 """
 
 from pathlib import Path
-from shadowaudit.assessment.scanner import scan_assessment
-from shadowaudit.assessment.eu_ai_act import generate_evidence_pack
+from capfence.assessment.scanner import scan_assessment
+from capfence.assessment.eu_ai_act import generate_evidence_pack
 
 
 def main():
@@ -15,7 +15,7 @@ def main():
     # Generate evidence pack
     pack = generate_evidence_pack(
         data=data,
-        system_name="ShadowAudit Demo Agent",
+        system_name="CapFence Demo Agent",
         system_version="0.4.0",
     )
 

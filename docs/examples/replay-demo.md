@@ -15,13 +15,13 @@ Create a JSONL trace of tool calls:
 ## Replay
 
 ```bash
-shadowaudit replay trace.jsonl
+capfence replay trace.jsonl
 ```
 
 For simulation and comparison:
 
 ```bash
-shadowaudit simulate --trace-file trace.jsonl --taxonomy financial --compare
+capfence simulate --trace-file trace.jsonl --taxonomy financial --compare
 ```
 
 ## What to look for

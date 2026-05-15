@@ -1,6 +1,6 @@
 # How the Audit Chain Works
 
-ShadowAudit's audit log is tamper-evident by design. Every entry is cryptographically linked to the previous one via a hash chain, making it impossible to alter or delete a past decision without invalidating all subsequent entries.
+CapFence's audit log is tamper-evident by design. Every entry is cryptographically linked to the previous one via a hash chain, making it impossible to alter or delete a past decision without invalidating all subsequent entries.
 
 ## Hash Chain Mechanics
 
@@ -22,7 +22,7 @@ Where `canonical_json` sorts keys, strips whitespace, and uses deterministic ser
 Verify any SQLite audit log database:
 
 ```bash
-shadowaudit verify --audit-log ./audit.db
+capfence verify --audit-log ./audit.db
 ```
 
 This re-computes every `entry_hash` and checks `prev_hash` linkage. If any row has been modified, deleted, or reordered, verification fails with a detailed error message.

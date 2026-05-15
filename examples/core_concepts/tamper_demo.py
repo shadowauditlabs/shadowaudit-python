@@ -1,4 +1,4 @@
-"""Tamper-evidence demo for ShadowAudit's hash chain audit log.
+"""Tamper-evidence demo for CapFence's hash chain audit log.
 
 Demonstrates that the audit log is tamper-evident: any modification to a
 recorded entry causes chain verification to fail with a precise error pointing
@@ -22,8 +22,8 @@ import sqlite3
 import tempfile
 from pathlib import Path
 
-from shadowaudit.core.audit import AuditLogger
-from shadowaudit.core.gate import Gate
+from capfence.core.audit import AuditLogger
+from capfence.core.gate import Gate
 
 
 def _populate_log(db_path: Path) -> AuditLogger:
@@ -65,7 +65,7 @@ def main() -> None:
         db_path = Path(f.name)
 
     try:
-        print("=== ShadowAudit Tamper-Evidence Demo ===\n")
+        print("=== CapFence Tamper-Evidence Demo ===\n")
 
         # 1. Populate
         print("Step 1 — Recording 6 gate decisions to audit log...")
@@ -116,7 +116,7 @@ def main() -> None:
         # 6. Explain the failure
         if not valid:
             print("Step 6 — Failure analysis:")
-            print(f"  ShadowAudit detected {len(errors)} chain break(s).")
+            print(f"  CapFence detected {len(errors)} chain break(s).")
             print(f"  Entry {target_id}: the stored entry_hash was computed from the original content.")
             print("  After the decision field was changed, re-hashing the content produces a different")
             print("  digest — the stored hash no longer matches the stored content.")
@@ -154,7 +154,7 @@ def main() -> None:
         print("=== Demo complete. ===")
         print()
         print("To run this on a real audit log:")
-        print("  shadowaudit verify --audit-log path/to/audit.db")
+        print("  capfence verify --audit-log path/to/audit.db")
 
     finally:
         db_path.unlink(missing_ok=True)

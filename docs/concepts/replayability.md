@@ -1,6 +1,6 @@
 # Replayability
 
-ShadowAudit can re-evaluate any past enforcement decision against the current policy. This lets you understand why a decision was made, test policy changes against real historical traffic, and reproduce incidents deterministically.
+CapFence can re-evaluate any past enforcement decision against the current policy. This lets you understand why a decision was made, test policy changes against real historical traffic, and reproduce incidents deterministically.
 
 ## How replay works
 
@@ -18,10 +18,10 @@ The replay engine loads this context and runs it through the gate again, produci
 
 ```bash
 # View a specific audit entry or payload hash
-shadowaudit trace <entry_hash>
+capfence trace <entry_hash>
 
 # Replay from an exported trace file
-shadowaudit replay trace.jsonl
+capfence replay trace.jsonl
 ```
 
 ## What replay is useful for
